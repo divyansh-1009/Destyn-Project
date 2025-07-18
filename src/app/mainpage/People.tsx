@@ -33,7 +33,6 @@ export default function People() {
   }, [session?.user?.email]);
 
   if (loading) return <div style={{ padding: 24 }}>Loading...</div>;
-  if (!users.length) return <div style={{ padding: 24 }}>No more people to show.</div>;
 
   const user = users[current];
 
@@ -92,8 +91,17 @@ export default function People() {
             fontSize: 16,
             cursor: "pointer",
           }}
-          onClick={() => setCurrent((prev) => prev + 1)}
-          disabled={current >= users.length - 1}
+          onClick={async () => {
+            await fetch("/api/like-user", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                currentUserEmail: session?.user?.email,
+                likedUserEmail: user.email,
+              }),
+            });
+            setCurrent((prev) => (prev + 1) % users.length);
+          }}
         >
           Correct
         </button>
@@ -109,15 +117,11 @@ export default function People() {
             fontSize: 16,
             cursor: "pointer",
           }}
-          onClick={() => setCurrent((prev) => prev + 1)}
-          disabled={current >= users.length - 1}
+          onClick={() => setCurrent((prev) => (prev + 1) % users.length)}
         >
           Wrong
         </button>
       </div>
-      {current >= users.length - 1 && (
-        <div style={{ marginTop: 24, textAlign: "center" }}>No more people to show.</div>
-      )}
     </div>
   );
 }
