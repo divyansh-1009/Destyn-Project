@@ -47,10 +47,8 @@ export default function WelcomePage() {
         answers,
       }),
     });
-    setSubmitted(true);
+    router.push("/mainpage"); 
   };
-
-  if (submitted) return <p>Thank you for submitting the form!</p>;
 
   return (
     <form

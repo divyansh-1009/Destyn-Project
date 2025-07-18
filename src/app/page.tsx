@@ -9,10 +9,23 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/welcome");
+    if (status === "authenticated" && session?.user?.email) {
+      // Check if user exists in DB
+      fetch("/api/user-exists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: session.user.email }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.exists) {
+            router.push("/mainpage");
+          } else {
+            router.push("/welcome");
+          }
+        });
     }
-  }, [status]);
+  }, [status, session, router]);
 
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>
