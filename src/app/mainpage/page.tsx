@@ -35,15 +35,25 @@ export default function MainPage() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        background: "#000",
+        color: "#fff",
+      }}
+    >
       <div style={{ flex: 1 }}>{Component}</div>
       <nav
         style={{
           display: "flex",
           justifyContent: "space-around",
-          borderTop: "1px solid #ccc",
-          padding: "10px 0",
-          background: "#fafafa",
+          borderTop: "1px solid #333",
+          padding: "16px 0",
+          background: "#111",
+          backdropFilter: "blur(10px)",
+          boxShadow: "0 -4px 20px rgba(0,0,0,0.3)",
         }}
       >
         {NAV_OPTIONS.map((opt) => (
@@ -53,10 +63,25 @@ export default function MainPage() {
             style={{
               background: "none",
               border: "none",
-              fontWeight: active === opt.key ? "bold" : "normal",
-              color: active === opt.key ? "#0070f3" : "#333",
-              fontSize: "16px",
+              fontWeight: active === opt.key ? "600" : "400",
+              color: active === opt.key ? "#0070f3" : "#888",
+              fontSize: "14px",
               cursor: "pointer",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              transition: "all 0.2s",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+            }}
+            onMouseEnter={(e) => {
+              if (active !== opt.key) {
+                e.target.style.color = "#fff";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (active !== opt.key) {
+                e.target.style.color = "#888";
+              }
             }}
           >
             {opt.label}
