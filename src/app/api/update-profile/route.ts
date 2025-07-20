@@ -3,7 +3,18 @@ import clientPromise from "@/lib/mongodb";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, name, bio, interests, profilePhotos } = await req.json();
+    const {
+      email,
+      name,
+      bio,
+      interests,
+      profilePhotos,
+      birthdate,
+      education,
+      profession,
+      languages,
+      relationshipGoals,
+    } = await req.json();
 
     if (!email) {
       return NextResponse.json({ error: "Missing email" }, { status: 400 });
@@ -20,6 +31,11 @@ export async function POST(req: NextRequest) {
           bio,
           interests,
           profilePhotos,
+          birthdate,
+          education,
+          profession,
+          languages,
+          relationshipGoals,
           updatedAt: new Date().toISOString(),
         },
       }

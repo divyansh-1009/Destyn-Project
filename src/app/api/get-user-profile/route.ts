@@ -12,20 +12,29 @@ export async function POST(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db("datingapp");
 
-    const userProfile = await db
-      .collection("responses")
-      .findOne(
-        { email },
-        {
-          projection: {
-            name: 1,
-            email: 1,
-            profilePhoto: 1,
-            answers: 1,
-            _id: 0,
-          },
-        }
-      );
+    const userProfile = await db.collection("responses").findOne(
+      { email },
+      {
+        projection: {
+          name: 1,
+          email: 1,
+          profilePhoto: 1,
+          profilePhotos: 1,
+          answers: 1,
+          bio: 1,
+          interests: 1,
+          birthdate: 1,
+          education: 1,
+          profession: 1,
+          languages: 1,
+          relationshipGoals: 1,
+          lat: 1,
+          lng: 1,
+          location: 1,
+          _id: 0,
+        },
+      }
+    );
 
     if (!userProfile) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });

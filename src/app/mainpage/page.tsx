@@ -5,6 +5,7 @@ import Feed from "./Feed";
 import People from "./People";
 import Chat from "./Chat";
 import Profile from "./Profile";
+import Link from "next/link";
 
 const NAV_OPTIONS = [
   { key: "feed", label: "Feed" },

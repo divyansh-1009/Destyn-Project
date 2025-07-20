@@ -16,6 +16,36 @@ const INTEREST_OPTIONS = [
   "Gaming",
 ];
 
+const ZODIAC_SIGNS = [
+  { name: "Aries", start: "03-21", end: "04-19" },
+  { name: "Taurus", start: "04-20", end: "05-20" },
+  { name: "Gemini", start: "05-21", end: "06-20" },
+  { name: "Cancer", start: "06-21", end: "07-22" },
+  { name: "Leo", start: "07-23", end: "08-22" },
+  { name: "Virgo", start: "08-23", end: "09-22" },
+  { name: "Libra", start: "09-23", end: "10-22" },
+  { name: "Scorpio", start: "10-23", end: "11-21" },
+  { name: "Sagittarius", start: "11-22", end: "12-21" },
+  { name: "Capricorn", start: "12-22", end: "01-19" },
+  { name: "Aquarius", start: "01-20", end: "02-18" },
+  { name: "Pisces", start: "02-19", end: "03-20" },
+];
+
+function getZodiacSign(dateStr: string) {
+  if (!dateStr) return null;
+  const [year, month, day] = dateStr.split("-");
+  const md = `${month}-${day}`;
+  for (const sign of ZODIAC_SIGNS) {
+    if (
+      (sign.start <= md && md <= sign.end) ||
+      (sign.start > sign.end && (md >= sign.start || md <= sign.end))
+    ) {
+      return sign.name;
+    }
+  }
+  return null;
+}
+
 export default function Profile() {
   const { data: session } = useSession();
   const [profile, setProfile] = useState<any>(null);
@@ -27,6 +57,11 @@ export default function Profile() {
     bio: "",
     interests: [] as string[],
     profilePhotos: [] as string[],
+    birthdate: "",
+    education: "",
+    profession: "",
+    languages: "",
+    relationshipGoals: "",
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -52,6 +87,11 @@ export default function Profile() {
             profilePhotos:
               data.profilePhotos ||
               (data.profilePhoto ? [data.profilePhoto] : []),
+            birthdate: data.birthdate || "",
+            education: data.education || "",
+            profession: data.profession || "",
+            languages: data.languages || "",
+            relationshipGoals: data.relationshipGoals || "",
           });
         }
       } catch (error) {
@@ -116,11 +156,38 @@ export default function Profile() {
     }
   };
 
-  const removePhoto = (photoUrl: string) => {
-    setForm((prev) => ({
-      ...prev,
-      profilePhotos: prev.profilePhotos.filter((url) => url !== photoUrl),
-    }));
+  const removePhoto = async (photoUrl: string) => {
+    if (!session?.user?.email) return;
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this photo? This cannot be undone."
+      )
+    )
+      return;
+    try {
+      const response = await fetch("/api/delete-photo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: session.user.email, photoUrl }),
+      });
+      if (response.ok) {
+        setForm((prev) => ({
+          ...prev,
+          profilePhotos: prev.profilePhotos.filter((url) => url !== photoUrl),
+        }));
+        setProfile((prev: any) => ({
+          ...prev,
+          profilePhotos: (prev?.profilePhotos || []).filter(
+            (url: string) => url !== photoUrl
+          ),
+        }));
+      } else {
+        const error = await response.json();
+        alert(`Failed to delete photo: ${error.error}`);
+      }
+    } catch (error) {
+      alert("Failed to delete photo. Please try again.");
+    }
   };
 
   const handleInputChange = (
@@ -266,6 +333,62 @@ export default function Profile() {
               >
                 {session?.user?.email}
               </p>
+              {profile?.birthdate && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 14,
+                    color: "#ffd700",
+                    fontWeight: 600,
+                  }}
+                >
+                  Zodiac: {getZodiacSign(profile.birthdate)}
+                </div>
+              )}
+              {profile?.education && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 14,
+                    color: "#fff",
+                  }}
+                >
+                  🎓 Education: {profile.education}
+                </div>
+              )}
+              {profile?.profession && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 14,
+                    color: "#fff",
+                  }}
+                >
+                  💼 Profession: {profile.profession}
+                </div>
+              )}
+              {profile?.languages && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 14,
+                    color: "#fff",
+                  }}
+                >
+                  🗣️ Languages: {profile.languages}
+                </div>
+              )}
+              {profile?.relationshipGoals && (
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: 14,
+                    color: "#fff",
+                  }}
+                >
+                  ❤️ Relationship Goals: {profile.relationshipGoals}
+                </div>
+              )}
             </div>
 
             {/* Photo Gallery */}
@@ -470,6 +593,38 @@ export default function Profile() {
               />
             </div>
 
+            {/* Birthdate */}
+            <div style={{ marginBottom: 20 }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: 8,
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#fff",
+                }}
+              >
+                Birthdate
+              </label>
+              <input
+                type="date"
+                name="birthdate"
+                value={form.birthdate}
+                onChange={handleInputChange}
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  background: "#0a0a0a",
+                  border: "1px solid #333",
+                  borderRadius: "8px",
+                  color: "#fff",
+                  fontSize: "14px",
+                }}
+                placeholder="YYYY-MM-DD"
+                max={new Date().toISOString().split("T")[0]}
+              />
+            </div>
+
             {/* Bio */}
             <div style={{ marginBottom: 20 }}>
               <label
@@ -643,6 +798,127 @@ export default function Profile() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Education */}
+            <div style={{ marginBottom: 20 }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: 8,
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#fff",
+                }}
+              >
+                Education
+              </label>
+              <input
+                type="text"
+                name="education"
+                value={form.education}
+                onChange={handleInputChange}
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  background: "#0a0a0a",
+                  border: "1px solid #333",
+                  borderRadius: "8px",
+                  color: "#fff",
+                  fontSize: "14px",
+                }}
+                placeholder="Your education (e.g. B.Tech, MBA, etc.)"
+              />
+            </div>
+            {/* Profession */}
+            <div style={{ marginBottom: 20 }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: 8,
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#fff",
+                }}
+              >
+                Profession
+              </label>
+              <input
+                type="text"
+                name="profession"
+                value={form.profession}
+                onChange={handleInputChange}
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  background: "#0a0a0a",
+                  border: "1px solid #333",
+                  borderRadius: "8px",
+                  color: "#fff",
+                  fontSize: "14px",
+                }}
+                placeholder="Your profession (e.g. Software Engineer)"
+              />
+            </div>
+            {/* Languages */}
+            <div style={{ marginBottom: 20 }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: 8,
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#fff",
+                }}
+              >
+                Languages Spoken
+              </label>
+              <input
+                type="text"
+                name="languages"
+                value={form.languages}
+                onChange={handleInputChange}
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  background: "#0a0a0a",
+                  border: "1px solid #333",
+                  borderRadius: "8px",
+                  color: "#fff",
+                  fontSize: "14px",
+                }}
+                placeholder="Languages (e.g. English, Hindi, Spanish)"
+              />
+            </div>
+            {/* Relationship Goals */}
+            <div style={{ marginBottom: 20 }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: 8,
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  color: "#fff",
+                }}
+              >
+                Relationship Goals
+              </label>
+              <input
+                type="text"
+                name="relationshipGoals"
+                value={form.relationshipGoals}
+                onChange={handleInputChange}
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  background: "#0a0a0a",
+                  border: "1px solid #333",
+                  borderRadius: "8px",
+                  color: "#fff",
+                  fontSize: "14px",
+                }}
+                placeholder="e.g. Long-term, Friendship, Marriage, etc."
+              />
             </div>
 
             {/* Save/Cancel Buttons */}
