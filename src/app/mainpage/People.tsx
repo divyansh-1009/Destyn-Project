@@ -7,7 +7,7 @@ type User = {
   name: string;
   email: string;
   answers: Record<string, string>;
-  // image?: string; // Uncomment if you have image URLs in DB
+  profilePhoto?: string;
 };
 
 export default function People() {
@@ -80,7 +80,6 @@ export default function People() {
         maxWidth: 500,
         margin: "0 auto",
         background: "#000",
-        minHeight: "100vh",
         color: "#fff",
       }}
     >
@@ -123,7 +122,7 @@ export default function People() {
           boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
         }}
       >
-        {/* Placeholder for image */}
+        {/* Profile Photo */}
         <div
           style={{
             width: 120,
@@ -137,10 +136,22 @@ export default function People() {
             fontSize: 48,
             color: "#666",
             border: "2px solid #333",
+            overflow: "hidden",
           }}
         >
-          {/* If you have user.image, use <img src={user.image} ... /> */}
-          <span>👤</span>
+          {user.profilePhoto ? (
+            <img
+              src={user.profilePhoto}
+              alt={`${user.name}'s profile`}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          ) : (
+            <span>👤</span>
+          )}
         </div>
         <h3
           style={{

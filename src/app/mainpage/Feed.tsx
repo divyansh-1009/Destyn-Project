@@ -114,7 +114,6 @@ export default function Feed() {
         margin: "0 auto",
         padding: "20px",
         background: "#000",
-        minHeight: "100vh",
       }}
     >
       {/* Header */}

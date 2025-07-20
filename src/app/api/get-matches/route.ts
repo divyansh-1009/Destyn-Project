@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     const matchedUsers = await db
       .collection("responses")
       .find({ email: { $in: uniqueMatchedEmails } })
-      .project({ name: 1, email: 1, _id: 0 })
+      .project({ name: 1, email: 1, profilePhoto: 1, _id: 0 })
       .toArray();
 
     return NextResponse.json({ matches: matchedUsers });

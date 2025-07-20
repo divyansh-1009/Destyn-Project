@@ -26,10 +26,35 @@ const clientPromise = client.connect();
 
 app.prepare().then(() => {
   const server = express();
+
+  // Add CORS middleware
+  server.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
+    if (req.method === "OPTIONS") {
+      res.sendStatus(200);
+    } else {
+      next();
+    }
+  });
+
   const httpServer = createServer(server);
   const io = new Server(httpServer, {
     cors: {
-      origin: "*",
+      origin: [
+        "http://localhost:3000",
+        "http://10.22.16.34:3000",
+        "http://0.0.0.0:3000",
+      ],
+      methods: ["GET", "POST"],
+      credentials: true,
     },
   });
 
@@ -63,8 +88,9 @@ app.prepare().then(() => {
     return handle(req, res);
   });
 
-  httpServer.listen(PORT, (err) => {
+  httpServer.listen(PORT, "0.0.0.0", (err) => {
     if (err) throw err;
     console.log(`> Ready on http://localhost:${PORT}`);
+    console.log(`> Network access: http://0.0.0.0:${PORT}`);
   });
 });

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const users = await db
     .collection("responses")
     .find({ email: { $ne: email } })
-    .project({ name: 1, email: 1, answers: 1, _id: 0 }) // Add image field if you have it
+    .project({ name: 1, email: 1, answers: 1, profilePhoto: 1, _id: 0 })
     .toArray();
   return NextResponse.json({ users });
 }

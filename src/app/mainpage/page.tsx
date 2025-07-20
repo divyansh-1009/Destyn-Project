@@ -37,14 +37,15 @@ export default function MainPage() {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        height: "100vh",
         display: "flex",
         flexDirection: "column",
         background: "#000",
         color: "#fff",
+        overflow: "hidden",
       }}
     >
-      <div style={{ flex: 1 }}>{Component}</div>
+      <div style={{ flex: 1, overflow: "auto" }}>{Component}</div>
       <nav
         style={{
           display: "flex",
@@ -54,6 +55,9 @@ export default function MainPage() {
           background: "#111",
           backdropFilter: "blur(10px)",
           boxShadow: "0 -4px 20px rgba(0,0,0,0.3)",
+          position: "sticky",
+          bottom: 0,
+          zIndex: 1000,
         }}
       >
         {NAV_OPTIONS.map((opt) => (

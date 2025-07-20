@@ -114,7 +114,7 @@ export default function Chat() {
     <div
       style={{
         display: "flex",
-        height: 600,
+        height: "calc(100vh - 120px)",
         maxWidth: 800,
         margin: "0 auto",
         border: "1px solid #333",
@@ -181,16 +181,67 @@ export default function Chat() {
                     : "1px solid #333",
                 transition: "all 0.2s",
                 color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
               }}
               onClick={() => setSelected(user)}
             >
+              {/* Profile Photo */}
               <div
-                style={{ fontWeight: "600", fontSize: "14px", marginBottom: 4 }}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  background: "#1a1a1a",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "1px solid #333",
+                  overflow: "hidden",
+                  flexShrink: 0,
+                }}
               >
-                {user.name || user.email}
+                {user.profilePhoto ? (
+                  <img
+                    src={user.profilePhoto}
+                    alt={`${user.name || user.email}'s profile`}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <span style={{ fontSize: "16px", color: "#666" }}>👤</span>
+                )}
               </div>
-              <div style={{ fontSize: "12px", color: "#888" }}>
-                {user.email}
+
+              {/* User Info */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div
+                  style={{
+                    fontWeight: "600",
+                    fontSize: "14px",
+                    marginBottom: 4,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {user.name || user.email}
+                </div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#888",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {user.email}
+                </div>
               </div>
             </div>
           ))}
