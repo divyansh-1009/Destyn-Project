@@ -64,114 +64,17 @@ app.prepare().then(() => {
     // Join a room for private chat (room name could be a chatId or user pair)
     socket.on("join", (room) => {
       socket.join(room);
-      console.log(`User ${socket.id} joined room: ${room}`);
     });
 
     // Handle sending a message
     socket.on("chat message", async (data) => {
-      // data: { room, sender, receiver, message, timestamp, status }
+      // data: { room, sender, receiver, message, timestamp }
       try {
         const db = client.db("datingapp");
-        const messageData = {
-          ...data,
-          status: "sent",
-          createdAt: new Date().toISOString(),
-        };
-
-        const result = await db.collection("messages").insertOne(messageData);
-        const savedMessage = { ...messageData, _id: result.insertedId };
-
-        // Broadcast to room
-        io.to(data.room).emit("chat message", savedMessage);
-        console.log("Message sent to room:", data.room);
-
-        // Update status to delivered after a short delay
-        setTimeout(async () => {
-          await db
-            .collection("messages")
-            .updateOne(
-              { _id: result.insertedId },
-              { $set: { status: "delivered" } }
-            );
-          io.to(data.room).emit("message status", {
-            messageId: result.insertedId,
-            status: "delivered",
-          });
-        }, 1000);
+        await db.collection("messages").insertOne(data);
+        io.to(data.room).emit("chat message", data); // Broadcast to room
       } catch (error) {
         console.error("Error saving message:", error);
-      }
-    });
-
-    // Typing indicators
-    socket.on("typing", (data) => {
-      socket.to(data.room).emit("typing", data);
-    });
-
-    socket.on("stop typing", (data) => {
-      socket.to(data.room).emit("stop typing", data);
-    });
-
-    // Message reactions
-    socket.on("add reaction", async (data) => {
-      try {
-        const db = client.db("datingapp");
-
-        // Try to update by ObjectId first
-        let updateResult;
-        if (
-          data.messageId &&
-          require("mongodb").ObjectId.isValid(data.messageId)
-        ) {
-          updateResult = await db
-            .collection("messages")
-            .updateOne(
-              { _id: new require("mongodb").ObjectId(data.messageId) },
-              { $inc: { [`reactions.${data.reaction}`]: 1 } }
-            );
-        }
-
-        // If not found by ObjectId, try to find by timestamp and message
-        if (!updateResult || updateResult.matchedCount === 0) {
-          const parts = data.messageId.split("-");
-          if (parts.length >= 2) {
-            const timestamp = parts[0];
-            const message = parts.slice(1).join("-");
-
-            updateResult = await db.collection("messages").updateOne(
-              {
-                timestamp: { $gte: new Date(parseInt(timestamp)) },
-                message: message,
-              },
-              { $inc: { [`reactions.${data.reaction}`]: 1 } }
-            );
-          }
-        }
-
-        if (updateResult && updateResult.matchedCount > 0) {
-          io.to(data.room).emit("reaction added", data);
-        }
-      } catch (error) {
-        console.error("Error adding reaction:", error);
-      }
-    });
-
-    // Mark message as read
-    socket.on("mark read", async (data) => {
-      try {
-        const db = client.db("datingapp");
-        await db.collection("messages").updateOne(
-          { _id: data.messageId },
-          {
-            $set: {
-              status: "read",
-              readAt: new Date().toISOString(),
-            },
-          }
-        );
-        io.to(data.room).emit("message read", { messageId: data.messageId });
-      } catch (error) {
-        console.error("Error marking message as read:", error);
       }
     });
 
