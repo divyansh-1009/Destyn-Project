@@ -35,34 +35,64 @@ export default function People() {
   const [loading, setLoading] = useState(true);
   const [likedUsers, setLikedUsers] = useState<string[]>([]);
 
-  useEffect(() => {
+  // Function to fetch fresh data
+  const fetchUsers = async () => {
     if (!session?.user?.email) return;
+    
     setLoading(true);
     
-    // Fetch users and liked users simultaneously
-    Promise.all([
-      fetch("/api/get-users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: session.user.email }),
-      }).then(res => res.json()),
-      fetch("/api/get-liked-users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: session.user.email }),
-      }).then(res => res.json())
-    ]).then(([usersData, likedData]) => {
+    try {
+      // Fetch users and liked users simultaneously
+      const [usersResponse, likedResponse] = await Promise.all([
+        fetch("/api/get-users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: session.user.email }),
+        }),
+        fetch("/api/get-liked-users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: session.user.email }),
+        })
+      ]);
+
+      const usersData = await usersResponse.json();
+      const likedData = await likedResponse.json();
+      
       const allUsers = usersData.users || [];
       const liked = likedData.liked || [];
       
-      // Filter out already liked users
-      const availableUsers = allUsers.filter((user: User) => !liked.includes(user.email));
+      // Filter out already liked users and current user
+      const availableUsers = allUsers.filter((user: User) => 
+        !liked.includes(user.email) && user.email !== session.user.email
+      );
       
       setUsers(availableUsers);
       setLikedUsers(liked);
       setCurrent(0);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      setUsers([]);
+    } finally {
       setLoading(false);
-    });
+    }
+  };
+
+  // Fetch users on mount and when session changes
+  useEffect(() => {
+    fetchUsers();
+  }, [session?.user?.email]);
+
+  // Add visibility change listener to refresh when user comes back to tab
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && session?.user?.email) {
+        fetchUsers();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [session?.user?.email]);
 
   if (loading)
@@ -99,33 +129,75 @@ export default function People() {
         <div style={{ fontSize: "20px", marginBottom: 8 }}>
           No more people to show
         </div>
-        <div style={{ fontSize: "14px", color: "#666" }}>
+        <div style={{ fontSize: "14px", color: "#666", marginBottom: 20 }}>
           Check back later for new profiles
         </div>
+        <button
+          onClick={fetchUsers}
+          style={{
+            padding: "12px 24px",
+            background: "#667eea",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            fontSize: 14,
+            cursor: "pointer",
+            transition: "background 0.2s"
+          }}
+          onMouseEnter={(e) =>
+            ((e.target as HTMLButtonElement).style.background = "#5a6fd8")
+          }
+          onMouseLeave={(e) =>
+            ((e.target as HTMLButtonElement).style.background = "#667eea")
+          }
+        >
+          🔄 Refresh
+        </button>
       </div>
     );
   }
 
   const handleLike = async () => {
-    await fetch("/api/like-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        currentUserEmail: session?.user?.email,
-        likedUserEmail: user.email,
-      }),
-    });
-    
-    // Remove this user from the list and move to next
-    setUsers(prev => prev.filter((_, index) => index !== current));
-    if (current >= users.length - 1) {
-      setCurrent(0);
+    try {
+      await fetch("/api/like-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentUserEmail: session?.user?.email,
+          likedUserEmail: user.email,
+        }),
+      });
+      
+      // Update liked users list locally
+      setLikedUsers(prev => [...prev, user.email]);
+      
+      // Remove this user from the list
+      const newUsers = users.filter((_, index) => index !== current);
+      setUsers(newUsers);
+      
+      // Adjust current index if needed
+      if (current >= newUsers.length && newUsers.length > 0) {
+        setCurrent(0);
+      }
+      
+      // If no more users, try to fetch fresh data
+      if (newUsers.length === 0) {
+        setTimeout(fetchUsers, 500); // Small delay to allow DB update
+      }
+    } catch (error) {
+      console.error("Error liking user:", error);
     }
   };
 
   const handlePass = () => {
-    // Just move to next user without liking
-    setCurrent((prev) => (prev + 1) % users.length);
+    // Move to next user without liking
+    const nextIndex = (current + 1) % users.length;
+    setCurrent(nextIndex);
+    
+    // If we've gone through all users, fetch fresh data
+    if (nextIndex === 0 && users.length > 1) {
+      setTimeout(fetchUsers, 1000);
+    }
   };
 
   return (
@@ -164,6 +236,15 @@ export default function People() {
         >
           Swipe through profiles and find your match
         </p>
+        <div
+          style={{
+            color: "#666",
+            fontSize: "12px",
+            marginTop: 8,
+          }}
+        >
+          {current + 1} of {users.length} • {users.length} people available
+        </div>
       </div>
 
       <div
@@ -342,6 +423,33 @@ export default function People() {
           onClick={handlePass}
         >
           ✖️ Pass
+        </button>
+      </div>
+      
+      {/* Refresh button at bottom */}
+      <div style={{ textAlign: "center", marginTop: 20 }}>
+        <button
+          onClick={fetchUsers}
+          style={{
+            padding: "8px 16px",
+            background: "transparent",
+            color: "#666",
+            border: "1px solid #333",
+            borderRadius: 6,
+            fontSize: 12,
+            cursor: "pointer",
+            transition: "all 0.2s"
+          }}
+          onMouseEnter={(e) => {
+            (e.target as HTMLButtonElement).style.color = "#fff";
+            (e.target as HTMLButtonElement).style.borderColor = "#666";
+          }}
+          onMouseLeave={(e) => {
+            (e.target as HTMLButtonElement).style.color = "#666";
+            (e.target as HTMLButtonElement).style.borderColor = "#333";
+          }}
+        >
+          🔄 Check for new people
         </button>
       </div>
     </div>
