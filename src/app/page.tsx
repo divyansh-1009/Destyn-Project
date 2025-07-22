@@ -4,6 +4,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
+import TypographyImage from "../assets/Typography.png"; // Import the image
 
 export default function LoginPage() {
   const { data: session, status } = useSession();
@@ -130,7 +131,7 @@ export default function LoginPage() {
         <svg
           viewBox="0 0 1440 320"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full"
+          className="w-full h-[250px]"
         >
           <path
             fill="#9C27B0"
@@ -154,26 +155,23 @@ export default function LoginPage() {
       </div>
 
       <div className="z-10 flex flex-col items-center justify-center text-white text-center flex-grow">
-        <div className="flex items-center mb-8">
+        <div className="flex items-center mb-8 -mt-50 md:mt-0">
           <div className="w-24 h-24 md:w-28 md:h-28 bg-gray-200 rounded-full mr-4 shadow-lg"></div>
           <div>
-            <h1
-              className="text-6xl md:text-7xl font-bold tracking-wider"
-              style={{
-                fontFamily: "'Nunito Sans', sans-serif",
-                fontWeight: 900,
-              }}
-            >
-              DESTYN
-            </h1>
+            {/* Replace the text "DESTYN" with the image */}
+            <img
+              src={TypographyImage.src}
+              alt="Destyn Logo"
+              className="w-48 md:w-64 lg:w-72 object-contain"
+            />
             <p className="text-xl md:text-2xl font-light tracking-widest">
-              tagline
+              Dil se Date tak...
             </p>
           </div>
         </div>
 
         <button
-          className="group flex items-center justify-center w-full max-w-xs px-6 py-4 mt-8 bg-gradient-to-r from-teal-400 to-cyan-500 text-white font-bold rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-cyan-300"
+          className="mt-30 md:mt-0 group flex items-center justify-center w-full max-w-xs px-6 py-4 mt-8 bg-gradient-to-r from-teal-400 to-cyan-500 text-white font-bold rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-cyan-300"
           onClick={handleSignIn}
           disabled={isSigningIn}
         >
