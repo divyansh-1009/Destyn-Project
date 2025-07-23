@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
       createdAt: new Date().toISOString(),
       likes: 0,
       comments: [],
+      reactions: {}, // emoji: [userEmail, ...]
     };
 
     const result = await db.collection("confessions").insertOne(confessionDoc);
