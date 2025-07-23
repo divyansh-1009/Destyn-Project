@@ -102,7 +102,7 @@ export default function People() {
           padding: 40,
           textAlign: "center",
           color: "#fff",
-          background: "#000",
+          background: "transparent", // Changed from #000 to transparent
           minHeight: "100vh",
         }}
       >
@@ -119,7 +119,7 @@ export default function People() {
           padding: 40,
           textAlign: "center",
           color: "#fff",
-          background: "#000",
+          background: "transparent", // Changed from #000 to transparent
           minHeight: "100vh",
         }}
       >
@@ -206,7 +206,7 @@ export default function People() {
         padding: 24,
         maxWidth: 500,
         margin: "0 auto",
-        background: "#000",
+        background: "transparent", // Changed from #000 to transparent
         color: "#fff",
       }}
     >

@@ -64,13 +64,52 @@ export default function MainPage() {
       Component = <Feed />;
   }
 
+  // Render navigation items
+  const renderNavItems = () => {
+    return NAV_OPTIONS.map((opt) => (
+      <button
+        key={opt.key}
+        onClick={() => setActive(opt.key)}
+        style={{
+          background: "none",
+          border: "none",
+          fontWeight: active === opt.key ? "600" : "400",
+          color: active === opt.key ? "#0070f3" : "#888",
+          fontSize: "14px",
+          cursor: "pointer",
+          padding: isMobile ? "8px 16px" : "16px",
+          borderRadius: "8px",
+          transition: "all 0.2s",
+          textAlign: "left",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: isMobile ? "center" : "flex-start",
+          marginBottom: isMobile ? 0 : "8px",
+        }}
+        onMouseEnter={(e) => {
+          if (active !== opt.key) {
+            (e.target as HTMLElement).style.color = "#fff";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (active !== opt.key) {
+            (e.target as HTMLElement).style.color = "#888";
+          }
+        }}
+      >
+        {opt.label}
+      </button>
+    ));
+  };
+
   return (
     <div
       style={{
         height: "100vh",
         display: "flex",
         flexDirection: "column",
-        background: "#000",
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         color: "#fff",
         overflow: "hidden",
       }}
@@ -168,6 +207,12 @@ export default function MainPage() {
                       textAlign: "left",
                       transition: "all 0.2s",
                     }}
+                    onMouseEnter={(e) => {
+                      (e.target as HTMLElement).style.background = "#333";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.target as HTMLElement).style.background = "none";
+                    }}
                   >
                     {opt.label}
                   </button>
@@ -208,53 +253,54 @@ export default function MainPage() {
         )}
       </header>
 
-      <div style={{ flex: 1, overflow: "auto" }}>{Component}</div>
-      <nav
+      {/* Main content area with flexible layout based on screen size */}
+      <div
         style={{
+          flex: 1,
           display: "flex",
-          justifyContent: "space-around",
-          borderTop: "1px solid #333",
-          padding: "16px 0",
-          background: "#111",
-          backdropFilter: "blur(10px)",
-          boxShadow: "0 -4px 20px rgba(0,0,0,0.3)",
-          position: "sticky",
-          bottom: 0,
-          zIndex: 1000,
+          flexDirection: isMobile ? "column" : "row",
+          overflow: "hidden",
         }}
       >
-        {NAV_OPTIONS.map((opt) => (
-          <button
-            key={opt.key}
-            onClick={() => setActive(opt.key)}
+        {/* Side navigation for desktop */}
+        {!isMobile && (
+          <div
             style={{
-              background: "none",
-              border: "none",
-              fontWeight: active === opt.key ? "600" : "400",
-              color: active === opt.key ? "#0070f3" : "#888",
-              fontSize: "14px",
-              cursor: "pointer",
-              padding: "8px 16px",
-              borderRadius: "8px",
-              transition: "all 0.2s",
-              textTransform: "uppercase",
-              letterSpacing: "0.5px",
-            }}
-            onMouseEnter={(e) => {
-              if (active !== opt.key) {
-                (e.target as HTMLElement).style.color = "#fff";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (active !== opt.key) {
-                (e.target as HTMLElement).style.color = "#888";
-              }
+              width: "200px",
+              borderRight: "1px solid #333",
+              background: "#111",
+              padding: "20px 10px",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
-            {opt.label}
-          </button>
-        ))}
-      </nav>
+            {renderNavItems()}
+          </div>
+        )}
+
+        {/* Main content */}
+        <div style={{ flex: 1, overflow: "auto" }}>{Component}</div>
+      </div>
+
+      {/* Bottom navigation for mobile */}
+      {isMobile && (
+        <nav
+          style={{
+            display: "flex",
+            justifyContent: "space-around",
+            borderTop: "1px solid #333",
+            padding: "16px 0",
+            background: "#111",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 -4px 20px rgba(0,0,0,0.3)",
+            position: "sticky",
+            bottom: 0,
+            zIndex: 1000,
+          }}
+        >
+          {renderNavItems()}
+        </nav>
+      )}
     </div>
   );
 }

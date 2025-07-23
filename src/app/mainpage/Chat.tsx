@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useSession } from "next-auth/react";
+import BlockConfirmModal from "./BlockConfirmModal";
+import ReportModal from "./ReportModal";
 
 const SOCKET_URL = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -13,6 +15,9 @@ export default function Chat() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [blockModalOpen, setBlockModalOpen] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const sentMessagesRef = useRef<Set<string>>(new Set());
@@ -40,9 +45,23 @@ export default function Chat() {
       });
   }, [session?.user?.email]);
 
+  // Fetch blocked users on mount and after blocking
+  useEffect(() => {
+    if (!session?.user?.email) return;
+    fetch(`/api/block-user?blockerEmail=${encodeURIComponent(session.user.email)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setBlockedUsers(data.blocked || []);
+      });
+  }, [session?.user?.email]);
+
+  // Determine if selected user is blocked
+  const isBlocked = selected && blockedUsers.includes(selected.email);
+
   // Setup socket connection and listeners
   useEffect(() => {
     if (!session?.user?.email || !selected) return;
+    if (isBlocked) return; // Do not set up socket if blocked
 
     const socket = io(SOCKET_URL);
     socketRef.current = socket;
@@ -65,7 +84,7 @@ export default function Chat() {
     return () => {
       socket.disconnect();
     };
-  }, [session?.user?.email, selected]);
+  }, [session?.user?.email, selected, isBlocked]);
 
   // Fetch chat history when a match is selected
   useEffect(() => {
@@ -265,15 +284,51 @@ export default function Chat() {
                 borderBottom: "1px solid #333",
                 background: "#111",
                 color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
               }}
             >
-              <div
-                style={{ fontWeight: "600", fontSize: "16px", marginBottom: 4 }}
-              >
-                💬 Chat with {selected.name || selected.email}
+              <div>
+                <div style={{ fontWeight: "600", fontSize: "16px", marginBottom: 4 }}>
+                  💬 Chat with {selected.name || selected.email}
+                </div>
+                <div style={{ fontSize: "12px", color: "#888" }}>{selected.email}</div>
               </div>
-              <div style={{ fontSize: "12px", color: "#888" }}>
-                {selected.email}
+              <div style={{ display: "flex", gap: 8 }}>
+                {isBlocked ? (
+                  <button
+                    style={{ background: "#0070f3", color: "#fff", border: "none", borderRadius: 6, padding: "6px 12px", fontWeight: 600, cursor: "pointer" }}
+                    onClick={async () => {
+                      setBlockModalOpen(false);
+                      if (!session?.user?.email || !selected?.email) return;
+                      await fetch("/api/block-user", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ blockerEmail: session.user.email, blockedEmail: selected.email, action: "unblock" }),
+                      });
+                      // Refetch blocked users after unblocking
+                      const res = await fetch(`/api/block-user?blockerEmail=${encodeURIComponent(session.user.email)}`);
+                      const data = await res.json();
+                      setBlockedUsers(data.blocked || []);
+                    }}
+                  >
+                    Unblock
+                  </button>
+                ) : (
+                  <button
+                    style={{ background: "#f44336", color: "#fff", border: "none", borderRadius: 6, padding: "6px 12px", fontWeight: 600, cursor: "pointer" }}
+                    onClick={() => setBlockModalOpen(true)}
+                  >
+                    Block
+                  </button>
+                )}
+                <button
+                  style={{ background: "#ff9800", color: "#fff", border: "none", borderRadius: 6, padding: "6px 12px", fontWeight: 600, cursor: "pointer" }}
+                  onClick={() => setReportModalOpen(true)}
+                >
+                  Report
+                </button>
               </div>
             </div>
 
@@ -423,7 +478,7 @@ export default function Chat() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") sendMessage();
+                    if (e.key === "Enter" && !isBlocked) sendMessage();
                   }}
                   onFocus={(e) =>
                     ((e.target as HTMLInputElement).style.borderColor =
@@ -432,34 +487,72 @@ export default function Chat() {
                   onBlur={(e) =>
                     ((e.target as HTMLInputElement).style.borderColor = "#333")
                   }
-                  placeholder="Type a message..."
+                  placeholder={isBlocked ? "You have blocked this user. You cannot send messages." : "Type a message..."}
+                  disabled={isBlocked}
                 />
                 <button
                   style={{
                     padding: "14px 24px",
                     borderRadius: 25,
-                    background: "#0070f3",
+                    background: isBlocked ? "#333" : "#0070f3",
                     color: "white",
                     border: "none",
-                    cursor: "pointer",
+                    cursor: isBlocked ? "not-allowed" : "pointer",
                     fontSize: "14px",
                     fontWeight: "600",
                     transition: "background 0.2s",
+                    opacity: isBlocked ? 0.6 : 1,
                   }}
-                  onClick={sendMessage}
+                  onClick={() => { if (!isBlocked) sendMessage(); }}
+                  disabled={isBlocked}
                   onMouseEnter={(e) =>
                     ((e.target as HTMLButtonElement).style.background =
-                      "#0056b3")
+                      isBlocked ? "#333" : "#0056b3")
                   }
                   onMouseLeave={(e) =>
                     ((e.target as HTMLButtonElement).style.background =
-                      "#0070f3")
+                      isBlocked ? "#333" : "#0070f3")
                   }
                 >
                   Send
                 </button>
               </div>
             </div>
+            <BlockConfirmModal
+              open={blockModalOpen}
+              onClose={() => setBlockModalOpen(false)}
+              onConfirm={async () => {
+                setBlockModalOpen(false);
+                if (!session?.user?.email || !selected?.email) return;
+                await fetch("/api/block-user", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ blockerEmail: session.user.email, blockedEmail: selected.email, action: "block" }),
+                });
+                // Refetch blocked users after blocking
+                const res = await fetch(`/api/block-user?blockerEmail=${encodeURIComponent(session.user.email)}`);
+                const data = await res.json();
+                setBlockedUsers(data.blocked || []);
+                setSelected(null);
+              }}
+              userEmail={selected?.email || ""}
+            />
+            <ReportModal
+              open={reportModalOpen}
+              onClose={() => setReportModalOpen(false)}
+              onSubmit={async (reason, details) => {
+                setReportModalOpen(false);
+                if (!session?.user?.email || !selected?.email) return;
+                await fetch("/api/report", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ reporterEmail: session.user.email, reportedUserEmail: selected.email, reason, details }),
+                });
+                alert("Report submitted. Thank you!");
+              }}
+              type="user"
+              targetEmail={selected?.email || ""}
+            />
           </>
         ) : (
           <div
