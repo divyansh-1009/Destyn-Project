@@ -9,10 +9,9 @@ export default function EditProfile() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [fields, setFields] = useState({
-    name: "",
     bio: "",
     interests: "",
-    profilePhotos: [],
+    birthdate: "",
   });
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
@@ -33,12 +32,10 @@ export default function EditProfile() {
         if (response.ok) {
           const data = await response.json();
           setFields({
-            name: data.name || "",
             bio: data.bio || "",
             interests: data.interests || "",
-            profilePhotos: data.profilePhotos || [],
+            birthdate: data.birthdate || "",
           });
-          setPhotoPreviews(data.profilePhotos || []);
         }
       } catch (err) {
         setError("Failed to fetch profile");
@@ -85,19 +82,14 @@ export default function EditProfile() {
     setError("");
     setSuccess("");
     try {
-      let uploadedUrls: string[] = [];
-      if (photoFiles.length) {
-        uploadedUrls = await handlePhotoUpload();
-      }
       const response = await fetch("/api/update-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: session?.user?.email,
-          name: fields.name,
           bio: fields.bio,
           interests: fields.interests,
-          profilePhotos: uploadedUrls.length ? uploadedUrls : fields.profilePhotos,
+          birthdate: fields.birthdate,
         }),
       });
       if (response.ok) {
@@ -123,16 +115,6 @@ export default function EditProfile() {
       <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 24, textAlign: "center" }}>Edit Profile</h1>
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
         <label style={{ fontWeight: 600 }}>
-          Name
-          <input
-            type="text"
-            name="name"
-            value={fields.name}
-            onChange={handleChange}
-            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #333", background: "#222", color: "#fff", marginTop: 6 }}
-          />
-        </label>
-        <label style={{ fontWeight: 600 }}>
           Bio
           <textarea
             name="bio"
@@ -153,26 +135,15 @@ export default function EditProfile() {
           />
         </label>
         <label style={{ fontWeight: 600 }}>
-          Profile Photos
+          Birthdate
           <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handlePhotoChange}
-            style={{ display: "block", marginTop: 6, color: "#fff" }}
+            type="date"
+            name="birthdate"
+            value={fields.birthdate}
+            onChange={handleChange}
+            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #333", background: "#222", color: "#fff", marginTop: 6 }}
           />
         </label>
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", margin: "10px 0" }}>
-          {photoPreviews.map((url, idx) => (
-            <img
-              key={idx}
-              src={url}
-              alt={`Profile preview ${idx + 1}`}
-              style={{ width: 80, height: 80, borderRadius: 12, objectFit: "cover", border: "2px solid #333" }}
-            />
-          ))}
-        </div>
         <button
           type="submit"
           disabled={submitting}
