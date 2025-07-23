@@ -549,6 +549,9 @@ export default function Chat() {
                   body: JSON.stringify({ reporterEmail: session.user.email, reportedUserEmail: selected.email, reason, details }),
                 });
                 alert("Report submitted. Thank you!");
+                // Instantly remove the match and clear chat
+                setMatches((prev) => prev.filter((u) => u.email !== selected.email));
+                setSelected(null);
               }}
               type="user"
               targetEmail={selected?.email || ""}
