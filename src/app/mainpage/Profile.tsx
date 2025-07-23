@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 export default function Profile() {
   const { data: session } = useSession();
@@ -437,7 +438,7 @@ export default function Profile() {
             onMouseLeave={(e) =>
               ((e.target as HTMLButtonElement).style.background = "transparent")
             }
-            onClick={() => {}}
+            onClick={() => signOut({ callbackUrl: "/" })}
           >
             🚪 Sign Out
           </button>
