@@ -2,9 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function Profile() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -412,7 +414,7 @@ export default function Profile() {
             onMouseLeave={(e) =>
               ((e.target as HTMLButtonElement).style.background = "transparent")
             }
-            onClick={() => {}}
+            onClick={() => router.push("/mainpage/edit-profile")}
           >
             🔧 Edit Profile
           </button>

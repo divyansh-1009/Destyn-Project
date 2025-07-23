@@ -6,6 +6,7 @@ import People from "./People";
 import Chat from "./Chat";
 import Profile from "./Profile";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 const NAV_OPTIONS = [
   { key: "feed", label: "Feed" },
@@ -23,7 +24,9 @@ const TOP_NAV_OPTIONS = [
 ];
 
 export default function MainPage() {
-  const [active, setActive] = useState("feed");
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || "feed";
+  const [active, setActive] = useState(initialTab);
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
