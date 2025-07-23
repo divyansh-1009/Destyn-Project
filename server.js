@@ -22,10 +22,30 @@ const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/";
 console.log("Using MongoDB URI:", uri);
 
 const client = new MongoClient(uri);
-const clientPromise = client.connect();
+let mongoConnected = false;
+const clientPromise = client.connect().then(() => {
+  mongoConnected = true;
+  console.log('MongoDB connected successfully');
+}).catch((err) => {
+  mongoConnected = false;
+  console.error('MongoDB connection error:', err);
+});
 
 app.prepare().then(() => {
   const server = express();
+
+  // Health check endpoint
+  server.get('/api/health', async (req, res) => {
+    try {
+      await clientPromise;
+      const db = client.db('datingapp');
+      // Try a simple command to check connection
+      await db.command({ ping: 1 });
+      res.status(200).json({ status: 'ok', mongoConnected: true });
+    } catch (err) {
+      res.status(500).json({ status: 'error', mongoConnected: false, error: err.message });
+    }
+  });
 
   // Add CORS middleware
   server.use((req, res, next) => {
@@ -68,13 +88,16 @@ app.prepare().then(() => {
 
     // Handle sending a message
     socket.on("chat message", async (data) => {
-      // data: { room, sender, receiver, message, timestamp }
       try {
+        await clientPromise;
         const db = client.db("datingapp");
+        console.log("Inserting message into messages collection:", data);
         await db.collection("messages").insertOne(data);
+        console.log("Message inserted successfully");
         io.to(data.room).emit("chat message", data); // Broadcast to room
       } catch (error) {
         console.error("Error saving message:", error);
+        socket.emit("chat error", { error: "Failed to save message", details: error.message });
       }
     });
 
