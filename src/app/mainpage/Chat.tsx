@@ -272,7 +272,6 @@ export default function Chat() {
                     style={{
                       fontWeight: "600",
                       fontSize: "14px",
-                      marginBottom: 4,
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
@@ -280,17 +279,7 @@ export default function Chat() {
                   >
                     {user.name || user.email}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#888",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {user.email}
-                  </div>
+                  {/* Removed email display from sidebar */}
                 </div>
               </div>
             ))}
@@ -347,11 +336,9 @@ export default function Chat() {
                         marginBottom: 4,
                       }}
                     >
-                      💬 Chat with {selected.name || selected.email}
+                      💬 {selected.name}
                     </div>
-                    <div style={{ fontSize: "12px", color: "#888" }}>
-                      {selected.email}
-                    </div>
+                    {/* Removed email display from here */}
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
