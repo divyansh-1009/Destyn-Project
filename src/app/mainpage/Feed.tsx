@@ -464,7 +464,11 @@ export default function Feed() {
       </div>
 
       {/* Confessions Feed */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div style={{ 
+        display: "flex", 
+        flexDirection: "column", 
+        gap: 78, // Increased gap from 20 to 28px for better spacing
+      }}>
         {confessions.length === 0 && !loading ? (
           <div
             style={{
@@ -545,15 +549,17 @@ export default function Feed() {
                     <span style={{ color: "#666", fontSize: "12px" }}>
                       Anonymous • {formatTime(confession.createdAt)}
                     </span>
-                    <span style={{ color: "#666", fontSize: "12px" }}>
-                      {confession.comments.length} comments
-                    </span>
-                    <button
-                      style={{ background: "#ff9800", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", fontWeight: 600, cursor: "pointer", fontSize: 12 }}
-                      onClick={() => { setReportTarget(confession._id); setReportModalOpen(true); }}
-                    >
-                      Report
-                    </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span style={{ color: "#666", fontSize: "12px" }}>
+                        {confession.comments.length} comments
+                      </span>
+                      <button
+                        style={{ background: "#ff9800", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", fontWeight: 600, cursor: "pointer", fontSize: 12 }}
+                        onClick={() => { setReportTarget(confession._id); setReportModalOpen(true); }}
+                      >
+                        Report
+                      </button>
+                    </div>
                   </div>
                 </div>
                 {/* Reactions Row */}

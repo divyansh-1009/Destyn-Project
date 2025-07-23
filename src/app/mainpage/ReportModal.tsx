@@ -23,8 +23,8 @@ export default function ReportModal({ open, onClose, onSubmit, type, targetId, t
             <select value={reason} onChange={e => setReason(e.target.value)} required style={{ width: "100%", padding: 8, borderRadius: 6, border: "1px solid #333", background: "#181818", color: "#fff", marginTop: 4 }}>
               <option value="">Select a reason</option>
               <option value="spam">Spam</option>
-              <option value="abuse">Abusive or inappropriate</option>
-              <option value="fake">Fake profile/content</option>
+              <option value="abuse">Abusive or inappropriate behaviour</option>
+              <option value="fake">Fake content</option>
               <option value="other">Other</option>
             </select>
           </label>

@@ -5,6 +5,9 @@ import Feed from "./Feed";
 import People from "./People";
 import Chat from "./Chat";
 import Profile from "./Profile";
+import AboutUs from "./AboutUs";
+import Guidelines from "./Guidelines";
+import Privacy from "./Privacy";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -17,10 +20,11 @@ const NAV_OPTIONS = [
 
 // Different options for the top navbar
 const TOP_NAV_OPTIONS = [
-  { key: "search", label: "Search" },
-  { key: "notifications", label: "Notifications" },
-  { key: "settings", label: "Settings" },
-  { key: "help", label: "Help" },
+  { key: "Guidelines", label: "Guidelines" },
+  { key: "FAQs", label: "FAQs" },
+  { key: "Privacy", label: "Privacy" },
+  { key: "About Us", label: "About Us" },
+  { key: "Feedback", label: "Feedback" },
 ];
 
 export default function MainPage() {
@@ -29,6 +33,9 @@ export default function MainPage() {
   const [active, setActive] = useState(initialTab);
   const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showAboutUs, setShowAboutUs] = useState(false);
+  const [showGuidelines, setShowGuidelines] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   // Check if the viewport is mobile size
   useEffect(() => {
@@ -45,6 +52,19 @@ export default function MainPage() {
     // Cleanup
     return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
+
+  const handleTopNavClick = (key: string) => {
+    console.log(`Clicked ${key}`);
+    if (key === "About Us") {
+      setShowAboutUs(true);
+    } else if (key === "Guidelines") {
+      setShowGuidelines(true);
+    } else if (key === "Privacy") {
+      setShowPrivacy(true);
+    }
+    // You can add handlers for other options here
+    setMenuOpen(false);
+  };
 
   let Component;
   switch (active) {
@@ -191,11 +211,7 @@ export default function MainPage() {
                 {TOP_NAV_OPTIONS.map((opt) => (
                   <button
                     key={opt.key}
-                    onClick={() => {
-                      // Placeholder for future functionality
-                      console.log(`Clicked ${opt.key}`);
-                      setMenuOpen(false);
-                    }}
+                    onClick={() => handleTopNavClick(opt.key)}
                     style={{
                       background: "none",
                       border: "none",
@@ -225,10 +241,7 @@ export default function MainPage() {
             {TOP_NAV_OPTIONS.map((opt) => (
               <button
                 key={opt.key}
-                onClick={() => {
-                  // Placeholder for future functionality
-                  console.log(`Clicked ${opt.key}`);
-                }}
+                onClick={() => handleTopNavClick(opt.key)}
                 style={{
                   background: "none",
                   border: "none",
@@ -281,6 +294,11 @@ export default function MainPage() {
         {/* Main content */}
         <div style={{ flex: 1, overflow: "auto" }}>{Component}</div>
       </div>
+
+      {/* Modals */}
+      {showAboutUs && <AboutUs onClose={() => setShowAboutUs(false)} />}
+      {showGuidelines && <Guidelines onClose={() => setShowGuidelines(false)} />}
+      {showPrivacy && <Privacy onClose={() => setShowPrivacy(false)} />}
 
       {/* Bottom navigation for mobile */}
       {isMobile && (

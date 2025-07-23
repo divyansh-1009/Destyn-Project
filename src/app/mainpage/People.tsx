@@ -200,232 +200,234 @@ export default function People() {
     }
   };
 
+  // Helper: get age from birthdate string (YYYY-MM-DD)
+  function getAge(birthdate?: string) {
+    if (!birthdate) return undefined;
+    const dob = new Date(birthdate);
+    const diff = Date.now() - dob.getTime();
+    const age = new Date(diff).getUTCFullYear() - 1970;
+    return age;
+  }
+
+  // Helper: get interests as array
+  function getInterests(user: User) {
+    if (user.answers && user.answers.interests) {
+      return user.answers.interests.split(",").map((i) => i.trim()).filter(Boolean);
+    }
+    return [];
+  }
+
+  // Helper: get school (if present)
+  function getSchool(user: User) {
+    if (user.answers && user.answers.school) return user.answers.school;
+    return undefined;
+  }
+
+  // Helper: get about (if present)
+  function getAbout(user: User) {
+    if (user.answers && user.answers.about) return user.answers.about;
+    return undefined;
+  }
+
+  // Helper: get major (if present)
+  function getMajor(user: User) {
+    if (user.answers && user.answers.major) return user.answers.major;
+    return undefined;
+  }
+
+  // Helper: get distance (if present)
+  function getDistance(user: User) {
+    if (user.answers && user.answers.distance) return user.answers.distance;
+    return undefined;
+  }
+
   return (
     <div
       style={{
         padding: 24,
-        maxWidth: 500,
+        maxWidth: 480,
         margin: "0 auto",
-        background: "transparent", // Changed from #000 to transparent
+        background: "transparent",
         color: "#fff",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
       }}
     >
       <div
         style={{
-          textAlign: "center",
-          marginBottom: 30,
-          padding: "20px 0",
+          borderRadius: 24,
+          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+          background: "#fff",
+          overflow: "hidden",
+          margin: "0 auto",
+          maxWidth: 440,
         }}
       >
-        <h1
-          style={{
-            fontSize: "32px",
-            fontWeight: "700",
-            color: "#fff",
-            margin: "0 0 8px 0",
-          }}
-        >
-          👥 Discover People
-        </h1>
-        <p
-          style={{
-            color: "#888",
-            fontSize: "16px",
-            margin: 0,
-          }}
-        >
-          Swipe through profiles and find your match
-        </p>
-        <div
-          style={{
-            color: "#666",
-            fontSize: "12px",
-            marginTop: 8,
-          }}
-        >
-          {current + 1} of {users.length} • {users.length} people available
-        </div>
-      </div>
-
-      <div
-        style={{
-          border: "1px solid #333",
-          borderRadius: 16,
-          padding: 32,
-          marginBottom: 24,
-          textAlign: "center",
-          background: "#111",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-        }}
-      >
-        {/* Profile Photo */}
-        <div
-          style={{
-            width: 120,
-            height: 120,
-            borderRadius: "50%",
-            background: "#1a1a1a",
-            margin: "0 auto 20px auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 48,
-            color: "#666",
-            border: "2px solid #333",
-            overflow: "hidden",
-          }}
-        >
-          {(user.profilePhotos && user.profilePhotos.length > 0) || user.profilePhoto ? (
+        {/* Profile Photo with overlay */}
+        <div style={{ position: "relative", width: "100%", height: 400, background: "#eee" }}>
+          {(user.profilePhotos?.[0] || user.profilePhoto) ? (
             <img
               src={user.profilePhotos?.[0] || user.profilePhoto}
-              alt={`${user.name}'s profile`}
+              alt={user.name}
               style={{
                 width: "100%",
-                height: "100%",
+                height: 400,
                 objectFit: "cover",
+                display: "block",
+                background: "#eee",
               }}
               onError={(e) => {
-                console.error("Error loading image:", e);
-                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).src = "/avatar-placeholder.svg";
               }}
             />
           ) : (
-            <span>👤</span>
+            <div style={{ width: "100%", height: 400, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 120, color: "#bbb", background: "#eee" }}>👤</div>
           )}
-        </div>
-        
-        <h3
-          style={{
-            fontSize: "24px",
-            fontWeight: "600",
-            margin: "0 0 8px 0",
+          {/* Overlay name and info (bottom left, always visible) */}
+          <div style={{
+            position: "absolute",
+            left: 12,
+            bottom: 12,
+            zIndex: 10,
             color: "#fff",
-          }}
-        >
-          {user.name}
-        </h3>
-        <p
-          style={{
-            color: "#888",
-            fontSize: "14px",
-            margin: "0 0 24px 0",
-          }}
-        >
-          {user.email}
-        </p>
-
-        <div
-          style={{
+            fontSize: 36,
+            fontWeight: 800,
+            textShadow: "0 1px 8px rgba(0,0,0,0.18)",
+            letterSpacing: 0.5,
+            lineHeight: 1.1,
+            pointerEvents: "none",
             textAlign: "left",
-            marginTop: 24,
-            background: "#0a0a0a",
-            borderRadius: 12,
-            padding: 20,
-            border: "1px solid #333",
-            maxHeight: "300px",
-            overflowY: "auto"
-          }}
-        >
-          <h4
-            style={{
+            fontFamily: "Montserrat, Mont, 'Montserrat', Arial, sans-serif",
+          }}>
+            {user.name}
+            {user.answers?.birthdate && (
+              <span style={{ fontWeight: 400, fontSize: 28, marginLeft: 8 }}>
+                , {getAge(user.answers.birthdate)}
+              </span>
+            )}
+            <div style={{
+              marginTop: 10,
+              fontSize: 20,
+              fontWeight: 400,
               color: "#fff",
-              margin: "0 0 16px 0",
-              fontSize: "16px",
-              fontWeight: "600",
-            }}
-          >
-            About {user.name}
-          </h4>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {user.answers &&
-              Object.entries(user.answers).map(([qid, ans]) => (
-                <div
-                  key={qid}
+              textShadow: "0 1px 4px rgba(0,0,0,0.12)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 4,
+              fontFamily: "Montserrat, Mont, 'Montserrat', Arial, sans-serif",
+            }}>
+              {getMajor(user) && (
+                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span role="img" aria-label="major">🎓</span> {getMajor(user)}
+                </span>
+              )}
+              {getDistance(user) && (
+                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span role="img" aria-label="distance">📍</span> {getDistance(user)}
+                </span>
+              )}
+            </div>
+          </div>
+          {/* Overlay gradient for readability */}
+          <div style={{
+            position: "absolute",
+            left: 0,
+            bottom: 0,
+            width: "100%",
+            height: 60,
+            background: "linear-gradient(0deg, rgba(0,0,0,0.35) 80%, rgba(0,0,0,0.01) 100%)",
+            zIndex: 2,
+            pointerEvents: "none",
+          }} />
+        </div>
+        {/* Card Details */}
+        <div style={{ padding: "28px 24px 18px 24px", color: "#222" }}>
+          {/* About/Bio section always visible */}
+          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>About</div>
+          <div style={{ fontSize: 15, marginBottom: 18, color: "#444" }}>
+            {getAbout(user) || <span style={{ color: "#bbb" }}>No bio provided.</span>}
+          </div>
+          {/* Interests section below bio */}
+          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Interests</div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 18, minHeight: 36 }}>
+            {getInterests(user).length > 0 ? (
+              getInterests(user).map((interest, idx) => (
+                <span
+                  key={idx}
                   style={{
-                    padding: "12px 16px",
-                    background: "#111",
-                    borderRadius: 8,
-                    border: "1px solid #333",
+                    background: "#f3e8ff",
+                    color: "#8e24aa",
+                    borderRadius: 16,
+                    padding: "6px 16px",
+                    fontSize: 15,
+                    fontWeight: 600,
+                    letterSpacing: 0.2,
+                    boxShadow: "0 1px 4px rgba(142,36,170,0.07)",
                   }}
                 >
-                  <div
-                    style={{
-                      color: "#0070f3",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      marginBottom: 4,
-                    }}
-                  >
-                    {QUESTION_LABELS[qid as keyof typeof QUESTION_LABELS] || qid}
-                  </div>
-                  <div
-                    style={{
-                      color: "#fff",
-                      fontSize: "14px",
-                      lineHeight: "1.4"
-                    }}
-                  >
-                    {ans}
-                  </div>
-                </div>
-              ))}
+                  {interest}
+                </span>
+              ))
+            ) : (
+              <span style={{ color: "#bbb", fontSize: 15 }}>No interests listed</span>
+            )}
           </div>
+          {/* School */}
+          {getSchool(user) && (
+            <>
+              <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>School</div>
+              <div style={{ fontSize: 15, marginBottom: 18, color: "#8e24aa", fontWeight: 600 }}>{getSchool(user)}</div>
+            </>
+          )}
         </div>
       </div>
-
-      <div
-        style={{ display: "flex", justifyContent: "space-between", gap: 16 }}
-      >
+      {/* Action Buttons */}
+      <div style={{ display: "flex", justifyContent: "center", gap: 64, marginTop: 32 }}>
         <button
           style={{
-            flex: 1,
-            padding: "16px 0",
-            background: "#4caf50",
-            color: "#fff",
+            width: 64,
+            height: 64,
+            borderRadius: "50%",
+            background: "#fff",
             border: "none",
-            borderRadius: 12,
-            fontSize: 16,
-            fontWeight: "600",
+            boxShadow: "0 2px 12px rgba(244,67,54,0.10)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 32,
+            color: "#f44336",
             cursor: "pointer",
             transition: "all 0.2s",
-            boxShadow: "0 4px 12px rgba(76, 175, 80, 0.3)",
           }}
-          onMouseEnter={(e) =>
-            ((e.target as HTMLButtonElement).style.background = "#45a049")
-          }
-          onMouseLeave={(e) =>
-            ((e.target as HTMLButtonElement).style.background = "#4caf50")
-          }
-          onClick={handleLike}
+          onClick={handlePass}
+          aria-label="Pass"
         >
-          ❤️ Like
+          ✖️
         </button>
         <button
           style={{
-            flex: 1,
-            padding: "16px 0",
-            background: "#f44336",
-            color: "#fff",
+            width: 64,
+            height: 64,
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #f857a6 0%, #ff5858 100%)",
             border: "none",
-            borderRadius: 12,
-            fontSize: 16,
-            fontWeight: "600",
+            boxShadow: "0 2px 12px rgba(248,87,166,0.10)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 32,
+            color: "#fff",
             cursor: "pointer",
             transition: "all 0.2s",
-            boxShadow: "0 4px 12px rgba(244, 67, 54, 0.3)",
           }}
-          onMouseEnter={(e) =>
-            ((e.target as HTMLButtonElement).style.background = "#d32f2f")
-          }
-          onMouseLeave={(e) =>
-            ((e.target as HTMLButtonElement).style.background = "#f44336")
-          }
-          onClick={handlePass}
+          onClick={handleLike}
+          aria-label="Like"
         >
-          ✖️ Pass
+          ♥
         </button>
       </div>
-      
       {/* Refresh button at bottom */}
       <div style={{ textAlign: "center", marginTop: 20 }}>
         <button

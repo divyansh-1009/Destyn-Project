@@ -178,7 +178,6 @@ export default function Profile() {
         <div
           style={{
             textAlign: "center",
-            marginBottom: 32,
           }}
         >
           <h3
@@ -301,79 +300,6 @@ export default function Profile() {
             style={{ display: "none" }}
           />
         </div>
-
-        {/* Profile Stats */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: 16,
-            marginTop: 32,
-            paddingTop: 24,
-            borderTop: "1px solid #333",
-          }}
-        >
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                fontSize: "24px",
-                fontWeight: "700",
-                color: "#0070f3",
-                marginBottom: 4,
-              }}
-            >
-              0
-            </div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#888",
-              }}
-            >
-              Matches
-            </div>
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                fontSize: "24px",
-                fontWeight: "700",
-                color: "#0070f3",
-                marginBottom: 4,
-              }}
-            >
-              0
-            </div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#888",
-              }}
-            >
-              Likes Given
-            </div>
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <div
-              style={{
-                fontSize: "24px",
-                fontWeight: "700",
-                color: "#0070f3",
-                marginBottom: 4,
-              }}
-            >
-              0
-            </div>
-            <div
-              style={{
-                fontSize: "12px",
-                color: "#888",
-              }}
-            >
-              Likes Received
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Account Actions */}
@@ -410,7 +336,7 @@ export default function Profile() {
               transition: "all 0.2s",
             }}
             onMouseEnter={(e) =>
-              ((e.target as HTMLButtonElement).style.background = "#0070f3")
+              ((e.target as HTMLButtonElement).style.background = "rgba(0, 112, 243, 0.1)")
             }
             onMouseLeave={(e) =>
               ((e.target as HTMLButtonElement).style.background = "transparent")
@@ -433,14 +359,14 @@ export default function Profile() {
               transition: "all 0.2s",
             }}
             onMouseEnter={(e) =>
-              ((e.target as HTMLButtonElement).style.background = "#f44336")
+              ((e.target as HTMLButtonElement).style.background = "rgba(244, 67, 54, 0.1)")
             }
             onMouseLeave={(e) =>
               ((e.target as HTMLButtonElement).style.background = "transparent")
             }
             onClick={() => signOut({ callbackUrl: "/" })}
           >
-            🚪 Sign Out
+            ↩️ Logout
           </button>
         </div>
       </div>
