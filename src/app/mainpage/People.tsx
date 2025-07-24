@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import React from "react";
 
 type User = {
   name: string;
@@ -28,12 +29,48 @@ const QUESTION_LABELS = {
   "q14": "Showing interest"
 };
 
+// Styled notification component
+function MatchNotification({ message, onClose }: { message: string, onClose: () => void }) {
+  React.useEffect(() => {
+    if (message) {
+      const timer = setTimeout(onClose, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [message, onClose]);
+  if (!message) return null;
+  return (
+    <div style={{
+      position: "fixed",
+      top: 30,
+      left: "50%",
+      transform: "translateX(-50%)",
+      background: "linear-gradient(90deg, #ffecd2 0%, #fcb69f 100%)",
+      color: "#333",
+      padding: "18px 32px",
+      borderRadius: 16,
+      boxShadow: "0 4px 24px rgba(0,0,0,0.15)",
+      zIndex: 1000,
+      fontWeight: 600,
+      fontSize: 18,
+      textAlign: "center",
+      minWidth: 320,
+      maxWidth: "90vw",
+      border: "2px solid #ffb88c",
+    }}>
+      {message}
+    </div>
+  );
+}
+
 export default function People() {
   const { data: session } = useSession();
   const [users, setUsers] = useState<User[]>([]);
   const [current, setCurrent] = useState(0);
   const [loading, setLoading] = useState(true);
   const [likedUsers, setLikedUsers] = useState<string[]>([]);
+  // Add state to track previous matches
+  const [matches, setMatches] = useState<any[]>([]);
+  const [matchNotification, setMatchNotification] = useState("");
 
   // Function to fetch fresh data
   const fetchUsers = async () => {
@@ -63,9 +100,11 @@ export default function People() {
       const liked = likedData.liked || [];
       
       // Filter out already liked users and current user
-      const availableUsers = allUsers.filter((user: User) => 
+      let availableUsers = allUsers.filter((user: User) => 
         !liked.includes(user.email) && user.email !== session.user.email
       );
+      // Shuffle the available users array
+      availableUsers = shuffleArray(availableUsers);
       
       setUsers(availableUsers);
       setLikedUsers(liked);
@@ -77,6 +116,16 @@ export default function People() {
       setLoading(false);
     }
   };
+
+  // Fisher-Yates shuffle
+  function shuffleArray<T>(array: T[]): T[] {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
 
   // Fetch users on mount and when session changes
   useEffect(() => {
@@ -93,6 +142,22 @@ export default function People() {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [session?.user?.email]);
+
+  // Fetch matches on mount and when session changes
+  const fetchMatches = async () => {
+    if (!session?.user?.email) return;
+    const res = await fetch("/api/get-matches", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: session.user.email }),
+    });
+    const data = await res.json();
+    setMatches(data.matches || []);
+  };
+
+  useEffect(() => {
+    fetchMatches();
   }, [session?.user?.email]);
 
   if (loading)
@@ -159,6 +224,8 @@ export default function People() {
 
   const handleLike = async () => {
     try {
+      // Store previous matches
+      const prevMatches = matches.map(m => m.email);
       await fetch("/api/like-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -183,6 +250,20 @@ export default function People() {
       // If no more users, try to fetch fresh data
       if (newUsers.length === 0) {
         setTimeout(fetchUsers, 500); // Small delay to allow DB update
+      }
+      // Fetch new matches and check for new match
+      await fetchMatches();
+      const res = await fetch("/api/get-matches", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: session.user?.email }),
+      });
+      const data = await res.json();
+      const newMatch = (data.matches || []).find((m: any) => !prevMatches.includes(m.email));
+      if (newMatch) {
+        let msg = `✨ You and ${(newMatch.name || newMatch.email)} just matched! ✨`;
+        setMatchNotification(msg);
+        // TODO: To notify the other user in real-time, implement socket or push notification logic.
       }
     } catch (error) {
       console.error("Error liking user:", error);
@@ -255,6 +336,7 @@ export default function People() {
         justifyContent: "center",
       }}
     >
+      <MatchNotification message={matchNotification} onClose={() => setMatchNotification("")} />
       <div
         style={{
           borderRadius: 24,

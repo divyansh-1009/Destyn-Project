@@ -33,7 +33,20 @@ export async function POST(req: NextRequest) {
       .project({ name: 1, email: 1, profilePhoto: 1, _id: 0 })
       .toArray();
 
-    return NextResponse.json({ matches: matchedUsers });
+    // Fetch similarities for each match from the matches collection
+    const matchesWithSimilarities = await Promise.all(
+      matchedUsers.map(async (user) => {
+        const usersSorted = [email, user.email].sort();
+        const matchDoc = await db.collection("matches").findOne({ users: usersSorted });
+        return {
+          ...user,
+          similarInterests: matchDoc?.similarInterests || [],
+          similarAnswers: matchDoc?.similarAnswers || [],
+        };
+      })
+    );
+
+    return NextResponse.json({ matches: matchesWithSimilarities });
   } catch (error) {
     console.error("Error fetching matches:", error);
     return NextResponse.json({ matches: [] });

@@ -6,6 +6,9 @@ import { useSession } from "next-auth/react";
 import BlockConfirmModal from "./BlockConfirmModal";
 import ReportModal from "./ReportModal";
 
+// Add import for useCallback
+import { useCallback } from "react";
+
 const SOCKET_URL = typeof window !== "undefined" ? window.location.origin : "";
 
 export default function Chat() {
@@ -19,6 +22,8 @@ export default function Chat() {
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<any | null>(null); // For selected user's profile
+  const [currentUserProfile, setCurrentUserProfile] = useState<any | null>(null); // For current user's profile
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const sentMessagesRef = useRef<Set<string>>(new Set());
@@ -73,6 +78,37 @@ export default function Chat() {
         setBlockedUsers(data.blocked || []);
       });
   }, [session?.user?.email]);
+
+  // Fetch current user profile
+  useEffect(() => {
+    if (!session?.user?.email) return;
+    fetch("/api/get-user-profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: session.user.email }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setCurrentUserProfile(data);
+      });
+  }, [session?.user?.email]);
+
+  // Fetch selected user profile
+  useEffect(() => {
+    if (!selected?.email) {
+      setSelectedProfile(null);
+      return;
+    }
+    fetch("/api/get-user-profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: selected.email }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setSelectedProfile(data);
+      });
+  }, [selected]);
 
   // Determine if selected user is blocked
   const isBlocked = selected && blockedUsers.includes(selected.email);
@@ -152,6 +188,14 @@ export default function Chat() {
   const handleBackToMatches = () => {
     setSelected(null);
   };
+
+  // Function to get similarities
+  const getSimilarities = useCallback((arr1: string[] = [], arr2: string[] = []) => {
+    return arr1.filter((item) => arr2.includes(item));
+  }, []);
+
+  // Remove fetching and computing similarities on chat open
+  // Instead, use the similarities from the selected match object
 
   return (
     <div
@@ -545,6 +589,28 @@ export default function Chat() {
                   backgroundSize: "20px 20px",
                 }}
               >
+                {messages.find((msg) => msg.sender === 'system') && (
+                  <div
+                    className="chat-system-message"
+                    style={{
+                      background: "linear-gradient(90deg, #a1c4fd 0%, #c2e9fb 100%)",
+                      color: "#222",
+                      padding: "16px 28px",
+                      borderRadius: "18px",
+                      margin: "0 auto 18px auto",
+                      textAlign: "center",
+                      fontStyle: "italic",
+                      fontWeight: 600,
+                      maxWidth: 420,
+                      fontSize: 18,
+                      boxShadow: "0 2px 16px rgba(100,180,255,0.10)",
+                      display: "block",
+                      whiteSpace: "pre-line"
+                    }}
+                  >
+                    {messages.find((msg) => msg.sender === 'system')?.message}
+                  </div>
+                )}
                 {loading && (
                   <div
                     style={{
@@ -558,7 +624,7 @@ export default function Chat() {
                   </div>
                 )}
 
-                {messages.map((msg, idx) => (
+                {messages.filter((msg, idx) => msg.sender !== 'system' || idx !== messages.findIndex(m => m.sender === 'system')).map((msg, idx) => (
                   <div
                     key={`${msg.timestamp}-${idx}`}
                     style={{ margin: "12px 0" }}
