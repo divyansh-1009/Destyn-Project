@@ -477,6 +477,223 @@ export default function Privacy({ onClose }: { onClose: () => void }) {
               <p style={{ marginTop: "12px" }}>
                 For information on how we process personal data through "profiling" and "automated decision-making", please see our FAQs.
               </p>
+
+              <div style={{ marginTop: "32px", overflowX: "auto" }}>
+                <table style={{ 
+                  width: "100%", 
+                  borderCollapse: "collapse", 
+                  fontSize: "14px",
+                  color: "#ccc",
+                  border: "1px solid #333"
+                }}>
+                  <thead>
+                    <tr>
+                      <th style={{ 
+                        padding: "16px", 
+                        textAlign: "left", 
+                        borderBottom: "2px solid #333",
+                        background: "rgba(102, 126, 234, 0.1)",
+                        color: "#fff",
+                        width: "33%"
+                      }}>
+                        PURPOSES FOR PROCESSING YOUR DATA
+                      </th>
+                      <th style={{ 
+                        padding: "16px", 
+                        textAlign: "left", 
+                        borderBottom: "2px solid #333",
+                        background: "rgba(102, 126, 234, 0.1)",
+                        color: "#fff",
+                        width: "33%"
+                      }}>
+                        GROUNDS FOR PROCESSING YOUR DATA
+                      </th>
+                      <th style={{ 
+                        padding: "16px", 
+                        textAlign: "left", 
+                        borderBottom: "2px solid #333",
+                        background: "rgba(102, 126, 234, 0.1)",
+                        color: "#fff",
+                        width: "34%"
+                      }}>
+                        CATEGORIES OF DATA PROCESSED
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <p style={{ fontWeight: "600", color: "#e0e0e0", marginBottom: "8px" }}>To enable you to use our service, including:</p>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Creating and maintaining your account and profile on our service</li>
+                          <li style={{ marginBottom: "6px" }}>Operating and maintaining the various features on our service</li>
+                          <li style={{ marginBottom: "6px" }}>Recommending other members to you and recommending you to them</li>
+                          <li style={{ marginBottom: "6px" }}>Organizing sweepstakes and contests</li>
+                          <li style={{ marginBottom: "6px" }}>Responding to your requests and questions</li>
+                          <li>Monitoring the well-functioning of our service and troubleshooting and fixing issues as needed</li>
+                        </ul>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Performance of our contract with you</li>
+                          <li>Your consent (where sensitive data or other types of data that require consent is processed)</li>
+                        </ul>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Account Data</li>
+                          <li style={{ marginBottom: "6px" }}>Profile Data</li>
+                          <li style={{ marginBottom: "6px" }}>Content</li>
+                          <li style={{ marginBottom: "6px" }}>Purchase Data</li>
+                          <li style={{ marginBottom: "6px" }}>Marketing, Survey and Research Data</li>
+                          <li style={{ marginBottom: "6px" }}>Third Party Data</li>
+                          <li style={{ marginBottom: "6px" }}>Customer Support Data</li>
+                          <li style={{ marginBottom: "6px" }}>Social Media Data</li>
+                          <li style={{ marginBottom: "6px" }}>Usage Data</li>
+                          <li style={{ marginBottom: "6px" }}>Technical Data</li>
+                          <li>Geolocation Data</li>
+                        </ul>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <p style={{ fontWeight: "600", color: "#e0e0e0", marginBottom: "8px" }}>To enable your purchases on our service, including:</p>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Processing payments</li>
+                          <li>Offering discounts and promotions, customizing prices</li>
+                        </ul>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li>Performance of our contract with you</li>
+                        </ul>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Account Data</li>
+                          <li style={{ marginBottom: "6px" }}>Profile Data</li>
+                          <li style={{ marginBottom: "6px" }}>Technical Data</li>
+                          <li style={{ marginBottom: "6px" }}>Purchase Data</li>
+                          <li>Usage Data</li>
+                        </ul>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <p style={{ fontWeight: "600", color: "#e0e0e0", marginBottom: "8px" }}>To operate advertising and marketing campaigns, including:</p>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Performing and measuring the effectiveness of advertising campaigns run on our service</li>
+                          <li style={{ marginBottom: "6px" }}>Performing and measuring the effectiveness of marketing campaigns promoting our own service on third-party platforms</li>
+                          <li>Communicating with you about products and services we believe may interest you</li>
+                        </ul>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Consent (where required under applicable law) and otherwise our legitimate interest.</li>
+                          <li>It is in our legitimate interest to promote our service and to show ads to our members which are tailored to their interests, as a way to improve their experience and help fund the parts of our service which are free</li>
+                        </ul>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Account Data</li>
+                          <li style={{ marginBottom: "6px" }}>Profile Data</li>
+                          <li style={{ marginBottom: "6px" }}>Usage Data</li>
+                          <li style={{ marginBottom: "6px" }}>Marketing, Survey and Research Data</li>
+                          <li>Technical Data</li>
+                        </ul>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <p style={{ fontWeight: "600", color: "#e0e0e0", marginBottom: "8px" }}>To improve our service and create new features and services, including:</p>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Running focus groups, market studies, and surveys</li>
+                          <li style={{ marginBottom: "6px" }}>Analyzing how our service is used</li>
+                          <li style={{ marginBottom: "6px" }}>Reviewing interactions with customer care teams to improve service quality</li>
+                          <li style={{ marginBottom: "6px" }}>Developing and improving new features and services, including through machine learning and other technologies, and testing them out</li>
+                          <li>Conducting research and publishing research papers</li>
+                        </ul>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Performance of our contract with you</li>
+                          <li style={{ marginBottom: "6px" }}>Our legitimate interest: It is in our legitimate interest to improve our service over time</li>
+                          <li>Consent where required under applicable law (e.g., we may process data deemed sensitive or special in certain area to help make sure that the various communities using our service are being treated fairly and equitably and that our service remains diverse and inclusive)</li>
+                        </ul>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Account Data</li>
+                          <li style={{ marginBottom: "6px" }}>Profile Data</li>
+                          <li style={{ marginBottom: "6px" }}>Content</li>
+                          <li style={{ marginBottom: "6px" }}>Purchase Data</li>
+                          <li style={{ marginBottom: "6px" }}>Marketing, Survey and Research Data</li>
+                          <li style={{ marginBottom: "6px" }}>Third Party Data</li>
+                          <li style={{ marginBottom: "6px" }}>Customer Support Data</li>
+                          <li style={{ marginBottom: "6px" }}>Social Media Data</li>
+                          <li style={{ marginBottom: "6px" }}>Usage Data</li>
+                          <li style={{ marginBottom: "6px" }}>Technical Data</li>
+                          <li>Geolocation Data</li>
+                        </ul>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </section>
 
           <div

@@ -256,7 +256,7 @@ export default function People() {
       const res = await fetch("/api/get-matches", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: session.user?.email }),
+        body: JSON.stringify({ email: session?.user?.email }),
       });
       const data = await res.json();
       const newMatch = (data.matches || []).find((m: any) => !prevMatches.includes(m.email));

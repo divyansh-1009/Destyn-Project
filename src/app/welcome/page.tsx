@@ -1,10 +1,15 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 const QUESTIONS = [
+	{
+		id: "q0",
+		question: "Let's start with a profile photo that shows who you are",
+		isPhotoUpload: true,
+	},
 	{
 		id: "q1",
 		question: "Which of these would you love doing with someone you vibe with?",
@@ -156,6 +161,9 @@ export default function WelcomePage() {
 	const [answers, setAnswers] = useState<{ [key: string]: string }>({});
 	const [currentQuestion, setCurrentQuestion] = useState(0);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+	const [uploading, setUploading] = useState(false);
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
 		if (status === "unauthenticated") {
@@ -185,6 +193,55 @@ export default function WelcomePage() {
 		setAnswers((prev) => ({ ...prev, [qid]: value }));
 	};
 
+	const triggerFileInput = () => {
+		fileInputRef.current?.click();
+	};
+
+	const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (!file || !session?.user?.email) return;
+
+		// Validate file type
+		if (!file.type.startsWith("image/")) {
+			alert("Please select an image file");
+			return;
+		}
+
+		// Validate file size (max 5MB)
+		if (file.size > 5 * 1024 * 1024) {
+			alert("File size must be less than 5MB");
+			return;
+		}
+
+		setUploading(true);
+
+		try {
+			const formData = new FormData();
+			formData.append("photo", file);
+			formData.append("userEmail", session.user.email);
+
+			const response = await fetch("/api/upload-photo", {
+				method: "POST",
+				body: formData,
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				setProfilePhoto(data.photoUrl);
+				// Mark this question as answered
+				setAnswers((prev) => ({ ...prev, q0: data.photoUrl }));
+			} else {
+				const error = await response.json();
+				alert(`Upload failed: ${error.error}`);
+			}
+		} catch (error) {
+			console.error("Error uploading photo:", error);
+			alert("Failed to upload photo. Please try again.");
+		} finally {
+			setUploading(false);
+		}
+	};
+
 	const handleNext = () => {
 		if (currentQuestion < QUESTIONS.length - 1) {
 			setCurrentQuestion((prev) => prev + 1);
@@ -206,6 +263,7 @@ export default function WelcomePage() {
 				body: JSON.stringify({
 					name: session.user.name,
 					email: session.user.email,
+					profilePhoto,
 					answers,
 				}),
 			});
@@ -218,7 +276,8 @@ export default function WelcomePage() {
 
 	const currentQ = QUESTIONS[currentQuestion];
 	const isLastQuestion = currentQuestion === QUESTIONS.length - 1;
-	const canProceed = answers[currentQ.id];
+	const isPhotoQuestion = currentQ.isPhotoUpload;
+	const canProceed = isPhotoQuestion ? !!profilePhoto : answers[currentQ.id];
 
 	return (
 		<div
@@ -248,9 +307,9 @@ export default function WelcomePage() {
 						background: "#f0f0f0",
 						height: "12px",
 						borderRadius: "10px",
-            marginTop: "5px",
-            marginLeft:"5px",
-            marginRight:"5px",
+						marginTop: "5px",
+						marginLeft: "5px",
+						marginRight: "5px",
 						marginBottom: "30px",
 						overflow: "hidden",
 					}}
@@ -291,56 +350,146 @@ export default function WelcomePage() {
 					{currentQ.question}
 				</h2>
 
-				{/* Options */}
-				<div
-					style={{
-						display: "flex",
-						flexDirection: "column",
-						gap: "15px",
-						marginBottom: "40px",
-					}}
-				>
-					{currentQ.options.map((opt) => (
-						<label
-							key={opt}
+				{/* Options or Photo Upload UI */}
+				{isPhotoQuestion ? (
+					<div
+						style={{
+							display: "flex",
+							flexDirection: "column",
+							alignItems: "center",
+							gap: "20px",
+							marginBottom: "40px",
+						}}
+					>
+						{/* Photo Preview Area */}
+						<div
 							style={{
+								width: "150px",
+								height: "150px",
+								borderRadius: "50%",
+								background: "#f0f0f0",
+								overflow: "hidden",
 								display: "flex",
 								alignItems: "center",
-								padding: "10px 15px", // Reduced padding
-								border:
-									answers[currentQ.id] === opt
-										? "2px solid #667eea"
-										: "2px solid #e0e0e0",
-								borderRadius: "10px", // Slightly smaller border radius
-								cursor: "pointer",
-								transition: "all 0.2s ease",
-								background:
-									answers[currentQ.id] === opt ? "#f8f9ff" : "#fff",
+								justifyContent: "center",
+								border: "2px solid #e0e0e0",
 							}}
 						>
-							<input
-								type="radio"
-								name={currentQ.id}
-								value={opt}
-								checked={answers[currentQ.id] === opt}
-								onChange={() => handleChange(currentQ.id, opt)}
+							{uploading ? (
+								<div>⏳</div>
+							) : profilePhoto ? (
+								<img
+									src={profilePhoto}
+									alt="Profile Preview"
+									style={{
+										width: "100%",
+										height: "100%",
+										objectFit: "cover",
+									}}
+								/>
+							) : (
+								<div
+									style={{
+										fontSize: "48px",
+										color: "#ccc",
+									}}
+								>
+									👤
+								</div>
+							)}
+						</div>
+
+						{/* Upload Button */}
+						<button
+							onClick={triggerFileInput}
+							disabled={uploading}
+							style={{
+								padding: "12px 24px",
+								background: uploading ? "#e0e0e0" : "#667eea",
+								color: uploading ? "#999" : "#fff",
+								border: "none",
+								borderRadius: "8px",
+								cursor: uploading ? "not-allowed" : "pointer",
+								fontSize: "14px",
+								fontWeight: "600",
+							}}
+						>
+							{uploading ? "Uploading..." : profilePhoto ? "Change Photo" : "Choose Photo"}
+						</button>
+
+						{/* Hidden File Input */}
+						<input
+							ref={fileInputRef}
+							type="file"
+							accept="image/*"
+							onChange={handlePhotoUpload}
+							style={{ display: "none" }}
+						/>
+
+						{/* Helper Text */}
+						<p
+							style={{
+								fontSize: "12px",
+								color: "#666",
+								textAlign: "center",
+							}}
+						>
+							Upload a clear photo of yourself. This will help others recognize you.
+							<br />
+							Supported formats: JPG, PNG (Max 5MB)
+						</p>
+					</div>
+				) : (
+					<div
+						style={{
+							display: "flex",
+							flexDirection: "column",
+							gap: "15px",
+							marginBottom: "40px",
+						}}
+					>
+						{currentQ.options?.map((opt) => (
+							<label
+								key={opt}
 								style={{
-									marginRight: "10px", // Reduced margin
-									transform: "scale(1.1)", // Slightly smaller input size
-								}}
-							/>
-							<span
-								style={{
-									fontSize: "13px", // Reduced font size
-									color: "#333",
-									lineHeight: "1.4",
+									display: "flex",
+									alignItems: "center",
+									padding: "10px 15px", // Reduced padding
+									border:
+										answers[currentQ.id] === opt
+											? "2px solid #667eea"
+											: "2px solid #e0e0e0",
+									borderRadius: "10px", // Slightly smaller border radius
+									cursor: "pointer",
+									transition: "all 0.2s ease",
+									background:
+										answers[currentQ.id] === opt ? "#f8f9ff" : "#fff",
 								}}
 							>
-								{opt}
-							</span>
-						</label>
-					))}
-				</div>
+								<input
+									type="radio"
+									name={currentQ.id}
+									value={opt}
+									checked={answers[currentQ.id] === opt}
+									onChange={() => handleChange(currentQ.id, opt)}
+									style={{
+										marginRight: "10px", // Reduced margin
+										transform: "scale(1.1)", // Slightly smaller input size
+									}}
+								/>
+								<span
+									style={{
+										fontSize: "13px", // Reduced font size
+										color: "#333",
+										lineHeight: "1.4",
+									}}
+								>
+									{opt}
+								</span>
+							</label>
+						))}
+					</div>
+				)}
 
 				{/* Navigation Buttons */}
 				<div
