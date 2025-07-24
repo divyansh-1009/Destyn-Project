@@ -363,7 +363,41 @@ export default function Guidelines({ onClose }: { onClose: () => void }) {
               <li style={{ marginBottom: "8px" }}>Report the user to Destyn right away</li>
               <li style={{ marginBottom: "8px" }}>Reach out to a college counselor or helpline</li>
               <li style={{ marginBottom: "8px" }}>Use campus security or local emergency numbers if in danger</li>
-              <li style={{ marginBottom: "8px" }}>Explore resources like RAINN or ThroughLine</li>
+              <li style={{ marginBottom: "8px" }}>
+                Explore resources like <a 
+                  href="https://rainn.org" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{
+                    color: "#667eea",
+                    textDecoration: "none",
+                    borderBottom: "1px dotted #667eea",
+                    transition: "color 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.target as HTMLElement).style.color = "#764ba2";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.target as HTMLElement).style.color = "#667eea";
+                  }}
+                >RAINN</a> or <a 
+                  href="https://findahelpline.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{
+                    color: "#667eea",
+                    textDecoration: "none",
+                    borderBottom: "1px dotted #667eea",
+                    transition: "color 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.target as HTMLElement).style.color = "#764ba2";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.target as HTMLElement).style.color = "#667eea";
+                  }}
+                >ThroughLine</a>
+              </li>
             </ul>
           </section>
 

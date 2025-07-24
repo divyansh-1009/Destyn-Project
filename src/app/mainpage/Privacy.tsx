@@ -79,11 +79,7 @@ export default function Privacy({ onClose }: { onClose: () => void }) {
               gap: "10px"
             }}
           >
-            <span>🔒</span> Your Data, Your Control
           </h2>
-          <p style={{ color: "#ccc", fontSize: "16px", margin: "16px 0" }}>
-            Last updated: July 24, 2025
-          </p>
         </div>
 
         <div
@@ -97,20 +93,6 @@ export default function Privacy({ onClose }: { onClose: () => void }) {
           }}
         >
           <section>
-            <p>
-              At Destyn, we believe in transparency about how we collect, use, and share information about you. This Privacy Policy is designed to help you understand what information we collect, why we collect it, and how you can update, manage, and delete your information.
-            </p>
-          </section>
-
-          <div style={{ 
-            width: "100%", 
-            height: "4px",
-            background: "linear-gradient(90deg, #667eea, #764ba2)",
-            borderRadius: "2px",
-            margin: "12px 0"
-          }} />
-
-          <section>
             <h2
               style={{
                 fontSize: "22px",
@@ -119,187 +101,14 @@ export default function Privacy({ onClose }: { onClose: () => void }) {
                 color: "#fff",
               }}
             >
-              Information We Collect
-            </h2>
-            
-            <h3 style={{ fontSize: "18px", fontWeight: "600", marginBottom: "12px", color: "#e0e0e0" }}>
-              Information You Provide
-            </h3>
-            <ul style={{ paddingLeft: "20px", marginTop: "8px" }}>
-              <li style={{ marginBottom: "8px" }}>
-                <strong style={{ color: "#fff" }}>Account Information:</strong> When you register, we collect your name, email, password, and college/university affiliation.
-              </li>
-              <li style={{ marginBottom: "8px" }}>
-                <strong style={{ color: "#fff" }}>Profile Information:</strong> Information you add to your profile such as photos, bio, interests, and preferences.
-              </li>
-              <li style={{ marginBottom: "8px" }}>
-                <strong style={{ color: "#fff" }}>Communications:</strong> Messages you exchange with other users through our platform.
-              </li>
-              <li style={{ marginBottom: "8px" }}>
-                <strong style={{ color: "#fff" }}>Content:</strong> Posts, comments, reactions, and other content you share on Destyn.
-              </li>
-            </ul>
-
-            <h3 style={{ fontSize: "18px", fontWeight: "600", margin: "20px 0 12px 0", color: "#e0e0e0" }}>
-              Automatically Collected Information
-            </h3>
-            <ul style={{ paddingLeft: "20px", marginTop: "8px" }}>
-              <li style={{ marginBottom: "8px" }}>
-                <strong style={{ color: "#fff" }}>Usage Data:</strong> Information about how you use Destyn, such as features you use, pages you visit, and actions you take.
-              </li>
-              <li style={{ marginBottom: "8px" }}>
-                <strong style={{ color: "#fff" }}>Device Information:</strong> Hardware model, operating system, unique device identifiers, and mobile network information.
-              </li>
-              <li style={{ marginBottom: "8px" }}>
-                <strong style={{ color: "#fff" }}>Location Data:</strong> With your permission, we may collect precise location data to help you connect with nearby users.
-              </li>
-              <li style={{ marginBottom: "8px" }}>
-                <strong style={{ color: "#fff" }}>Cookies and Similar Technologies:</strong> Information collected through cookies and similar technologies about your browsing behavior.
-              </li>
-            </ul>
-          </section>
-
-          <div style={{ 
-            width: "100%", 
-            height: "4px",
-            background: "linear-gradient(90deg, #667eea, #764ba2)",
-            borderRadius: "2px",
-            margin: "12px 0"
-          }} />
-
-          <section>
-            <h2
-              style={{
-                fontSize: "22px",
-                fontWeight: "600",
-                marginBottom: "16px",
-                color: "#fff",
-              }}
-            >
-              How We Use Your Information
-            </h2>
-            
-            <ul style={{ paddingLeft: "20px", marginTop: "8px" }}>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Provide and Improve Our Services:</strong> To operate Destyn, develop new features, and enhance your experience.
-              </li>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Personalization:</strong> To customize content, recommendations, and features to match your preferences and interests.
-              </li>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Communication:</strong> To facilitate communication between users, send service updates, and respond to your inquiries.
-              </li>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Safety and Security:</strong> To verify accounts, prevent fraud, and ensure the security of our platform.
-              </li>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Research and Analytics:</strong> To understand how users interact with our platform and improve our services.
-              </li>
-            </ul>
-          </section>
-
-          <div style={{ 
-            width: "100%", 
-            height: "4px",
-            background: "linear-gradient(90deg, #667eea, #764ba2)",
-            borderRadius: "2px",
-            margin: "12px 0"
-          }} />
-
-          <section>
-            <h2
-              style={{
-                fontSize: "22px",
-                fontWeight: "600",
-                marginBottom: "16px",
-                color: "#fff",
-              }}
-            >
-              Information Sharing and Disclosure
-            </h2>
-            
-            <p>We share your information in the following ways:</p>
-            <ul style={{ paddingLeft: "20px", marginTop: "12px" }}>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>With Other Users:</strong> Information in your profile is visible to other Destyn users according to your privacy settings.
-              </li>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Service Providers:</strong> We share information with vendors who help us provide services (e.g., cloud storage, analytics).
-              </li>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Legal Requirements:</strong> We may disclose information if required by law or to protect the rights, property, or safety of Destyn, our users, or others.
-              </li>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Business Transfers:</strong> If Destyn is involved in a merger, acquisition, or sale of assets, your information may be transferred as part of that transaction.
-              </li>
-            </ul>
-            <p>
-              <strong style={{ color: "#fff" }}>We do not sell your personal information to third parties.</strong>
-            </p>
-          </section>
-
-          <div style={{ 
-            width: "100%", 
-            height: "4px",
-            background: "linear-gradient(90deg, #667eea, #764ba2)",
-            borderRadius: "2px",
-            margin: "12px 0"
-          }} />
-
-          <section>
-            <h2
-              style={{
-                fontSize: "22px",
-                fontWeight: "600",
-                marginBottom: "16px",
-                color: "#fff",
-              }}
-            >
-              Your Choices and Rights
-            </h2>
-            
-            <p>You have several choices regarding your information:</p>
-            <ul style={{ paddingLeft: "20px", marginTop: "12px" }}>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Account Information:</strong> You can update, correct, or delete your account information at any time through your account settings.
-              </li>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Profile Privacy:</strong> You can control who sees your profile and what information is visible to others.
-              </li>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Communications:</strong> You can opt out of receiving promotional communications from us.
-              </li>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Location Data:</strong> You can enable or disable location services through your device settings.
-              </li>
-              <li style={{ marginBottom: "12px" }}>
-                <strong style={{ color: "#fff" }}>Account Deletion:</strong> You can delete your account at any time, which will remove your profile and most of your information from our systems.
-              </li>
-            </ul>
-          </section>
-
-          <div style={{ 
-            width: "100%", 
-            height: "4px",
-            background: "linear-gradient(90deg, #667eea, #764ba2)",
-            borderRadius: "2px",
-            margin: "12px 0"
-          }} />
-
-          <section>
-            <h2
-              style={{
-                fontSize: "22px",
-                fontWeight: "600",
-                marginBottom: "16px",
-                color: "#fff",
-              }}
-            >
-              Data Security
+              1. Where This Privacy Policy Applies
             </h2>
             
             <p>
-              We implement appropriate technical and organizational measures to protect your personal information against unauthorized access, accidental loss, alteration, or destruction. However, no internet transmission is ever completely secure, so we encourage you to take care when disclosing personal information online.
+              This Privacy Policy applies to websites, apps, events and other services we operate under the brand. Whether you're searching for your soulmate, joining us at one of our events, or using any of our other awesome services, this Policy has got you covered. For simplicity, we just refer to all of these as our "service" in this Privacy Policy.
+            </p>
+            <p style={{ marginTop: "12px" }}>
+              If for some reason, one of our services requires its own separate privacy policy, then that policy will be made available to you and that policy -- not this Privacy Policy -- will apply.
             </p>
           </section>
 
@@ -320,71 +129,355 @@ export default function Privacy({ onClose }: { onClose: () => void }) {
                 color: "#fff",
               }}
             >
-              Data Retention
+              2. Data We Collect
             </h2>
             
             <p>
-              We retain your information for as long as your account is active or as needed to provide you services. We may retain certain information even after you delete your account if necessary to comply with legal obligations, resolve disputes, or enforce our agreements.
+              It goes without saying, we can't help you develop meaningful connections without you providing some information about yourself, like basic profile details and the types of people you'd like to meet. Using our service also generates some information, such as when you logged in and how you used the service. We may also collect data from third parties, like when you access the service through an account you have on another platform (e.g., Facebook, Google, or Apple) or when you upload information from your account on another platform to complete your profile. If you're interested in all the details, be sure to check out the table below.
             </p>
+
+            <div style={{ marginTop: "24px", overflowX: "auto" }}>
+              <table style={{ 
+                width: "100%", 
+                borderCollapse: "collapse", 
+                fontSize: "14px",
+                color: "#ccc",
+                border: "1px solid #333"
+              }}>
+                <thead>
+                  <tr>
+                    <th style={{ 
+                      padding: "16px", 
+                      textAlign: "left", 
+                      borderBottom: "2px solid #333",
+                      background: "rgba(102, 126, 234, 0.1)",
+                      color: "#fff",
+                      width: "30%"
+                    }}>
+                      DATA YOU GIVE US
+                    </th>
+                    <th style={{ 
+                      padding: "16px", 
+                      textAlign: "left", 
+                      borderBottom: "2px solid #333",
+                      background: "rgba(102, 126, 234, 0.1)",
+                      color: "#fff",
+                      width: "70%"
+                    }}>
+                      DESCRIPTION
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top",
+                      fontWeight: "600",
+                      color: "#e0e0e0"
+                    }}>
+                      Account Data
+                    </td>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top"
+                    }}>
+                      When you create an account, you provide us with basic information to set up your account, including your phone number, name, email address, and date of birth.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top",
+                      fontWeight: "600",
+                      color: "#e0e0e0",
+                      background: "rgba(0, 0, 0, 0.2)"
+                    }}>
+                      Profile Data
+                    </td>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top",
+                      background: "rgba(0, 0, 0, 0.2)"
+                    }}>
+                      When you complete your profile, you share additional details about yourself, such as your gender, interests, and preferences. Some of this data may be considered sensitive or special in certain countries, such as details about sexual orientation, sexual life, health, racial or ethnic origins, religious beliefs, or political affiliations. If you choose to provide this data, you consent to us using it as laid out in this Privacy Policy.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top",
+                      fontWeight: "600",
+                      color: "#e0e0e0"
+                    }}>
+                      Content
+                    </td>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top"
+                    }}>
+                      When you use our service, you may post photos, videos, audio, text and other types of content, such as your chats with other members.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top",
+                      fontWeight: "600",
+                      color: "#e0e0e0",
+                      background: "rgba(0, 0, 0, 0.2)"
+                    }}>
+                      Marketing, Survey and Research Data
+                    </td>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top",
+                      background: "rgba(0, 0, 0, 0.2)"
+                    }}>
+                      We sometimes run (i) surveys, focus groups, or market studies for research purposes and (ii) promotions, events or contests for marketing purposes. When you choose to participate, you give us information to process your entry and participation, as well as your responses to our questions and your feedback.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top",
+                      fontWeight: "600",
+                      color: "#e0e0e0"
+                    }}>
+                      Third-Party Data
+                    </td>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top"
+                    }}>
+                      When you choose to share with us information about other people (for example, if you use the contact details of someone you know for a given feature or if you submit a query or report involving a member), we process this data on your behalf to complete your request.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ 
+                      padding: "16px", 
+                      verticalAlign: "top",
+                      fontWeight: "600",
+                      color: "#e0e0e0",
+                      background: "rgba(0, 0, 0, 0.2)"
+                    }}>
+                      Customer Support Data
+                    </td>
+                    <td style={{ 
+                      padding: "16px", 
+                      verticalAlign: "top",
+                      background: "rgba(0, 0, 0, 0.2)"
+                    }}>
+                      When you contact us, you provide us with information that may be necessary to help address your enquiry. Other people may also submit queries or reports involving you. Finally, our moderation tools and teams can collect additional data as part of their investigations. Further, we are part of Destyn. We consider the safety and security of members a top priority. If you were banned from Destyn, your data may be shared with us to allow us to take necessary actions, including closing your account or preventing you from creating an account on our service. Where legally allowed, we can also receive information about suspected or convicted bad actors from third parties as part of our efforts to ensure our members' safety and security.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style={{ marginTop: "32px", overflowX: "auto" }}>
+              <table style={{ 
+                width: "100%", 
+                borderCollapse: "collapse", 
+                fontSize: "14px",
+                color: "#ccc",
+                border: "1px solid #333"
+              }}>
+                <thead>
+                  <tr>
+                    <th style={{ 
+                      padding: "16px", 
+                      textAlign: "left", 
+                      borderBottom: "2px solid #333",
+                      background: "rgba(102, 126, 234, 0.1)",
+                      color: "#fff",
+                      width: "30%"
+                    }}>
+                      DATA GENERATED OR AUTOMATICALLY COLLECTED
+                    </th>
+                    <th style={{ 
+                      padding: "16px", 
+                      textAlign: "left", 
+                      borderBottom: "2px solid #333",
+                      background: "rgba(102, 126, 234, 0.1)",
+                      color: "#fff",
+                      width: "70%"
+                    }}>
+                      DESCRIPTION
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top",
+                      fontWeight: "600",
+                      color: "#e0e0e0"
+                    }}>
+                      Usage Data
+                    </td>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top"
+                    }}>
+                      Using the service generates data about your activity, including how you use it (e.g., when you logged in, features you've been using, actions taken, information shown to you, referring webpages, ads you interacted with) and how you interact with others (e.g., searching, matching, communicating). We may also receive data related to interactions you have had with our ads on third-party websites or apps.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ 
+                      padding: "16px", 
+                      verticalAlign: "top",
+                      fontWeight: "600",
+                      color: "#e0e0e0",
+                      background: "rgba(0, 0, 0, 0.2)"
+                    }}>
+                      Technical Data
+                    </td>
+                    <td style={{ 
+                      padding: "16px", 
+                      verticalAlign: "top",
+                      background: "rgba(0, 0, 0, 0.2)"
+                    }}>
+                      Using the service involves the collection of data from and about the device(s) you use to access our service, including hardware and software information such as IP address, device ID and type, apps settings and characteristics, app crashes, advertising IDs and identifiers associated with cookies or other technologies that may uniquely identify a device or browser. For more information about cookies, see our cookie policy.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </section>
 
-          <div style={{ 
-            width: "100%", 
-            height: "4px",
-            background: "linear-gradient(90deg, #667eea, #764ba2)",
-            borderRadius: "2px",
-            margin: "12px 0"
-          }} />
+          <div style={{ marginTop: "32px", overflowX: "auto" }}>
+              <table style={{ 
+                width: "100%", 
+                borderCollapse: "collapse", 
+                fontSize: "14px",
+                color: "#ccc",
+                border: "1px solid #333"
+              }}>
+                <thead>
+                  <tr>
+                    <th style={{ 
+                      padding: "16px", 
+                      textAlign: "left", 
+                      borderBottom: "2px solid #333",
+                      background: "rgba(102, 126, 234, 0.1)",
+                      color: "#fff",
+                      width: "30%"
+                    }}>
+                      OTHER DATA WE COLLECT WITH YOUR PERMISSION
+                    </th>
+                    <th style={{ 
+                      padding: "16px", 
+                      textAlign: "left", 
+                      borderBottom: "2px solid #333",
+                      background: "rgba(102, 126, 234, 0.1)",
+                      color: "#fff",
+                      width: "70%"
+                    }}>
+                      DESCRIPTION
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top",
+                      fontWeight: "600",
+                      color: "#e0e0e0"
+                    }}>
+                      Geolocation Data
+                    </td>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top"
+                    }}>
+                      If you permit us, we can collect your geolocation (latitude and longitude) from your device. If you decline permission, features that rely on precise geolocation may not be available to you.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top",
+                      fontWeight: "600",
+                      color: "#e0e0e0",
+                      background: "rgba(0, 0, 0, 0.2)"
+                    }}>
+                      Face Geometry Data
+                    </td>
+                    <td style={{ 
+                      padding: "16px", 
+                      borderBottom: "1px solid #333",
+                      verticalAlign: "top",
+                      background: "rgba(0, 0, 0, 0.2)"
+                    }}>
+                      You may choose to participate in certain of our features, like Selfie Verification, that involve the collection of face geometry data, which may be considered biometric data in some jurisdictions. Learn more about our verification feature and how we process your face geometry data.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ 
+                      padding: "16px", 
+                      verticalAlign: "top",
+                      fontWeight: "600",
+                      color: "#e0e0e0"
+                    }}>
+                      ID Data
+                    </td>
+                    <td style={{ 
+                      padding: "16px", 
+                      verticalAlign: "top"
+                    }}>
+                      You may provide us with a copy of your government-issued ID to help us check that you're who you say you are.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-          <section>
-            <h2
-              style={{
-                fontSize: "22px",
-                fontWeight: "600",
-                marginBottom: "16px",
-                color: "#fff",
-              }}
-            >
-              Changes to This Policy
-            </h2>
-            
-            <p>
-              We may update this Privacy Policy from time to time. We will notify you of any significant changes by posting the new Privacy Policy on this page and updating the "Last updated" date at the top. We encourage you to review this Privacy Policy periodically.
-            </p>
-          </section>
+            <div style={{ 
+              width: "100%", 
+              height: "4px",
+              background: "linear-gradient(90deg, #667eea, #764ba2)",
+              borderRadius: "2px",
+              margin: "24px 0 12px 0"
+            }} />
 
-          <div style={{ 
-            width: "100%", 
-            height: "4px",
-            background: "linear-gradient(90deg, #667eea, #764ba2)",
-            borderRadius: "2px",
-            margin: "12px 0"
-          }} />
-
-          <section>
-            <h2
-              style={{
-                fontSize: "22px",
-                fontWeight: "600",
-                marginBottom: "16px",
-                color: "#fff",
-              }}
-            >
-              Contact Us
-            </h2>
-            
-            <p>
-              If you have any questions about this Privacy Policy or our privacy practices, please contact us at:
-            </p>
-            <p style={{ 
-              margin: "16px 0", 
-              fontWeight: "600",
-              color: "#e0e0e0",
-              textAlign: "center" 
-            }}>
-              privacy@destyn.com
-            </p>
-          </section>
+            <section>
+              <h2
+                style={{
+                  fontSize: "22px",
+                  fontWeight: "600",
+                  marginBottom: "16px",
+                  color: "#fff",
+                }}
+              >
+                4. Why and How We Use Your Data
+              </h2>
+              
+              <p>
+                The main reason we process your data is to provide our service to you and improve it over time. That includes connecting you with members who might make your heart skip a beat, personalizing your experience, and just helping you make the most of our service. We also process your data to keep you and all of our members safe and secure while using our service. We take this responsibility very seriously and we're always working to improve our systems and processes to help protect you. And yes, we may process your data to show relevant ads – you cannot control this in your settings. Read on for a more detailed explanation.
+              </p>
+              
+              <p style={{ marginTop: "12px" }}>
+                For information on how we process personal data through "profiling" and "automated decision-making", please see our FAQs.
+              </p>
+            </section>
 
           <div
             style={{
