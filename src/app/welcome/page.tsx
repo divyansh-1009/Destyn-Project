@@ -165,6 +165,35 @@ export default function WelcomePage() {
 	const [uploading, setUploading] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
+	// Add effect to fetch the user's profile photo when the component mounts
+	useEffect(() => {
+		if (session?.user?.email) {
+			fetchUserProfile();
+		}
+	}, [session?.user?.email]);
+
+	// Function to fetch user profile including photo
+	const fetchUserProfile = async () => {
+		try {
+			const response = await fetch("/api/get-user-profile", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ email: session?.user?.email }),
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				if (data.profilePhoto) {
+					setProfilePhoto(data.profilePhoto);
+					// Also update the answers state
+					setAnswers((prev) => ({ ...prev, q0: data.profilePhoto }));
+				}
+			}
+		} catch (error) {
+			console.error("Error fetching user profile:", error);
+		}
+	};
+
 	useEffect(() => {
 		if (status === "unauthenticated") {
 			router.push("/");
