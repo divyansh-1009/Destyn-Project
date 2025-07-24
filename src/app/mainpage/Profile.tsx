@@ -4,371 +4,150 @@ import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { FaCamera } from 'react-icons/fa';
 
 export default function Profile() {
   const { data: session } = useSession();
   const router = useRouter();
+  const [profile, setProfile] = useState<any>(null);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
-  const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch user's profile photo on component mount
   useEffect(() => {
     if (!session?.user?.email) return;
-
-    const fetchProfilePhoto = async () => {
+    const fetchProfile = async () => {
       try {
         const response = await fetch("/api/get-user-profile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: session.user.email }),
         });
-
         if (response.ok) {
           const data = await response.json();
-          if (data.profilePhoto) {
-            setProfilePhoto(data.profilePhoto);
+          setProfile(data);
+          if (Array.isArray(data.profilePhotos) && data.profilePhotos.length > 0) {
+            setProfilePhoto(data.profilePhotos[0]);
+          } else {
+            setProfilePhoto(data.profilePhoto || null);
           }
         }
       } catch (error) {
-        console.error("Error fetching profile photo:", error);
-      } finally {
-        setLoading(false);
+        setProfile(null);
       }
     };
-
-    fetchProfilePhoto();
+    fetchProfile();
   }, [session?.user?.email]);
 
-  const handlePhotoUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const triggerFileInput = () => fileInputRef.current?.click();
+
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !session?.user?.email) return;
-
-    // Validate file type
-    if (!file.type.startsWith("image/")) {
-      alert("Please select an image file");
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert("File size must be less than 5MB");
-      return;
-    }
-
     setUploading(true);
-    setUploadSuccess(false);
-
     try {
       const formData = new FormData();
       formData.append("photo", file);
       formData.append("userEmail", session.user.email);
-
       const response = await fetch("/api/upload-photo", {
         method: "POST",
         body: formData,
       });
-
       if (response.ok) {
         const data = await response.json();
         setProfilePhoto(data.photoUrl);
-        setUploadSuccess(true);
-
-        // Reset success message after 3 seconds
-        setTimeout(() => setUploadSuccess(false), 3000);
-      } else {
-        const error = await response.json();
-        alert(`Upload failed: ${error.error}`);
+        setProfile((prev: any) => ({ ...prev, profilePhoto: data.photoUrl }));
       }
-    } catch (error) {
-      console.error("Error uploading photo:", error);
-      alert("Failed to upload photo. Please try again.");
     } finally {
       setUploading(false);
     }
   };
 
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
+  // Helper: get age from birthdate string (YYYY-MM-DD)
+  function getAge(birthdate?: string) {
+    if (!birthdate) return undefined;
+    const dob = new Date(birthdate);
+    const diff = Date.now() - dob.getTime();
+    const age = new Date(diff).getUTCFullYear() - 1970;
+    return age;
+  }
+
+  // Demo stats (replace with real data if available)
+  const likes = 247;
+  const matches = 42;
+  const rating = 3.8;
 
   return (
-    <div
-      style={{
-        maxWidth: 600,
-        margin: "0 auto",
-        padding: "20px",
-        background: "#000",
-        color: "#fff",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          textAlign: "center",
-          marginBottom: 30,
-          padding: "20px 0",
-        }}
-      >
-        <h1
-          style={{
-            fontSize: "32px",
-            fontWeight: "700",
-            color: "#fff",
-            margin: "0 0 8px 0",
-          }}
-        >
-          👤 Profile
-        </h1>
-        <p
-          style={{
-            color: "#888",
-            fontSize: "16px",
-            margin: 0,
-          }}
-        >
-          Manage your profile and upload photos
-        </p>
-      </div>
-
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '32px 0' }}>
+      <div style={{ maxWidth: 480, margin: '0 auto' }}>
       {/* Profile Card */}
-      <div
-        style={{
-          background: "#111",
-          borderRadius: 16,
-          padding: 32,
-          marginBottom: 24,
-          border: "1px solid #333",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-        }}
-      >
-        {/* User Info */}
-        <div
+        <div style={{
+          borderRadius: 32,
+          overflow: 'hidden',
+          boxShadow: '0 8px 32px rgba(80,0,120,0.10)',
+          background: '#fff',
+            marginBottom: 32,
+          position: 'relative',
+        }}>
+          <div style={{ position: 'relative', width: '100%', height: 340, background: '#222' }}>
+            {profilePhoto ? (
+              <img src={profilePhoto} alt="Profile" style={{ width: '100%', height: 340, objectFit: 'cover', display: 'block' }} />
+            ) : (
+              <div style={{ width: '100%', height: 340, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 120, color: '#bbb', background: '#222' }}>👤</div>
+            )}
+            {/* Overlay name only (no age) */}
+            <div style={{ position: 'absolute', left: 32, bottom: 32, color: '#fff', zIndex: 2 }}>
+              <div style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.1, textShadow: '0 2px 12px rgba(0,0,0,0.18)' }}>
+                {profile?.name}
+              </div>
+          </div>
+            {/* Camera icon for upload */}
+            {/* In the profile photo card, remove the camera button and its input. Only show the profile photo (or placeholder). */}
+          </div>
+        </div>
+        {/* About Me Section */}
+        <div style={{ background: '#fff', borderRadius: 18, padding: '28px 28px 18px 28px', marginBottom: 24, boxShadow: '0 2px 8px rgba(80,0,120,0.04)' }}>
+          <div style={{ fontWeight: 700, fontSize: 22, marginBottom: 8, color: '#222' }}>About Me</div>
+          <div style={{ fontSize: 17, color: '#444', minHeight: 32 }}>
+            {profile?.bio ? profile.bio : <span style={{ color: '#bbb' }}>Add a fun bio to tell others about yourself!</span>}
+          </div>
+              </div>
+        {/* Interests Section */}
+        <div style={{ background: '#fff', borderRadius: 18, padding: '28px 28px 18px 28px', marginBottom: 24, boxShadow: '0 2px 8px rgba(80,0,120,0.04)' }}>
+          <div style={{ fontWeight: 700, fontSize: 22, marginBottom: 12, color: '#222' }}>My Interests</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, minHeight: 36 }}>
+            {Array.isArray(profile?.interests) && profile.interests.length > 0 ? (
+              profile.interests.map((interest: string, idx: number) => (
+                <span key={idx} style={{ background: '#f3e8ff', color: '#a259f7', borderRadius: 16, padding: '8px 18px', fontSize: 16, fontWeight: 600, letterSpacing: 0.2, boxShadow: '0 1px 4px rgba(162,89,247,0.07)' }}>{interest}</span>
+              ))
+            ) : (
+              <span style={{ color: '#bbb', fontSize: 16 }}>Add Your Interests</span>
+            )}
+          </div>
+        </div>
+      </div>
+      {/* Gradient Edit Full Profile Button at the bottom */}
+      <div style={{ maxWidth: 560, margin: '32px auto 0 auto', padding: '0 16px' }}>
+        <button
+          onClick={() => router.push('/mainpage/edit-profile')}
           style={{
-            textAlign: "center",
+            width: '100%',
+            background: 'linear-gradient(90deg, #a259f7 0%, #f857a6 100%)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 20,
+            padding: '22px 0',
+            fontSize: 22,
+            fontWeight: 700,
+            boxShadow: '0 4px 24px rgba(162,89,247,0.10)',
+            cursor: 'pointer',
+            letterSpacing: 0.5,
+            marginTop: 0,
             marginBottom: 32,
           }}
         >
-          <h2
-            style={{
-              fontSize: "24px",
-              fontWeight: "600",
-              margin: "0 0 8px 0",
-              color: "#fff",
-            }}
-          >
-            {session?.user?.name || "User"}
-          </h2>
-          <p
-            style={{
-              color: "#888",
-              fontSize: "14px",
-              margin: 0,
-            }}
-          >
-            {session?.user?.email}
-          </p>
-        </div>
-
-        {/* Profile Photo Section */}
-        <div
-          style={{
-            textAlign: "center",
-          }}
-        >
-          <h3
-            style={{
-              fontSize: "18px",
-              fontWeight: "600",
-              margin: "0 0 20px 0",
-              color: "#fff",
-            }}
-          >
-            Profile Photo
-          </h3>
-
-          {/* Photo Display */}
-          <div
-            style={{
-              width: 150,
-              height: 150,
-              borderRadius: "50%",
-              margin: "0 auto 20px auto",
-              overflow: "hidden",
-              border: "3px solid #333",
-              background: "#1a1a1a",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              position: "relative",
-            }}
-          >
-            {loading ? (
-              <div
-                style={{
-                  fontSize: "24px",
-                  color: "#666",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                ⏳
-              </div>
-            ) : profilePhoto ? (
-              <img
-                src={profilePhoto}
-                alt="Profile"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  fontSize: "48px",
-                  color: "#666",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                👤
-              </div>
-            )}
-          </div>
-
-          {/* Upload Button */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <button
-              onClick={triggerFileInput}
-              disabled={uploading}
-              style={{
-                padding: "12px 24px",
-                borderRadius: 8,
-                background: uploading ? "#333" : "#0070f3",
-                color: "white",
-                border: "none",
-                cursor: uploading ? "not-allowed" : "pointer",
-                fontWeight: "600",
-                fontSize: "14px",
-                transition: "all 0.2s",
-                opacity: uploading ? 0.6 : 1,
-              }}
-            >
-              {uploading ? "Uploading..." : "📷 Upload Photo"}
-            </button>
-
-            {uploadSuccess && (
-              <div
-                style={{
-                  padding: "8px 16px",
-                  background: "#4caf50",
-                  color: "white",
-                  borderRadius: 6,
-                  fontSize: "12px",
-                  fontWeight: "600",
-                }}
-              >
-                ✅ Photo uploaded successfully!
-              </div>
-            )}
-
-            <p
-              style={{
-                color: "#666",
-                fontSize: "12px",
-                margin: "8px 0 0 0",
-              }}
-            >
-              Supported formats: JPG, PNG, GIF (Max 5MB)
-            </p>
-          </div>
-
-          {/* Hidden File Input */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handlePhotoUpload}
-            style={{ display: "none" }}
-          />
-        </div>
-      </div>
-
-      {/* Account Actions */}
-      <div
-        style={{
-          background: "#111",
-          borderRadius: 16,
-          padding: 24,
-          border: "1px solid #333",
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "18px",
-            fontWeight: "600",
-            margin: "0 0 16px 0",
-            color: "#fff",
-          }}
-        >
-          Account Settings
-        </h3>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <button
-            style={{
-              padding: "12px 16px",
-              borderRadius: 8,
-              background: "transparent",
-              color: "#0070f3",
-              border: "1px solid #0070f3",
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: "600",
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) =>
-              ((e.target as HTMLButtonElement).style.background = "rgba(0, 112, 243, 0.1)")
-            }
-            onMouseLeave={(e) =>
-              ((e.target as HTMLButtonElement).style.background = "transparent")
-            }
-            onClick={() => router.push("/mainpage/edit-profile")}
-          >
-            🔧 Edit Profile
-          </button>
-
-          <button
-            style={{
-              padding: "12px 16px",
-              borderRadius: 8,
-              background: "transparent",
-              color: "#f44336",
-              border: "1px solid #f44336",
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: "600",
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) =>
-              ((e.target as HTMLButtonElement).style.background = "rgba(244, 67, 54, 0.1)")
-            }
-            onMouseLeave={(e) =>
-              ((e.target as HTMLButtonElement).style.background = "transparent")
-            }
-            onClick={() => signOut({ callbackUrl: "/" })}
-          >
-            ↩️ Logout
-          </button>
-        </div>
+          Edit Full Profile
+        </button>
       </div>
     </div>
   );

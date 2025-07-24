@@ -349,9 +349,9 @@ export default function People() {
       >
         {/* Profile Photo with overlay */}
         <div style={{ position: "relative", width: "100%", height: 400, background: "#eee" }}>
-          {(user.profilePhotos?.[0] || user.profilePhoto) ? (
+          {(Array.isArray(user.profilePhotos) && user.profilePhotos.length > 0 ? user.profilePhotos[0] : user.profilePhoto) ? (
             <img
-              src={user.profilePhotos?.[0] || user.profilePhoto}
+              src={Array.isArray(user.profilePhotos) && user.profilePhotos.length > 0 ? user.profilePhotos[0] : user.profilePhoto}
               alt={user.name}
               style={{
                 width: "100%",
