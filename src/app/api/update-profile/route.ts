@@ -14,6 +14,9 @@ export async function POST(req: NextRequest) {
       profession,
       languages,
       relationshipGoals,
+      answers,
+      gender,
+      preference,
     } = await req.json();
 
     if (!email) {
@@ -36,6 +39,9 @@ export async function POST(req: NextRequest) {
           profession,
           languages,
           relationshipGoals,
+          answers,
+          gender,
+          preference,
           updatedAt: new Date().toISOString(),
         },
       }

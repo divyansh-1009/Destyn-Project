@@ -4,6 +4,10 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
+const INTEREST_OPTIONS = [
+	"Music", "Movies", "Sports", "Travel", "Reading", "Cooking", "Dancing", "Gaming", "Art", "Photography", "Fitness", "Yoga", "Meditation", "Technology", "Science", "Nature", "Animals", "Fashion", "Shopping", "Writing", "Blogging", "Volunteering", "Gardening", "Hiking", "Cycling", "Swimming", "Board Games", "Podcasts", "DIY", "Cars"
+];
+
 const QUESTIONS = [
 	{
 		id: "q0",
@@ -12,6 +16,22 @@ const QUESTIONS = [
 	},
 	{
 		id: "q1",
+		question: "Write a short bio about yourself",
+		isBio: true,
+	},
+	{
+		id: "q2",
+		question: "What are your interests? (Select as many as you like)",
+		isInterests: true,
+		//options: INTEREST_OPTIONS,
+	},
+	{
+		id: "q3",
+		question: "Tell us about your gender, who you'd like to date, and your date of birth",
+		isGenderPrefDob: true,
+	},
+	{
+		id: "q4",
 		question: "Which of these would you love doing with someone you vibe with?",
 		options: [
 			"Learning or working together",
@@ -21,7 +41,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q2",
+		id: "q5",
 		question: "What's your go-to comfort activity?",
 		options: [
 			"Gaming",
@@ -32,7 +52,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q3",
+		id: "q6",
 		question: "Which kind of books or stories do you enjoy?",
 		options: [
 			"Self-improvement or psychology",
@@ -42,7 +62,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q4",
+		id: "q7",
 		question: "How do you usually respond to compliments?",
 		options: [
 			"Blush and get awkward",
@@ -52,7 +72,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q5",
+		id: "q8",
 		question: "Which music vibe do you connect with most?",
 		options: [
 			"Rock / Metal – intense",
@@ -63,7 +83,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q6",
+		id: "q9",
 		question: "What's your current relationship experience?",
 		options: [
 			"I've been in a serious relationship before",
@@ -73,7 +93,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q7",
+		id: "q10",
 		question: "What kind of snacks do you usually reach for?",
 		options: [
 			"Sweet stuff",
@@ -83,7 +103,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q8",
+		id: "q11",
 		question: "Pick the food that best matches your vibe:",
 		options: [
 			"Pizza — chill, classic, always a good time",
@@ -94,7 +114,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q9",
+		id: "q12",
 		question: "Which sounds most like you?",
 		options: [
 			"Loyal and thoughtful",
@@ -104,7 +124,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q10",
+		id: "q13",
 		question: "What kind of person are you drawn to?",
 		options: [
 			"Kind and supportive",
@@ -114,7 +134,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q11",
+		id: "q14",
 		question: "When you like someone, how do you act?",
 		options: [
 			"I get nervous and quiet",
@@ -124,7 +144,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q12",
+		id: "q15",
 		question: "How do you feel about personal space in a relationship?",
 		options: [
 			"I need a good amount of alone time",
@@ -134,7 +154,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q13",
+		id: "q16",
 		question: "Which of these sounds like your vibe in a relationship?",
 		options: [
 			"A team that supports each other",
@@ -144,7 +164,7 @@ const QUESTIONS = [
 		],
 	},
 	{
-		id: "q14",
+		id: "q17",
 		question: "How do you usually show someone that you like them?",
 		options: [
 			"I joke around with them",
@@ -158,11 +178,16 @@ const QUESTIONS = [
 export default function WelcomePage() {
 	const { data: session, status } = useSession();
 	const router = useRouter();
-	const [answers, setAnswers] = useState<{ [key: string]: string }>({});
+	const [answers, setAnswers] = useState<{ [key: string]: any }>({});
 	const [currentQuestion, setCurrentQuestion] = useState(0);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
 	const [uploading, setUploading] = useState(false);
+	const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+	const [gender, setGender] = useState("");
+	const [preference, setPreference] = useState("");
+	const [dob, setDob] = useState("");
+	const [bio, setBio] = useState("");
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	// Add effect to fetch the user's profile photo when the component mounts
@@ -188,6 +213,11 @@ export default function WelcomePage() {
 					// Also update the answers state
 					setAnswers((prev) => ({ ...prev, q0: data.profilePhoto }));
 				}
+				if (data.bio) setBio(data.bio);
+				if (data.interests) setSelectedInterests(data.interests);
+				if (data.gender) setGender(data.gender);
+				if (data.preference) setPreference(data.preference);
+				if (data.birthdate) setDob(data.birthdate);
 			}
 		} catch (error) {
 			console.error("Error fetching user profile:", error);
@@ -286,19 +316,24 @@ export default function WelcomePage() {
 	const handleSubmit = async () => {
 		setIsSubmitting(true);
 		try {
-			await fetch("/api/submit-form", {
+			await fetch("/api/update-profile", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					name: session.user.name,
 					email: session.user.email,
+					name: session.user.name,
+					bio,
+					interests: selectedInterests,
 					profilePhoto,
+					gender,
+					preference,
+					birthdate: dob,
 					answers,
 				}),
 			});
 			router.push("/mainpage");
 		} catch (error) {
-			console.error("Error submitting form:", error);
+			console.error("Error updating profile:", error);
 			setIsSubmitting(false);
 		}
 	};
@@ -477,6 +512,65 @@ export default function WelcomePage() {
 							marginBottom: "40px",
 						}}
 					>
+						{currentQ.isBio && (
+							<textarea
+								value={bio}
+								onChange={e => { setBio(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: e.target.value })); }}
+								placeholder="Tell us about yourself..."
+								style={{ width: '100%', minHeight: 80, borderRadius: 8, border: '1px solid #ccc', padding: 10, fontSize: 14, color: '#111' }}
+							/>
+						)}
+						{currentQ.isInterests && (
+							<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+								{INTEREST_OPTIONS.map(opt => (
+									<button
+										key={opt}
+										type="button"
+										onClick={() => {
+											setSelectedInterests(prev => prev.includes(opt) ? prev.filter(i => i !== opt) : [...prev, opt]);
+											setAnswers(prev => ({ ...prev, [currentQ.id]: prev[currentQ.id]?.includes(opt) ? prev[currentQ.id].filter((i: string) => i !== opt) : [...(prev[currentQ.id] || []), opt] }));
+										}}
+										style={{
+											background: selectedInterests.includes(opt) ? '#667eea' : '#f0f0f0',
+											color: selectedInterests.includes(opt) ? '#fff' : '#333',
+											border: 'none',
+											borderRadius: 16,
+											padding: '8px 16px',
+											cursor: 'pointer',
+											fontWeight: 500,
+										}}
+									>
+										{opt}
+									</button>
+								))}
+							</div>
+						)}
+						{currentQ.isGenderPrefDob && (
+							<div style={{ display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'center', marginBottom: 32 }}>
+								<div style={{ width: '100%', maxWidth: 340 }}>
+									<label style={{ fontWeight: 600, display: 'block', marginBottom: 6, color: '#222' }}>Gender</label>
+									<select value={gender} onChange={e => { setGender(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], gender: e.target.value } })); }} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, color: '#111', background: '#fff' }}>
+										<option value="">Select your gender</option>
+										<option value="male">Male</option>
+										<option value="female">Female</option>
+										<option value="other">Other</option>
+									</select>
+								</div>
+								<div style={{ width: '100%', maxWidth: 340 }}>
+									<label style={{ fontWeight: 600, display: 'block', marginBottom: 6, color: '#222' }}>Interested in dating</label>
+									<select value={preference} onChange={e => { setPreference(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], preference: e.target.value } })); }} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, color: '#111', background: '#fff' }}>
+										<option value="">Select preference</option>
+										<option value="male">Men</option>
+										<option value="female">Women</option>
+										<option value="any">Anyone</option>
+									</select>
+								</div>
+								<div style={{ width: '100%', maxWidth: 340 }}>
+									<label style={{ fontWeight: 600, display: 'block', marginBottom: 6, color: '#222' }}>Date of Birth</label>
+									<input type="date" value={dob} onChange={e => { setDob(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], dob: e.target.value } })); }} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, color: '#111', background: '#fff' }} />
+								</div>
+							</div>
+						)}
 						{currentQ.options?.map((opt) => (
 							<label
 								key={opt}
