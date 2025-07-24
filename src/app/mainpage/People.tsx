@@ -99,10 +99,53 @@ export default function People() {
       const allUsers = usersData.users || [];
       const liked = likedData.liked || [];
       
+      // Get the current user's email
+      const currentUserEmail = session.user.email.toLowerCase();
+      
       // Filter out already liked users and current user
       let availableUsers = allUsers.filter((user: User) => 
         !liked.includes(user.email) && user.email !== session.user.email
       );
+      
+      // Apply batch-based filtering rules
+      if (currentUserEmail.startsWith("b22") && currentUserEmail.endsWith("@iitj.ac.in")) {
+        availableUsers = availableUsers.filter((user: User) => {
+          const email = user.email.toLowerCase();
+          return !(
+            email.startsWith("b23") && email.endsWith("@iitj.ac.in") || 
+            email.startsWith("b24") && email.endsWith("@iitj.ac.in") || 
+            email.startsWith("b25") && email.endsWith("@iitj.ac.in")
+          );
+        });
+      } else if (currentUserEmail.startsWith("b23") && currentUserEmail.endsWith("@iitj.ac.in")) {
+        availableUsers = availableUsers.filter((user: User) => {
+          const email = user.email.toLowerCase();
+          return !(
+            email.startsWith("b22") && email.endsWith("@iitj.ac.in") || 
+            email.startsWith("b24") && email.endsWith("@iitj.ac.in") || 
+            email.startsWith("b25") && email.endsWith("@iitj.ac.in")
+          );
+        });
+      } else if (currentUserEmail.startsWith("b24") && currentUserEmail.endsWith("@iitj.ac.in")) {
+        availableUsers = availableUsers.filter((user: User) => {
+          const email = user.email.toLowerCase();
+          return !(
+            email.startsWith("b22") && email.endsWith("@iitj.ac.in") || 
+            email.startsWith("b23") && email.endsWith("@iitj.ac.in") || 
+            email.startsWith("b25") && email.endsWith("@iitj.ac.in")
+          );
+        });
+      } else if (currentUserEmail.startsWith("b25") && currentUserEmail.endsWith("@iitj.ac.in")) {
+        availableUsers = availableUsers.filter((user: User) => {
+          const email = user.email.toLowerCase();
+          return !(
+            email.startsWith("b22") && email.endsWith("@iitj.ac.in") || 
+            email.startsWith("b23") && email.endsWith("@iitj.ac.in") || 
+            email.startsWith("b24") && email.endsWith("@iitj.ac.in")
+          );
+        });
+      }
+      
       // Shuffle the available users array
       availableUsers = shuffleArray(availableUsers);
       
