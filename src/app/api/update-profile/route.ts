@@ -3,21 +3,8 @@ import clientPromise from "@/lib/mongodb";
 
 export async function POST(req: NextRequest) {
   try {
-    const {
-      email,
-      name,
-      bio,
-      interests,
-      profilePhotos,
-      birthdate,
-      education,
-      profession,
-      languages,
-      relationshipGoals,
-      answers,
-      gender,
-      preference,
-    } = await req.json();
+    const body = await req.json();
+    const { email } = body;
 
     if (!email) {
       return NextResponse.json({ error: "Missing email" }, { status: 400 });
@@ -26,25 +13,31 @@ export async function POST(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db("datingapp");
 
+    // Build $set object only with defined fields
+    const allowedFields = [
+      "name",
+      "bio",
+      "interests",
+      "profilePhotos",
+      "birthdate",
+      "education",
+      "profession",
+      "languages",
+      "relationshipGoals",
+      "answers",
+      "gender",
+      "preference",
+    ];
+    const setObj = { updatedAt: new Date().toISOString() };
+    for (const field of allowedFields) {
+      if (body[field] !== undefined) {
+        setObj[field] = body[field];
+      }
+    }
+
     await db.collection("responses").updateOne(
       { email },
-      {
-        $set: {
-          name,
-          bio,
-          interests,
-          profilePhotos,
-          birthdate,
-          education,
-          profession,
-          languages,
-          relationshipGoals,
-          answers,
-          gender,
-          preference,
-          updatedAt: new Date().toISOString(),
-        },
-      }
+      { $set: setObj }
     );
 
     return NextResponse.json({
