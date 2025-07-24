@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { FaCamera } from 'react-icons/fa';
+import { FiLogOut } from 'react-icons/fi'; // Import logout icon
 
 export default function Profile() {
   const { data: session } = useSession();
@@ -72,6 +73,14 @@ export default function Profile() {
     return age;
   }
 
+  // Handle logout function
+  const handleLogout = async () => {
+    // NextAuth signOut will clear the session and cookies
+    await signOut({ redirect: false });
+    // Redirect to login page
+    router.push('/');
+  };
+
   // Demo stats (replace with real data if available)
   const likes = 247;
   const matches = 42;
@@ -126,8 +135,9 @@ export default function Profile() {
           </div>
         </div>
       </div>
-      {/* Gradient Edit Full Profile Button at the bottom */}
+      {/* Buttons Container */}
       <div style={{ maxWidth: 560, margin: '32px auto 0 auto', padding: '0 16px' }}>
+        {/* Edit Profile Button */}
         <button
           onClick={() => router.push('/mainpage/edit-profile')}
           style={{
@@ -143,10 +153,42 @@ export default function Profile() {
             cursor: 'pointer',
             letterSpacing: 0.5,
             marginTop: 0,
-            marginBottom: 32,
+            marginBottom: 16,
           }}
         >
           Edit Full Profile
+        </button>
+        
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          style={{
+            width: '100%',
+            background: '#ffffff',
+            color: '#f44336',
+            border: '2px solid #f44336',
+            borderRadius: 20,
+            padding: '18px 0',
+            fontSize: 20,
+            fontWeight: 700,
+            boxShadow: '0 4px 16px rgba(244,67,54,0.06)',
+            cursor: 'pointer',
+            letterSpacing: 0.5,
+            marginBottom: 32,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = '#fff5f5';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = '#ffffff';
+          }}
+        >
+          <FiLogOut size={20} /> Log Out
         </button>
       </div>
     </div>

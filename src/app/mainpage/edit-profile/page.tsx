@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { DndContext, closestCenter, DragOverlay } from '@dnd-kit/core';
 import { restrictToParentElement } from '@dnd-kit/modifiers';
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy, horizontalListSortingStrategy } from '@dnd-kit/sortable';
+import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -180,79 +180,124 @@ export default function EditProfile() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', paddingBottom: 40 }}>
-      {/* Top Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 24px 12px 24px', background: '#fff', borderBottom: '1px solid #eee', borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+      {/* Top Navigation Bar */}
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: 64,
+        background: '#fff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 32px',
+        zIndex: 100,
+        boxShadow: '0 2px 8px rgba(80,0,120,0.07)',
+      }}>
         <button onClick={() => router.back()} style={{ background: 'none', border: 'none', fontSize: 26, color: '#333', cursor: 'pointer' }}><FaArrowLeft /></button>
-        <div style={{ fontWeight: 700, fontSize: 26, color: '#222' }}>Edit Profile</div>
-        <button type="submit" form="edit-profile-form" style={{ background: 'linear-gradient(90deg, #a259f7 0%, #f857a6 100%)', color: '#fff', border: 'none', borderRadius: 20, padding: '10px 28px', fontWeight: 700, fontSize: 18, boxShadow: '0 2px 8px rgba(162,89,247,0.10)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}><FaCamera style={{ fontSize: 18 }} /> Save</button>
+        <div style={{ fontWeight: 700, fontSize: 26, color: '#222', textAlign: 'center', flex: 1 }}>Edit Profile</div>
+        <button
+          onClick={handleSubmit}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 32px',
+            height: 44,
+            borderRadius: 22,
+            border: 'none',
+            background: 'linear-gradient(90deg, #a259f7 0%, #f857a6 100%)',
+            color: '#fff',
+            fontWeight: 700,
+            fontSize: 18,
+            boxShadow: '0 2px 8px rgba(80,0,120,0.07)',
+            cursor: 'pointer',
+            outline: 'none',
+            margin: 0,
+            width: 110,
+          }}
+        >
+          Save
+        </button>
       </div>
+      {/* Add a spacer div after the nav bar to push content down */}
+      <div style={{ height: 64 }} />
       <form id="edit-profile-form" onSubmit={handleSubmit} style={{ maxWidth: 540, margin: '0 auto', padding: '0 12px' }}>
         {/* Photos Section */}
         <div style={{ background: '#fff', borderRadius: 28, boxShadow: '0 4px 24px rgba(80,0,120,0.07)', padding: 28, margin: '32px 0 24px 0' }}>
           <div style={{ display: 'flex', alignItems: 'center', fontWeight: 700, fontSize: 20, color: '#a259f7', marginBottom: 18, gap: 10 }}><FaCamera /> Photos</div>
-          <DndContext
-            collisionDetection={closestCenter}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onDragCancel={handleDragCancel}
-            modifiers={[restrictToParentElement]}
-          >
-            <SortableContext items={photos.map((photo) => photo.id)} strategy={horizontalListSortingStrategy}>
-              <div style={{ display: 'flex', gap: 18, alignItems: 'center', marginBottom: 10, overflowX: 'auto', minHeight: 110 }}>
-                {photos.map((photo, idx) => (
-                  <SortablePhoto
-                    key={photo.id}
-                    id={photo.id}
-                    url={photo.preview}
-                    onDelete={() => handleDeletePhoto(photo.id)}
-                    isProfile={idx === 0}
-                    isDragging={activeId === photo.id}
-                    dragging={!!activeId}
-                  />
-                ))}
-                {photos.length < 6 && (
-                  <label style={{ width: 90, height: 90, border: '2px dashed #a259f7', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 38, color: '#a259f7', cursor: 'pointer', background: '#faf7ff' }}>
-                    +
-                    <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handlePhotoChange} />
-                  </label>
-                )}
-              </div>
-            </SortableContext>
-            <DragOverlay style={{ pointerEvents: 'none' }}>
-              {activePhoto ? (
-                <div
+          {/* In the photo area, just display the photos in a grid with delete buttons. Remove all drag-and-drop logic and components. */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 90px)',
+            gridAutoRows: '110px',
+            gap: 18,
+            alignItems: 'center',
+            marginBottom: 10,
+            justifyContent: 'center',
+            width: '100%',
+            maxWidth: 350,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          }}>
+            {photos.map((photo, idx) => (
+              <div
+                key={photo.id}
+                style={{
+                  width: 90,
+                  height: 90,
+                  borderRadius: 20,
+                  background: '#eee',
+                  position: 'relative',
+                  boxShadow: '0 2px 8px rgba(80,0,120,0.07)',
+                  marginRight: 0,
+                  marginBottom: 0,
+                  border: idx === 0 ? '2px solid #a259f7' : '2px solid transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <img src={photo.preview} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: 20, objectFit: 'cover', pointerEvents: 'none' }} />
+                <button
+                  type="button"
+                  onClick={e => { e.stopPropagation(); e.preventDefault(); handleDeletePhoto(photo.id); }}
                   style={{
-                    width: 90,
-                    height: 90,
-                    borderRadius: 20,
-                    background: '#eee',
-                    boxShadow: '0 0 0 4px #a259f7, 0 12px 32px rgba(80,0,120,0.18)',
+                    position: 'absolute',
+                    top: 2,
+                    right: 2,
+                    background: '#fff',
+                    color: '#a259f7',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: 28,
+                    height: 28,
+                    fontWeight: 700,
+                    fontSize: 20,
+                    cursor: 'pointer',
+                    boxShadow: '0 1px 4px rgba(162,89,247,0.10)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    zIndex: 1000,
-                    margin: 0,
-                    padding: 0,
+                    transition: 'background 0.18s, color 0.18s, box-shadow 0.18s',
                   }}
+                  aria-label="Delete photo"
                 >
-                  <img
-                    src={activePhoto.preview}
-                    alt="Profile"
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: 20,
-                      objectFit: 'cover',
-                      pointerEvents: 'none',
-                      margin: 0,
-                      padding: 0,
-                      display: 'block',
-                    }}
-                  />
-                </div>
-              ) : null}
-            </DragOverlay>
-          </DndContext>
+                  ×
+                </button>
+                {idx === 0 && (
+                  <div style={{ position: 'absolute', left: 0, bottom: 0, background: 'linear-gradient(90deg, #a259f7 0%, #f857a6 100%)', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: '0 12px 0 20px', padding: '2px 10px', letterSpacing: 0.5 }}>Profile</div>
+                )}
+              </div>
+            ))}
+            {photos.length < 6 && (
+              <label style={{ width: 90, height: 90, border: '2px dashed #a259f7', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 38, color: '#a259f7', cursor: 'pointer', background: '#faf7ff' }}>
+                +
+                <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handlePhotoChange} />
+              </label>
+            )}
+          </div>
           <div style={{ color: '#888', fontSize: 15, marginTop: 6 }}>Add up to 6 photos. First photo will be your main profile picture.</div>
         </div>
         {/* About Me Section */}
@@ -297,20 +342,23 @@ function SortablePhoto({ id, url, onDelete, isProfile, isDragging = false, dragg
     <div
       ref={setNodeRef}
       {...attributes}
+      {...listeners}
       style={{
         width: 90,
         height: 90,
         borderRadius: 20,
-        objectFit: 'cover',
         background: '#eee',
         position: 'relative',
         boxShadow: isDragging ? '0 0 0 4px #a259f7, 0 12px 32px rgba(80,0,120,0.18)' : hovered ? '0 4px 16px rgba(162,89,247,0.18)' : '0 2px 8px rgba(80,0,120,0.07)',
         transform: `${CSS.Transform.toString(transform)}${isDragging ? ' scale(1.10)' : hovered ? ' scale(1.04)' : ''}`,
         transition: 'box-shadow 0.18s, transform 0.18s, opacity 0.18s',
-        marginRight: 8,
-        marginBottom: 8,
+        marginRight: 0,
+        marginBottom: 0,
         border: isProfile ? '2px solid #a259f7' : hovered ? '2px solid #c3a6f7' : '2px solid transparent',
-        cursor: hovered ? 'pointer' : 'default',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: hovered ? 'grab' : 'default',
         opacity: dragging && !isDragging ? 0.6 : 1,
         zIndex: isDragging ? 1000 : undefined,
       }}
@@ -320,38 +368,6 @@ function SortablePhoto({ id, url, onDelete, isProfile, isDragging = false, dragg
       aria-label={isProfile ? 'Profile photo' : 'Photo'}
     >
       <img src={url} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: 20, objectFit: 'cover', pointerEvents: 'none' }} />
-      {/* Drag handle (6 dots) */}
-      <div
-        {...listeners}
-        style={{
-          position: 'absolute',
-          left: 6,
-          top: 6,
-          width: 38,
-          height: 38,
-          borderRadius: '50%',
-          background: isDragging ? 'rgba(162,89,247,0.25)' : hovered ? 'rgba(162,89,247,0.13)' : 'rgba(255,255,255,0.01)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'grab',
-          zIndex: 2,
-          opacity: hovered || isDragging ? 1 : 0.7,
-          transition: 'background 0.18s, opacity 0.18s',
-          boxShadow: isDragging ? '0 2px 8px #a259f7aa' : undefined,
-        }}
-        aria-label="Drag to reorder"
-        title="Drag to reorder"
-      >
-        <svg width="28" height="28" viewBox="0 0 18 18">
-          <circle cx="4" cy="5" r="2" fill="#a259f7" />
-          <circle cx="4" cy="13" r="2" fill="#a259f7" />
-          <circle cx="9" cy="5" r="2" fill="#a259f7" />
-          <circle cx="9" cy="13" r="2" fill="#a259f7" />
-          <circle cx="14" cy="5" r="2" fill="#a259f7" />
-          <circle cx="14" cy="13" r="2" fill="#a259f7" />
-        </svg>
-      </div>
       <button
         type="button"
         onClick={e => { e.stopPropagation(); e.preventDefault(); onDelete(); }}
@@ -359,8 +375,8 @@ function SortablePhoto({ id, url, onDelete, isProfile, isDragging = false, dragg
           position: 'absolute',
           top: 2,
           right: 2,
-          background: hovered ? 'linear-gradient(90deg, #f857a6 0%, #a259f7 100%)' : '#fff',
-          color: hovered ? '#fff' : '#a259f7',
+          background: '#fff',
+          color: '#a259f7',
           border: 'none',
           borderRadius: '50%',
           width: 28,
@@ -368,7 +384,7 @@ function SortablePhoto({ id, url, onDelete, isProfile, isDragging = false, dragg
           fontWeight: 700,
           fontSize: 20,
           cursor: 'pointer',
-          boxShadow: hovered ? '0 2px 8px #a259f7aa' : '0 1px 4px rgba(162,89,247,0.10)',
+          boxShadow: '0 1px 4px rgba(162,89,247,0.10)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
