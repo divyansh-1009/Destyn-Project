@@ -12,33 +12,28 @@ export async function POST(req: NextRequest) {
     const client = await clientPromise;
     const db = client.db("datingapp");
 
-    const userProfile = await db.collection("responses").findOne(
-      { email },
-      {
-        projection: {
-          name: 1,
-          email: 1,
-          profilePhoto: 1,
-          profilePhotos: 1,
-          answers: 1,
-          bio: 1,
-          interests: 1,
-          birthdate: 1,
-          education: 1,
-          profession: 1,
-          languages: 1,
-          relationshipGoals: 1,
-          lat: 1,
-          lng: 1,
-          location: 1,
-          _id: 0,
-        },
-      }
-    );
+    const userResponse = await db.collection("responses").findOne({ email });
 
-    if (!userProfile) {
+    if (!userResponse) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
+
+    // Extract data from the answers object to create a clean profile
+    const answers = userResponse.answers || {};
+
+    // Construct the profile with data from the answers object
+    const userProfile = {
+      name: userResponse.name,
+      email: userResponse.email,
+      profilePhoto: answers.q0 || null,
+      bio: answers.q1 || "",
+      interests: answers.q2 || [],
+      gender: answers.q3?.gender || "",
+      preference: answers.q3?.preference || "",
+      birthdate: answers.q3?.dob || "",
+      // Include the answers for other fields
+      answers: answers,
+    };
 
     return NextResponse.json(userProfile);
   } catch (error) {

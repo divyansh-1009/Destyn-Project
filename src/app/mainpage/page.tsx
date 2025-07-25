@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import Feed from "./Feed";
 import People from "./People";
 import Chat from "./Chat";
@@ -18,40 +20,69 @@ const NAV_OPTIONS = [
   { key: "profile", label: "Profile" },
 ];
 
-// Different options for the top navbar
 const TOP_NAV_OPTIONS = [
   { key: "Guidelines", label: "Guidelines" },
   { key: "FAQs", label: "FAQs" },
   { key: "Privacy", label: "Privacy" },
   { key: "About Us", label: "About Us" },
-  { key: "Feedback", label: "Feedback" },
 ];
 
 export default function MainPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get("tab") || "feed";
-  const [active, setActive] = useState(initialTab);
-  const [isMobile, setIsMobile] = useState(false);
+  const tabParam = searchParams.get("tab");
+  const [active, setActive] = useState(tabParam || "feed");
+  const [isLoading, setIsLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showAboutUs, setShowAboutUs] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
 
-  // Check if the viewport is mobile size
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    if (tabParam && NAV_OPTIONS.some((opt) => opt.key === tabParam)) {
+      setActive(tabParam);
+    }
+  }, [tabParam]);
 
-    // Initial check
-    checkIfMobile();
+  useEffect(() => {
+    // Handle unauthenticated users
+    if (status === "unauthenticated") {
+      router.push("/");
+      return;
+    }
 
-    // Add event listener for window resize
-    window.addEventListener("resize", checkIfMobile);
+    // Check if profile is complete when session is available
+    if (session?.user?.email) {
+      checkProfileCompletion();
+    }
+  }, [session, status, router]);
 
-    // Cleanup
-    return () => window.removeEventListener("resize", checkIfMobile);
-  }, []);
+  const checkProfileCompletion = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/check-profile-completion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: session?.user?.email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.isComplete) {
+        // Profile is incomplete, redirect to welcome page
+        router.push("/welcome");
+        return;
+      }
+
+      // Profile is complete, allow access to main page
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error checking profile completion:", error);
+      // On error, redirect to welcome page to be safe
+      router.push("/welcome");
+    }
+  };
 
   const handleTopNavClick = (key: string) => {
     console.log(`Clicked ${key}`);
@@ -97,15 +128,15 @@ export default function MainPage() {
           color: active === opt.key ? "#0070f3" : "#888",
           fontSize: "14px",
           cursor: "pointer",
-          padding: isMobile ? "8px 16px" : "16px",
+          padding: "8px 16px",
           borderRadius: "8px",
           transition: "all 0.2s",
           textAlign: "left",
           width: "100%",
           display: "flex",
           alignItems: "center",
-          justifyContent: isMobile ? "center" : "flex-start",
-          marginBottom: isMobile ? 0 : "8px",
+          justifyContent: "center",
+          marginBottom: 0,
         }}
         onMouseEnter={(e) => {
           if (active !== opt.key) {
@@ -122,6 +153,58 @@ export default function MainPage() {
       </button>
     ));
   };
+
+  if (isLoading || status === "loading") {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          background: "#faf7ff",
+          color: "#333",
+        }}
+      >
+        <div
+          style={{
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              width: "60px",
+              height: "60px",
+              border: "4px solid rgba(102, 126, 234, 0.3)",
+              borderTop: "4px solid #667eea",
+              borderRadius: "50%",
+              margin: "0 auto 20px",
+              animation: "spin 1s linear infinite",
+            }}
+          ></div>
+          <p
+            style={{
+              fontSize: "16px",
+              fontWeight: "500",
+            }}
+          >
+            Loading your profile...
+          </p>
+
+          <style jsx>{`
+            @keyframes spin {
+              0% {
+                transform: rotate(0deg);
+              }
+              100% {
+                transform: rotate(360deg);
+              }
+            }
+          `}</style>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -176,7 +259,7 @@ export default function MainPage() {
         </div>
 
         {/* Different navigation options for top navbar */}
-        {isMobile ? (
+        {true ? (
           <div style={{ position: "relative" }}>
             {/* Mobile menu button */}
             <button
@@ -271,12 +354,12 @@ export default function MainPage() {
         style={{
           flex: 1,
           display: "flex",
-          flexDirection: isMobile ? "column" : "row",
+          flexDirection: true ? "column" : "row",
           overflow: "hidden",
         }}
       >
         {/* Side navigation for desktop */}
-        {!isMobile && (
+        {!true && (
           <div
             style={{
               width: "200px",
@@ -301,7 +384,7 @@ export default function MainPage() {
       {showPrivacy && <Privacy onClose={() => setShowPrivacy(false)} />}
 
       {/* Bottom navigation for mobile */}
-      {isMobile && (
+      {true && (
         <nav
           style={{
             display: "flex",
