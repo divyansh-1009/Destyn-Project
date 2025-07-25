@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(bytes);
 
     // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
+    const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
       cloudinary.uploader
         .upload_stream(
           {
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
           },
           (error, result) => {
             if (error) reject(error);
-            else resolve(result);
+            else resolve(result as { secure_url: string });
           }
         )
         .end(buffer);
@@ -45,8 +45,9 @@ export async function POST(req: NextRequest) {
     await db.collection("responses").updateOne(
       { email: userEmail },
       {
+        $push: { profilePhotos: result.secure_url },
         $set: {
-          profilePhoto: result.secure_url,
+          profilePhoto: result.secure_url, // Keep for backward compatibility
           updatedAt: new Date().toISOString(),
         },
       },

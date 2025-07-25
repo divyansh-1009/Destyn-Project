@@ -11,6 +11,7 @@ import AboutUs from "./AboutUs";
 import Guidelines from "./Guidelines";
 import Privacy from "./Privacy";
 import FAQs from "./FAQs";
+import Feedback from "./Feedback";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -26,6 +27,7 @@ const TOP_NAV_OPTIONS = [
   { key: "FAQs", label: "FAQs" },
   { key: "Privacy", label: "Privacy" },
   { key: "About Us", label: "About Us" },
+  { key: "Feedback", label: "Feedback" },
 ];
 
 export default function MainPage() {
@@ -40,6 +42,7 @@ export default function MainPage() {
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showFAQs, setShowFAQs] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {
@@ -107,6 +110,8 @@ export default function MainPage() {
       setShowPrivacy(true);
     } else if (key === "FAQs") {
       setShowFAQs(true);
+    } else if (key === "Feedback") {
+      setShowFeedback(true);
     }
     setMenuOpen(false);
   };
@@ -444,6 +449,7 @@ export default function MainPage() {
           }}
         />
       )}
+      {showFeedback && <Feedback onClose={() => setShowFeedback(false)} />}
 
       {/* Bottom navigation for mobile */}
       {isMobile && (

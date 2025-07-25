@@ -25,12 +25,13 @@ export async function POST(req: NextRequest) {
     const userProfile = {
       name: userResponse.name,
       email: userResponse.email,
-      profilePhoto: answers.q0 || null,
-      bio: answers.q1 || "",
-      interests: answers.q2 || [],
-      gender: answers.q3?.gender || "",
-      preference: answers.q3?.preference || "",
-      birthdate: answers.q3?.dob || "",
+      profilePhoto: answers.q0 || userResponse.profilePhoto || null,
+      profilePhotos: userResponse.profilePhotos || (userResponse.profilePhoto ? [userResponse.profilePhoto] : []),
+      bio: userResponse.bio || answers.q1 || "",
+      interests: userResponse.interests || answers.q2 || [],
+      gender: answers.q3?.gender || userResponse.gender || "",
+      preference: answers.q3?.preference || userResponse.preference || "",
+      birthdate: answers.q3?.dob || userResponse.birthdate || "",
       // Include the answers for other fields
       answers: answers,
     };

@@ -38,9 +38,12 @@ export default function EditProfile() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const activePhoto = photos.find(p => p.id === activeId) || null;
 
-  // Example popular interests
-  const POPULAR_INTERESTS = [
-    "Photography", "Music", "Travel", "Food", "Movies", "Books", "Gaming", "Sports"
+  // All 30 interests from the welcome page
+  const ALL_INTERESTS = [
+    "Music", "Movies", "Sports", "Travel", "Reading", "Cooking", "Dancing", "Gaming", "Art", "Photography", 
+    "Fitness", "Yoga", "Meditation", "Technology", "Science", "Nature", "Animals", "Fashion", "Shopping", 
+    "Writing", "Blogging", "Volunteering", "Gardening", "Hiking", "Cycling", "Swimming", "Board Games", 
+    "Podcasts", "DIY", "Cars"
   ];
 
   useEffect(() => {
@@ -114,7 +117,7 @@ export default function EditProfile() {
   const handleDragCancel = () => setActiveId(null);
 
   const handleAddCustomInterest = () => {
-    if (fields.customInterest && fields.interests.length < 10 && !fields.interests.includes(fields.customInterest)) {
+    if (fields.customInterest && !fields.interests.includes(fields.customInterest)) {
       setFields((prev) => ({ ...prev, interests: [...prev.interests, prev.customInterest], customInterest: "" }));
     }
   };
@@ -122,7 +125,7 @@ export default function EditProfile() {
   const handleInterestClick = (interest: string) => {
     if (fields.interests.includes(interest)) {
       setFields((prev) => ({ ...prev, interests: prev.interests.filter((i) => i !== interest) }));
-    } else if (fields.interests.length < 10) {
+    } else {
       setFields((prev) => ({ ...prev, interests: [...prev.interests, interest] }));
     }
   };
@@ -137,45 +140,79 @@ export default function EditProfile() {
     setSubmitting(true);
     setError("");
     setSuccess("");
+    
     try {
+      // Validate required fields
+      if (!fields.bio.trim() || fields.bio.trim().length < 1) {
+        setError("Bio must have at least 1 character");
+        setSubmitting(false);
+        return;
+      }
+
+      if (fields.interests.length === 0) {
+        setError("Please select at least one interest");
+        setSubmitting(false);
+        return;
+      }
+
+      if (photos.length === 0) {
+        setError("Please upload at least one profile photo");
+        setSubmitting(false);
+        return;
+      }
+
+      // Upload new photos and collect all photo URLs
       const uploadedUrls: string[] = [];
       for (let i = 0; i < photos.length; i++) {
         const item = photos[i].fileOrUrl;
         if (typeof item === 'string' && item.startsWith('http')) {
+          // This is an existing photo URL
           uploadedUrls.push(item);
         } else if (item instanceof File) {
+          // This is a new file that needs to be uploaded
           const formData = new FormData();
           formData.append("photo", item);
           formData.append("userEmail", session?.user?.email ?? "");
+          
           const response = await fetch("/api/upload-photo", {
             method: "POST",
             body: formData,
           });
+          
           if (response.ok) {
             const data = await response.json();
             uploadedUrls.push(data.photoUrl);
+          } else {
+            const errorData = await response.json();
+            throw new Error(`Failed to upload photo: ${errorData.error || 'Unknown error'}`);
           }
         }
       }
-      const response = await fetch("/api/update-profile", {
+
+      // Update profile with all changes
+      const updateResponse = await fetch("/api/update-profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: session?.user?.email,
-          bio: fields.bio,
+          bio: fields.bio.trim(),
           interests: fields.interests,
           profilePhotos: uploadedUrls,
+          name: session?.user?.name || fields.name,
         }),
       });
-      if (response.ok) {
+
+      if (updateResponse.ok) {
         setSuccess("Profile updated successfully!");
+        // Redirect after a short delay to show success message
         setTimeout(() => router.push("/mainpage?tab=profile"), 1200);
       } else {
-        const err = await response.json();
-        setError(err.error || "Failed to update profile");
+        const errorData = await updateResponse.json();
+        throw new Error(errorData.error || "Failed to update profile");
       }
     } catch (err) {
-      setError("Failed to update profile");
+      console.error("Error updating profile:", err);
+      setError(err instanceof Error ? err.message : "Failed to update profile");
     } finally {
       setSubmitting(false);
     }
@@ -209,18 +246,19 @@ export default function EditProfile() {
         left: 0,
         width: '100%',
         height: 64,
-        background: '#fff',
+        background: '#000000',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '0 32px',
         zIndex: 100,
-        boxShadow: '0 2px 8px rgba(80,0,120,0.07)',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
       }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', fontSize: 26, color: '#333', cursor: 'pointer' }}><FaArrowLeft /></button>
-        <div style={{ fontWeight: 700, fontSize: 26, color: '#222', textAlign: 'center', flex: 1 }}>Edit Profile</div>
+        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', fontSize: 26, color: '#ffffff', cursor: 'pointer' }}><FaArrowLeft /></button>
+        <div style={{ fontWeight: 700, fontSize: 26, color: '#ffffff', textAlign: 'center', flex: 1 }}>Edit Profile</div>
         <button
           onClick={handleSubmit}
+          disabled={submitting || !fields.bio.trim() || fields.interests.length === 0 || photos.length === 0}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -229,26 +267,33 @@ export default function EditProfile() {
             height: 44,
             borderRadius: 22,
             border: 'none',
-            background: 'linear-gradient(90deg, #a259f7 0%, #f857a6 100%)',
-            color: '#fff',
+            background: (submitting || !fields.bio.trim() || fields.interests.length === 0 || photos.length === 0) 
+              ? 'linear-gradient(90deg, #666666 0%, #888888 100%)' 
+              : 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)',
+            color: (submitting || !fields.bio.trim() || fields.interests.length === 0 || photos.length === 0) 
+              ? '#999999' 
+              : '#000000',
             fontWeight: 700,
             fontSize: 18,
-            boxShadow: '0 2px 8px rgba(80,0,120,0.07)',
-            cursor: 'pointer',
+            boxShadow: '0 2px 8px rgba(79,195,247,0.3)',
+            cursor: (submitting || !fields.bio.trim() || fields.interests.length === 0 || photos.length === 0) 
+              ? 'not-allowed' 
+              : 'pointer',
             outline: 'none',
             margin: 0,
             width: 110,
+            transition: 'all 0.3s ease',
           }}
         >
-          Save
+          {submitting ? 'Saving...' : 'Save'}
         </button>
       </div>
       {/* Add a spacer div after the nav bar to push content down */}
       <div style={{ height: 64 }} />
       <form id="edit-profile-form" onSubmit={handleSubmit}>
         {/* Photos Section */}
-        <div style={{ background: '#fff', borderRadius: 28, boxShadow: '0 4px 24px rgba(80,0,120,0.07)', padding: 28, margin: '32px 0 24px 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', fontWeight: 700, fontSize: 20, color: '#a259f7', marginBottom: 18, gap: 10 }}><FaCamera /> Photos</div>
+        <div style={{ background: '#000000', borderRadius: 28, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', padding: 28, margin: '32px 0 24px 0', border: '2px solid #4FC3F7' }}>
+          <div style={{ display: 'flex', alignItems: 'center', fontWeight: 700, fontSize: 20, color: '#4FC3F7', marginBottom: 18, gap: 10 }}><FaCamera /> Photos <span style={{ color: '#ff4444', fontSize: '14px' }}>*</span></div>
           {/* In the photo area, just display the photos in a grid with delete buttons. Remove all drag-and-drop logic and components. */}
           <div style={{
             display: 'grid',
@@ -270,12 +315,12 @@ export default function EditProfile() {
                   width: 90,
                   height: 90,
                   borderRadius: 20,
-                  background: '#eee',
+                  background: '#333',
                   position: 'relative',
-                  boxShadow: '0 2px 8px rgba(80,0,120,0.07)',
+                  boxShadow: '0 2px 8px rgba(79,195,247,0.2)',
                   marginRight: 0,
                   marginBottom: 0,
-                  border: idx === 0 ? '2px solid #a259f7' : '2px solid transparent',
+                  border: idx === 0 ? '2px solid #4FC3F7' : '2px solid #333',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -289,8 +334,8 @@ export default function EditProfile() {
                     position: 'absolute',
                     top: 2,
                     right: 2,
-                    background: '#fff',
-                    color: '#a259f7',
+                    background: '#000000',
+                    color: '#4FC3F7',
                     border: 'none',
                     borderRadius: '50%',
                     width: 28,
@@ -298,7 +343,7 @@ export default function EditProfile() {
                     fontWeight: 700,
                     fontSize: 20,
                     cursor: 'pointer',
-                    boxShadow: '0 1px 4px rgba(162,89,247,0.10)',
+                    boxShadow: '0 1px 4px rgba(79,195,247,0.3)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -309,47 +354,58 @@ export default function EditProfile() {
                   ×
                 </button>
                 {idx === 0 && (
-                  <div style={{ position: 'absolute', left: 0, bottom: 0, background: 'linear-gradient(90deg, #a259f7 0%, #f857a6 100%)', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: '0 12px 0 20px', padding: '2px 10px', letterSpacing: 0.5 }}>Profile</div>
+                  <div style={{ position: 'absolute', left: 0, bottom: 0, background: 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)', color: '#000000', fontSize: 11, fontWeight: 700, borderRadius: '0 12px 0 20px', padding: '2px 10px', letterSpacing: 0.5 }}>Profile</div>
                 )}
               </div>
             ))}
             {photos.length < 6 && (
-              <label style={{ width: 90, height: 90, border: '2px dashed #a259f7', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 38, color: '#a259f7', cursor: 'pointer', background: '#faf7ff' }}>
+              <label style={{ width: 90, height: 90, border: '2px dashed #4FC3F7', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 38, color: '#4FC3F7', cursor: 'pointer', background: '#1a1a1a' }}>
                 +
                 <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handlePhotoChange} />
               </label>
             )}
           </div>
-          <div style={{ color: '#888', fontSize: 15, marginTop: 6 }}>Add up to 6 photos. First photo will be your main profile picture.</div>
+          <div style={{ color: '#cccccc', fontSize: 15, marginTop: 6 }}>
+            Add up to 6 photos. First photo will be your main profile picture.
+            {photos.length === 0 && <span style={{ color: '#ff4444', display: 'block', marginTop: 4 }}>• At least one photo required</span>}
+          </div>
         </div>
         {/* About Me Section */}
-        <div style={{ background: '#fff', borderRadius: 28, boxShadow: '0 4px 24px rgba(80,0,120,0.07)', padding: 28, marginBottom: 24 }}>
-          <div style={{ display: 'flex', alignItems: 'center', fontWeight: 700, fontSize: 20, color: '#a259f7', marginBottom: 18, gap: 10 }}><FaHeart /> About Me</div>
-          <label style={{ fontWeight: 600, color: '#222', marginBottom: 8, display: 'block' }}>Bio
-            <textarea name="bio" value={fields.bio} onChange={handleChange} maxLength={500} rows={3} style={{ width: '100%', padding: 16, borderRadius: 16, border: '1px solid #eee', fontSize: 17, marginTop: 6, background: '#faf7ff', color: '#222', resize: 'vertical' }} />
+        <div style={{ background: '#000000', borderRadius: 28, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', padding: 28, marginBottom: 24, border: '2px solid #4FC3F7' }}>
+          <div style={{ display: 'flex', alignItems: 'center', fontWeight: 700, fontSize: 20, color: '#4FC3F7', marginBottom: 18, gap: 10 }}><FaHeart /> About Me</div>
+          <label style={{ fontWeight: 600, color: '#ffffff', marginBottom: 8, display: 'block' }}>
+            Bio <span style={{ color: '#ff4444', fontSize: '14px' }}>*</span>
           </label>
-          <div style={{ textAlign: 'right', color: '#888', fontSize: 14 }}>{fields.bio.length}/500</div>
+          <textarea name="bio" value={fields.bio} onChange={handleChange} maxLength={500} rows={3} style={{ width: '100%', padding: 16, borderRadius: 16, border: '1px solid #333', fontSize: 17, marginTop: 6, background: '#1a1a1a', color: '#ffffff', resize: 'vertical' }} />
+          <div style={{ textAlign: 'right', color: '#cccccc', fontSize: 14 }}>
+            {fields.bio.length}/500 {!fields.bio.trim() && <span style={{ color: '#ff4444' }}>• Minimum 1 character required</span>}
+          </div>
         </div>
         {/* Interests Section */}
-        <div style={{ background: '#fff', borderRadius: 28, boxShadow: '0 4px 24px rgba(80,0,120,0.07)', padding: 28, marginBottom: 24 }}>
-          <div style={{ fontWeight: 700, fontSize: 20, color: '#a259f7', marginBottom: 12 }}>Interests</div>
-          <div style={{ fontWeight: 600, color: '#222', marginBottom: 8 }}>Your Interests ({fields.interests.length}/10)</div>
+        <div style={{ background: '#000000', borderRadius: 28, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', padding: 28, marginBottom: 24, border: '2px solid #4FC3F7' }}>
+          <div style={{ fontWeight: 700, fontSize: 20, color: '#4FC3F7', marginBottom: 12 }}>Interests</div>
+          <div style={{ fontWeight: 600, color: '#ffffff', marginBottom: 8 }}>
+            Your Interests ({fields.interests.length} selected) <span style={{ color: '#ff4444', fontSize: '14px' }}>*</span>
+          </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
             {fields.interests.map((interest, idx) => (
-              <span key={idx} style={{ background: 'linear-gradient(90deg, #a259f7 0%, #f857a6 100%)', color: '#fff', borderRadius: 16, padding: '8px 18px', fontSize: 16, fontWeight: 600, letterSpacing: 0.2, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span key={idx} style={{ background: 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)', color: '#000000', borderRadius: 16, padding: '8px 18px', fontSize: 16, fontWeight: 600, letterSpacing: 0.2, display: 'flex', alignItems: 'center', gap: 8 }}>
                 {interest}
-                <button type="button" onClick={() => handleRemoveInterest(interest)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: 18, marginLeft: 4, cursor: 'pointer' }}>&times;</button>
+                <button type="button" onClick={() => handleRemoveInterest(interest)} style={{ background: 'none', border: 'none', color: '#000000', fontSize: 18, marginLeft: 4, cursor: 'pointer' }}>&times;</button>
               </span>
             ))}
           </div>
-          <div style={{ fontWeight: 600, color: '#222', marginBottom: 8 }}>Popular Interests</div>
+          {fields.interests.length === 0 && (
+            <div style={{ color: '#ff4444', fontSize: 14, marginBottom: 8 }}>• At least one interest required</div>
+          )}
+          <div style={{ fontWeight: 600, color: '#ffffff', marginBottom: 8 }}>All Interests</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-            {POPULAR_INTERESTS.map((interest, idx) => (
-              <button key={idx} type="button" onClick={() => handleInterestClick(interest)} style={{ background: fields.interests.includes(interest) ? 'linear-gradient(90deg, #a259f7 0%, #f857a6 100%)' : '#faf7ff', color: fields.interests.includes(interest) ? '#fff' : '#a259f7', border: 'none', borderRadius: 16, padding: '8px 18px', fontSize: 16, fontWeight: 600, letterSpacing: 0.2, cursor: 'pointer' }}>+ {interest}</button>
+            {ALL_INTERESTS.map((interest, idx) => (
+              <button key={idx} type="button" onClick={() => handleInterestClick(interest)} style={{ background: fields.interests.includes(interest) ? 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)' : '#1a1a1a', color: fields.interests.includes(interest) ? '#000000' : '#4FC3F7', border: 'none', borderRadius: 16, padding: '8px 18px', fontSize: 16, fontWeight: 600, letterSpacing: 0.2, cursor: 'pointer' }}>+ {interest}</button>
             ))}
           </div>
         </div>
-        {error && <div style={{ color: '#f44336', marginTop: 12 }}>{error}</div>}
+        {error && <div style={{ color: '#ff4444', marginTop: 12 }}>{error}</div>}
         {success && <div style={{ color: '#4caf50', marginTop: 12 }}>{success}</div>}
       </form>
     </div>
@@ -369,14 +425,14 @@ function SortablePhoto({ id, url, onDelete, isProfile, isDragging = false, dragg
         width: 90,
         height: 90,
         borderRadius: 20,
-        background: '#eee',
+        background: '#333',
         position: 'relative',
-        boxShadow: isDragging ? '0 0 0 4px #a259f7, 0 12px 32px rgba(80,0,120,0.18)' : hovered ? '0 4px 16px rgba(162,89,247,0.18)' : '0 2px 8px rgba(80,0,120,0.07)',
+        boxShadow: isDragging ? '0 0 0 4px #4FC3F7, 0 12px 32px rgba(79,195,247,0.3)' : hovered ? '0 4px 16px rgba(79,195,247,0.3)' : '0 2px 8px rgba(79,195,247,0.2)',
         transform: `${CSS.Transform.toString(transform)}${isDragging ? ' scale(1.10)' : hovered ? ' scale(1.04)' : ''}`,
         transition: 'box-shadow 0.18s, transform 0.18s, opacity 0.18s',
         marginRight: 0,
         marginBottom: 0,
-        border: isProfile ? '2px solid #a259f7' : hovered ? '2px solid #c3a6f7' : '2px solid transparent',
+        border: isProfile ? '2px solid #4FC3F7' : hovered ? '2px solid #29B6F6' : '2px solid #333',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -397,8 +453,8 @@ function SortablePhoto({ id, url, onDelete, isProfile, isDragging = false, dragg
           position: 'absolute',
           top: 2,
           right: 2,
-          background: '#fff',
-          color: '#a259f7',
+          background: '#000000',
+          color: '#4FC3F7',
           border: 'none',
           borderRadius: '50%',
           width: 28,
@@ -406,7 +462,7 @@ function SortablePhoto({ id, url, onDelete, isProfile, isDragging = false, dragg
           fontWeight: 700,
           fontSize: 20,
           cursor: 'pointer',
-          boxShadow: '0 1px 4px rgba(162,89,247,0.10)',
+          boxShadow: '0 1px 4px rgba(79,195,247,0.3)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -417,7 +473,7 @@ function SortablePhoto({ id, url, onDelete, isProfile, isDragging = false, dragg
         ×
       </button>
       {isProfile && (
-        <div style={{ position: 'absolute', left: 0, bottom: 0, background: 'linear-gradient(90deg, #a259f7 0%, #f857a6 100%)', color: '#fff', fontSize: 11, fontWeight: 700, borderRadius: '0 12px 0 20px', padding: '2px 10px', letterSpacing: 0.5 }}>Profile</div>
+        <div style={{ position: 'absolute', left: 0, bottom: 0, background: 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)', color: '#000000', fontSize: 11, fontWeight: 700, borderRadius: '0 12px 0 20px', padding: '2px 10px', letterSpacing: 0.5 }}>Profile</div>
       )}
     </div>
   );

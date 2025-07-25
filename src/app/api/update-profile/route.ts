@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       "gender",
       "preference",
     ];
-    const setObj = { updatedAt: new Date().toISOString() };
+    const setObj: { [key: string]: any } = { updatedAt: new Date().toISOString() };
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
         setObj[field] = body[field];
