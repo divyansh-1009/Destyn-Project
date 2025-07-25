@@ -10,6 +10,7 @@ import Profile from "./Profile";
 import AboutUs from "./AboutUs";
 import Guidelines from "./Guidelines";
 import Privacy from "./Privacy";
+import FAQs from "./FAQs";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -38,6 +39,8 @@ export default function MainPage() {
   const [showAboutUs, setShowAboutUs] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showFAQs, setShowFAQs] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {
     if (tabParam && NAV_OPTIONS.some((opt) => opt.key === tabParam)) {
@@ -57,6 +60,16 @@ export default function MainPage() {
       checkProfileCompletion();
     }
   }, [session, status, router]);
+
+  useEffect(() => {
+    // Function to check screen width
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize(); // Initial check
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const checkProfileCompletion = async () => {
     try {
@@ -92,8 +105,9 @@ export default function MainPage() {
       setShowGuidelines(true);
     } else if (key === "Privacy") {
       setShowPrivacy(true);
+    } else if (key === "FAQs") {
+      setShowFAQs(true);
     }
-    // You can add handlers for other options here
     setMenuOpen(false);
   };
 
@@ -355,23 +369,61 @@ export default function MainPage() {
         style={{
           flex: 1,
           display: "flex",
-          flexDirection: true ? "column" : "row",
+          flexDirection: isMobile ? "column" : "row",
           overflow: "hidden",
         }}
       >
         {/* Side navigation for desktop */}
-        {!true && (
+        {!isMobile && (
           <div
             style={{
-              width: "200px",
+              width: "120px", // Slightly narrower for a sleeker look
               borderRight: "1px solid #333",
               background: "#111",
-              padding: "20px 10px",
+              padding: "32px 8px",
               display: "flex",
               flexDirection: "column",
+              minHeight: 0,
+              alignItems: "center",
             }}
           >
-            {renderNavItems()}
+            {NAV_OPTIONS.map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => setActive(opt.key)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontWeight: active === opt.key ? "700" : "500",
+                  color: active === opt.key ? "#0070f3" : "#bbb",
+                  fontSize: "16px", // Reduced from 20px to 16px
+                  fontFamily: "'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Liberation Sans', sans-serif",
+                  letterSpacing: "0.5px",
+                  cursor: "pointer",
+                  padding: "14px 0",
+                  borderRadius: "10px",
+                  transition: "all 0.2s",
+                  textAlign: "center",
+                  width: "100%",
+                  marginBottom: "14px", // 60% of previous 24px
+                  boxShadow: active === opt.key ? "0 2px 8px rgba(0,112,243,0.08)" : "none",
+                }}
+                onMouseEnter={(e) => {
+                  if (active !== opt.key) {
+                    (e.target as HTMLElement).style.color = "#fff";
+                    (e.target as HTMLElement).style.background = "#222";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (active !== opt.key) {
+                    (e.target as HTMLElement).style.color = "#bbb";
+                    (e.target as HTMLElement).style.background = "none";
+                  }
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
         )}
 
@@ -383,9 +435,18 @@ export default function MainPage() {
       {showAboutUs && <AboutUs onClose={() => setShowAboutUs(false)} />}
       {showGuidelines && <Guidelines onClose={() => setShowGuidelines(false)} />}
       {showPrivacy && <Privacy onClose={() => setShowPrivacy(false)} />}
+      {showFAQs && (
+        <FAQs
+          onClose={() => setShowFAQs(false)}
+          onShowPrivacy={() => {
+            setShowFAQs(false);
+            setShowPrivacy(true);
+          }}
+        />
+      )}
 
       {/* Bottom navigation for mobile */}
-      {true && (
+      {isMobile && (
         <nav
           style={{
             display: "flex",
