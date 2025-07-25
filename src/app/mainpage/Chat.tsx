@@ -209,7 +209,7 @@ export default function Chat() {
         maxWidth: 800,
         margin: "0 auto",
         border: "1px solid #333",
-        borderRadius: 12,
+        borderRadius: 0, // Changed from 12 to 0 to remove rounded corners
         overflow: "hidden",
         background: "#0a0a0a",
         boxShadow: "0 8px 32px rgba(0,0,0,0.3)",

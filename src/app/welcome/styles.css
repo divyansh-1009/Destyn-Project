@@ -1,0 +1,36 @@
+/* Create this CSS file and import it in your page.tsx */
+
+@media (max-width: 480px) {
+  .question-text {
+    font-size: 16px !important;
+    padding: 0 5px !important;
+  }
+  
+  .option-label {
+    padding: 8px 12px !important;
+  }
+  
+  .option-text {
+    font-size: 12px !important;
+  }
+  
+  .nav-button {
+    padding: 10px 16px !important;
+    font-size: 12px !important;
+  }
+  
+  .container-card {
+    padding: 15px 10px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .interest-button {
+    font-size: 12px !important;
+    padding: 6px 12px !important;
+  }
+  
+  .form-select, .form-input {
+    font-size: 14px !important;
+  }
+}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,6 +10,18 @@ export async function POST(req: NextRequest) {
     }
     const client = await clientPromise;
     const db = client.db("datingapp");
+
+    // Prevent duplicate report for the same confession by the same user
+    if (confessionId) {
+      const existingReport = await db.collection("reports").findOne({
+        reporterEmail,
+        confessionId,
+      });
+      if (existingReport) {
+        return NextResponse.json({ error: "You have already reported this gossip." }, { status: 409 });
+      }
+    }
+
     const reportDoc = {
       reporterEmail,
       reportedUserEmail: reportedUserEmail || null,
@@ -19,6 +32,18 @@ export async function POST(req: NextRequest) {
       status: 'pending',
     };
     await db.collection("reports").insertOne(reportDoc);
+
+    // If reporting a confession, check if it has 10 or more reports and delete if so
+    if (confessionId) {
+      const reportCount = await db.collection("reports").countDocuments({ confessionId });
+      if (reportCount >= 10) {
+        try {
+          await db.collection("confessions").deleteOne({ _id: new ObjectId(confessionId) });
+        } catch (err) {
+          console.error("Error deleting confession after 10 reports:", err);
+        }
+      }
+    }
 
     // If reporting a user (not just a confession), unmatch and delete chat
     if (reporterEmail && reportedUserEmail) {

@@ -191,6 +191,7 @@ export default function WelcomePage() {
 	const [profileCompleted, setProfileCompleted] = useState(false); // New state to track completion
 	const [isCheckingCompletion, setIsCheckingCompletion] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
 	// Add effect to fetch the user's profile photo when the component mounts
 	useEffect(() => {
@@ -265,6 +266,30 @@ export default function WelcomePage() {
 			router.push("/");
 		}
 	}, [status, router]);
+
+	// Add this in the head section of your component
+	useEffect(() => {
+		// Add viewport meta tag to ensure proper scaling on mobile devices
+		const meta = document.createElement('meta');
+		meta.name = 'viewport';
+		meta.content = 'width=device-width, initial-scale=1, maximum-scale=1';
+		document.getElementsByTagName('head')[0].appendChild(meta);
+		
+		return () => {
+			document.getElementsByTagName('head')[0].removeChild(meta);
+		};
+	}, []);
+
+	useEffect(() => {
+		const handleResize = () => {
+			setWindowWidth(window.innerWidth);
+		};
+		
+		if (typeof window !== 'undefined') {
+			window.addEventListener('resize', handleResize);
+			return () => window.removeEventListener('resize', handleResize);
+		}
+	}, []);
 
 	if (status === "loading")
 		return (
@@ -514,6 +539,8 @@ export default function WelcomePage() {
 		);
 	}
 
+	const isMobile = windowWidth < 768;
+
 	return (
 		<div
 			style={{
@@ -529,11 +556,12 @@ export default function WelcomePage() {
 				style={{
 					background: "#fff",
 					borderRadius: "20px",
-					padding: "10px",
+					padding: "20px",
 					maxWidth: "600px",
-					width: "100%",
+					width: "calc(100% - 20px)",
 					boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
-					margin: "20px 20px", // Add margin for smaller screens
+					margin: "20px auto",
+					overflow: "hidden",
 				}}
 			>
 				{/* Progress Bar */}
@@ -574,12 +602,13 @@ export default function WelcomePage() {
 				{/* Question */}
 				<h2
 					style={{
-						fontSize: "20px", // Reduced from 24px
+						fontSize: isMobile ? "18px" : "20px",
 						fontWeight: "600",
 						color: "#333",
 						marginBottom: "30px",
 						textAlign: "center",
 						lineHeight: "1.4",
+						padding: "0 10px",
 					}}
 				>
 					{currentQ.question}
@@ -692,7 +721,13 @@ export default function WelcomePage() {
 							/>
 						)}
 						{currentQ.isInterests && (
-							<div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+							<div style={{ 
+								display: 'flex', 
+								flexWrap: 'wrap', 
+								gap: 8, 
+								marginBottom: 16,
+								justifyContent: 'center'
+							}}>
 								{INTEREST_OPTIONS.map(opt => (
 									<button
 										key={opt}
@@ -705,10 +740,12 @@ export default function WelcomePage() {
 											background: selectedInterests.includes(opt) ? '#667eea' : '#f0f0f0',
 											color: selectedInterests.includes(opt) ? '#fff' : '#333',
 											border: 'none',
-											borderRadius: 16,
+											borderRadius: '16px',
 											padding: '8px 16px',
 											cursor: 'pointer',
 											fontWeight: 500,
+											margin: '4px',
+											fontSize: window.innerWidth < 768 ? '12px' : '14px',
 										}}
 									>
 										{opt}
@@ -717,10 +754,30 @@ export default function WelcomePage() {
 							</div>
 						)}
 						{currentQ.isGenderPrefDob && (
-							<div style={{ display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'center', marginBottom: 32 }}>
+							<div style={{ 
+								display: 'flex', 
+								flexDirection: 'column', 
+								gap: window.innerWidth < 768 ? 16 : 24, 
+								alignItems: 'center', 
+								marginBottom: 32,
+								width: '100%'
+							}}>
 								<div style={{ width: '100%', maxWidth: 340 }}>
 									<label style={{ fontWeight: 600, display: 'block', marginBottom: 6, color: '#222' }}>Gender</label>
-									<select value={gender} onChange={e => { setGender(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], gender: e.target.value } })); }} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, color: '#111', background: '#fff' }}>
+									<select 
+										value={gender} 
+										onChange={e => { setGender(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], gender: e.target.value } })); }} 
+										style={{ 
+											width: '100%', 
+											padding: '10px', 
+											borderRadius: '8px', 
+											border: '1px solid #ccc', 
+											fontSize: window.innerWidth < 768 ? '14px' : '15px', 
+											color: '#111', 
+											background: '#fff',
+											appearance: 'auto' // Ensures proper display on mobile
+										}}
+									>
 										<option value="">Select your gender</option>
 										<option value="male">Male</option>
 										<option value="female">Female</option>
@@ -728,7 +785,20 @@ export default function WelcomePage() {
 								</div>
 								<div style={{ width: '100%', maxWidth: 340 }}>
 									<label style={{ fontWeight: 600, display: 'block', marginBottom: 6, color: '#222' }}>Interested in dating</label>
-									<select value={preference} onChange={e => { setPreference(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], preference: e.target.value } })); }} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, color: '#111', background: '#fff' }}>
+									<select 
+										value={preference} 
+										onChange={e => { setPreference(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], preference: e.target.value } })); }} 
+										style={{ 
+											width: '100%', 
+											padding: '10px', 
+											borderRadius: '8px', 
+											border: '1px solid #ccc', 
+											fontSize: window.innerWidth < 768 ? '14px' : '15px', 
+											color: '#111', 
+											background: '#fff',
+											appearance: 'auto' // Ensures proper display on mobile
+										}}
+									>
 										<option value="">Select preference</option>
 										<option value="male">Male</option>
 										<option value="female">Female</option>

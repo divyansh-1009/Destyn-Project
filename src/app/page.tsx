@@ -156,7 +156,6 @@ export default function LoginPage() {
 
       <div className="z-10 flex flex-col items-center justify-center text-white text-center flex-grow">
         <div className="flex items-center mb-8 -mt-50 md:mt-0">
-          <div className="w-24 h-24 md:w-28 md:h-28 bg-gray-200 rounded-full mr-4 shadow-lg"></div>
           <div>
             {/* Replace the text "DESTYN" with the image */}
             <img

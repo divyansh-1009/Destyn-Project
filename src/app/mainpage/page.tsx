@@ -162,8 +162,8 @@ export default function MainPage() {
           justifyContent: "center",
           alignItems: "center",
           height: "100vh",
-          background: "#faf7ff",
-          color: "#333",
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", // Changed to match other screens
+          color: "#fff", // Changed to white for contrast
         }}
       >
         <div
@@ -175,8 +175,8 @@ export default function MainPage() {
             style={{
               width: "60px",
               height: "60px",
-              border: "4px solid rgba(102, 126, 234, 0.3)",
-              borderTop: "4px solid #667eea",
+              border: "4px solid rgba(255,255,255,0.3)",
+              borderTop: "4px solid #fff",
               borderRadius: "50%",
               margin: "0 auto 20px",
               animation: "spin 1s linear infinite",
@@ -241,20 +241,6 @@ export default function MainPage() {
           }}
         >
           {/* Replace with your actual logo */}
-          <div
-            style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "50%",
-              background: "#0070f3",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: "bold",
-            }}
-          >
-            D
-          </div>
           <span style={{ fontWeight: "700", fontSize: "20px" }}>Destyn</span>
         </div>
 
@@ -276,47 +262,62 @@ export default function MainPage() {
               ☰
             </button>
 
-            {/* Dropdown menu */}
+            {/* Dropdown menu and overlay */}
             {menuOpen && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "100%",
-                  right: 0,
-                  background: "#222",
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
-                  overflow: "hidden",
-                  marginTop: "8px",
-                  width: "150px",
-                }}
-              >
-                {TOP_NAV_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.key}
-                    onClick={() => handleTopNavClick(opt.key)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#fff",
-                      fontSize: "14px",
-                      cursor: "pointer",
-                      padding: "12px 16px",
-                      width: "100%",
-                      textAlign: "left",
-                      transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.target as HTMLElement).style.background = "#333";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.target as HTMLElement).style.background = "none";
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
+              <>
+                {/* Overlay to close menu when clicking outside */}
+                <div
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    zIndex: 999, // less than dropdown
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    right: 0,
+                    background: "#222",
+                    borderRadius: "8px",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+                    overflow: "hidden",
+                    marginTop: "8px",
+                    width: "150px",
+                    zIndex: 1000,
+                  }}
+                >
+                  {TOP_NAV_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.key}
+                      onClick={() => handleTopNavClick(opt.key)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#fff",
+                        fontSize: "14px",
+                        cursor: "pointer",
+                        padding: "12px 16px",
+                        width: "100%",
+                        textAlign: "left",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.target as HTMLElement).style.background = "#333";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.target as HTMLElement).style.background = "none";
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         ) : (

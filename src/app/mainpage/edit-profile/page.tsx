@@ -14,7 +14,14 @@ export default function EditProfile() {
   const { data: session } = useSession();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [fields, setFields] = useState({
+  const [fields, setFields] = useState<{
+    name: string;
+    age: string;
+    bio: string;
+    interests: string[];
+    customInterest: string;
+    birthdate: string;
+  }>({
     name: "",
     age: "",
     bio: "",
@@ -139,7 +146,7 @@ export default function EditProfile() {
         } else if (item instanceof File) {
           const formData = new FormData();
           formData.append("photo", item);
-          formData.append("userEmail", session.user.email);
+          formData.append("userEmail", session?.user?.email ?? "");
           const response = await fetch("/api/upload-photo", {
             method: "POST",
             body: formData,
@@ -179,7 +186,22 @@ export default function EditProfile() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', paddingBottom: 40 }}>
+    <div className="edit-profile-root" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', paddingBottom: 40 }}>
+      <style jsx>{`
+        .edit-profile-root > form {
+          width: 100%;
+          max-width: 540px;
+          margin: 0 auto;
+          padding: 0 12px;
+        }
+        @media (min-width: 900px) {
+          .edit-profile-root > form {
+            width: 80vw;
+            max-width: 1100px;
+            padding: 0 0;
+          }
+        }
+      `}</style>
       {/* Top Navigation Bar */}
       <div style={{
         position: 'fixed',
@@ -223,7 +245,7 @@ export default function EditProfile() {
       </div>
       {/* Add a spacer div after the nav bar to push content down */}
       <div style={{ height: 64 }} />
-      <form id="edit-profile-form" onSubmit={handleSubmit} style={{ maxWidth: 540, margin: '0 auto', padding: '0 12px' }}>
+      <form id="edit-profile-form" onSubmit={handleSubmit}>
         {/* Photos Section */}
         <div style={{ background: '#fff', borderRadius: 28, boxShadow: '0 4px 24px rgba(80,0,120,0.07)', padding: 28, margin: '32px 0 24px 0' }}>
           <div style={{ display: 'flex', alignItems: 'center', fontWeight: 700, fontSize: 20, color: '#a259f7', marginBottom: 18, gap: 10 }}><FaCamera /> Photos</div>
@@ -399,4 +421,4 @@ function SortablePhoto({ id, url, onDelete, isProfile, isDragging = false, dragg
       )}
     </div>
   );
-} 
+}

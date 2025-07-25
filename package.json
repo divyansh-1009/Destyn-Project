@@ -34,6 +34,7 @@
     "@types/node": "^20.19.9",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
     "tailwindcss": "^4",
     "typescript": "^5.8.3"
   }

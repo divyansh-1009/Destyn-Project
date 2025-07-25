@@ -142,36 +142,40 @@ export default function Profile() {
           onClick={() => router.push('/mainpage/edit-profile')}
           style={{
             width: '100%',
-            background: 'linear-gradient(90deg, #a259f7 0%, #f857a6 100%)',
+            background: 'linear-gradient(90deg, #0070f3 0%, #00c6ff 100%)',
             color: '#fff',
             border: 'none',
             borderRadius: 20,
-            padding: '22px 0',
+            padding: '18px 0', // Changed from 22px to 18px to match logout button
             fontSize: 22,
             fontWeight: 700,
-            boxShadow: '0 4px 24px rgba(162,89,247,0.10)',
+            boxShadow: '0 4px 24px rgba(0,112,243,0.10)',
             cursor: 'pointer',
             letterSpacing: 0.5,
             marginTop: 0,
             marginBottom: 16,
+            display: 'flex', // Ensure vertical alignment matches logout button
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
           }}
         >
-          Edit Full Profile
+          Edit Profile
         </button>
-        
+
         {/* Logout Button */}
         <button
           onClick={handleLogout}
           style={{
             width: '100%',
-            background: '#ffffff',
-            color: '#f44336',
-            border: '2px solid #f44336',
+            background: 'linear-gradient(90deg, #f44336 0%, #ff8a65 100%)',
+            color: '#fff',
+            border: 'none',
             borderRadius: 20,
             padding: '18px 0',
             fontSize: 20,
             fontWeight: 700,
-            boxShadow: '0 4px 16px rgba(244,67,54,0.06)',
+            boxShadow: '0 4px 16px rgba(244,67,54,0.10)',
             cursor: 'pointer',
             letterSpacing: 0.5,
             marginBottom: 32,
@@ -182,10 +186,10 @@ export default function Profile() {
             transition: 'all 0.3s ease'
           }}
           onMouseOver={(e) => {
-            e.currentTarget.style.background = '#fff5f5';
+            e.currentTarget.style.background = 'linear-gradient(90deg, #ff5252 0%, #ffb199 100%)';
           }}
           onMouseOut={(e) => {
-            e.currentTarget.style.background = '#ffffff';
+            e.currentTarget.style.background = 'linear-gradient(90deg, #f44336 0%, #ff8a65 100%)';
           }}
         >
           <FiLogOut size={20} /> Log Out

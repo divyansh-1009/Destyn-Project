@@ -237,14 +237,14 @@ export default function People() {
         <div style={{ fontSize: "20px", marginBottom: 8 }}>
           No more people to show
         </div>
-        <div style={{ fontSize: "14px", color: "#666", marginBottom: 20 }}>
+        <div style={{ fontSize: "14px", marginBottom: 20 }}>
           Check back later for new profiles
         </div>
         <button
           onClick={fetchUsers}
           style={{
             padding: "12px 24px",
-            background: "#667eea",
+            background: "#23232b", 
             color: "#fff",
             border: "none",
             borderRadius: 8,
@@ -253,10 +253,10 @@ export default function People() {
             transition: "background 0.2s"
           }}
           onMouseEnter={(e) =>
-            ((e.target as HTMLButtonElement).style.background = "#5a6fd8")
+            ((e.target as HTMLButtonElement).style.background = "#353542")
           }
           onMouseLeave={(e) =>
-            ((e.target as HTMLButtonElement).style.background = "#667eea")
+            ((e.target as HTMLButtonElement).style.background = "#23232b")
           }
         >
           🔄 Refresh
