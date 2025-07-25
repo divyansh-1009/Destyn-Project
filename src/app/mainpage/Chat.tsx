@@ -8,6 +8,7 @@ import ReportModal from "./ReportModal";
 
 // Add import for useCallback
 import { useCallback } from "react";
+import { useRouter } from "next/navigation";
 
 const SOCKET_URL = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -24,9 +25,12 @@ export default function Chat() {
   const [isMobile, setIsMobile] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<any | null>(null); // For selected user's profile
   const [currentUserProfile, setCurrentUserProfile] = useState<any | null>(null); // For current user's profile
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const sentMessagesRef = useRef<Set<string>>(new Set());
+
+  const router = useRouter();
 
   // Check screen size for responsive layout
   useEffect(() => {
@@ -378,6 +382,13 @@ export default function Chat() {
                         fontWeight: "600",
                         fontSize: "16px",
                         marginBottom: 4,
+                        cursor: "pointer",
+                        textDecoration: "underline",
+                      }}
+                      onClick={() => {
+                        if (selected?.email) {
+                          router.push(`/mainpage/user-profile?email=${encodeURIComponent(selected.email)}`);
+                        }
                       }}
                     >
                       💬 {selected.name}
@@ -385,197 +396,7 @@ export default function Chat() {
                     {/* Removed email display from here */}
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  {isMobile ? (
-                    // On mobile, use dropdown menu for actions
-                    <div style={{ position: "relative" }}>
-                      <button
-                        style={{
-                          background: "#333",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: 6,
-                          padding: "6px 12px",
-                          fontWeight: 600,
-                          cursor: "pointer",
-                        }}
-                        onClick={(e) => {
-                          const menu = e.currentTarget.nextElementSibling as HTMLDivElement;
-                          menu.style.display =
-                            menu.style.display === "block" ? "none" : "block";
-                        }}
-                      >
-                        •••
-                      </button>
-                      <div
-                        style={{
-                          display: "none",
-                          position: "absolute",
-                          right: 0,
-                          top: "100%",
-                          background: "#1a1a1a",
-                          border: "1px solid #333",
-                          borderRadius: 6,
-                          zIndex: 10,
-                          width: 120,
-                        }}
-                      >
-                        {isBlocked ? (
-                          <button
-                            style={{
-                              width: "100%",
-                              padding: "10px",
-                              background: "transparent",
-                              color: "#0070f3",
-                              border: "none",
-                              borderBottom: "1px solid #333",
-                              textAlign: "left",
-                              cursor: "pointer",
-                            }}
-                            onClick={async () => {
-                              const menu = document.querySelector(
-                                "[style*='display: block']"
-                              ) as HTMLDivElement;
-                              if (menu) menu.style.display = "none";
-
-                              if (!session?.user?.email || !selected?.email) return;
-                              await fetch("/api/block-user", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                  blockerEmail: session.user.email,
-                                  blockedEmail: selected.email,
-                                  action: "unblock",
-                                }),
-                              });
-                              // Refetch blocked users after unblocking
-                              const res = await fetch(
-                                `/api/block-user?blockerEmail=${encodeURIComponent(
-                                  session.user.email
-                                )}`
-                              );
-                              const data = await res.json();
-                              setBlockedUsers(data.blocked || []);
-                            }}
-                          >
-                            Unblock
-                          </button>
-                        ) : (
-                          <button
-                            style={{
-                              width: "100%",
-                              padding: "10px",
-                              background: "transparent",
-                              color: "#f44336",
-                              border: "none",
-                              borderBottom: "1px solid #333",
-                              textAlign: "left",
-                              cursor: "pointer",
-                            }}
-                            onClick={() => {
-                              const menu = document.querySelector(
-                                "[style*='display: block']"
-                              ) as HTMLDivElement;
-                              if (menu) menu.style.display = "none";
-                              setBlockModalOpen(true);
-                            }}
-                          >
-                            Block
-                          </button>
-                        )}
-                        <button
-                          style={{
-                            width: "100%",
-                            padding: "10px",
-                            background: "transparent",
-                            color: "#ff9800",
-                            border: "none",
-                            textAlign: "left",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => {
-                            const menu = document.querySelector(
-                              "[style*='display: block']"
-                            ) as HTMLDivElement;
-                            if (menu) menu.style.display = "none";
-                            setReportModalOpen(true);
-                          }}
-                        >
-                          Report
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    // Desktop layout - show buttons side by side
-                    <>
-                      {isBlocked ? (
-                        <button
-                          style={{
-                            background: "#0070f3",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: 6,
-                            padding: "6px 12px",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
-                          onClick={async () => {
-                            setBlockModalOpen(false);
-                            if (!session?.user?.email || !selected?.email) return;
-                            await fetch("/api/block-user", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                blockerEmail: session.user.email,
-                                blockedEmail: selected.email,
-                                action: "unblock",
-                              }),
-                            });
-                            // Refetch blocked users after unblocking
-                            const res = await fetch(
-                              `/api/block-user?blockerEmail=${encodeURIComponent(
-                                session.user.email
-                              )}`
-                            );
-                            const data = await res.json();
-                            setBlockedUsers(data.blocked || []);
-                          }}
-                        >
-                          Unblock
-                        </button>
-                      ) : (
-                        <button
-                          style={{
-                            background: "#f44336",
-                            color: "#fff",
-                            border: "none",
-                            borderRadius: 6,
-                            padding: "6px 12px",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
-                          onClick={() => setBlockModalOpen(true)}
-                        >
-                          Block
-                        </button>
-                      )}
-                      <button
-                        style={{
-                          background: "#ff9800",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: 6,
-                          padding: "6px 12px",
-                          fontWeight: 600,
-                          cursor: "pointer",
-                        }}
-                        onClick={() => setReportModalOpen(true)}
-                      >
-                        Report
-                      </button>
-                    </>
-                  )}
-                </div>
+                {/* Remove block/report buttons from here and dropdown */}
               </div>
 
               <div

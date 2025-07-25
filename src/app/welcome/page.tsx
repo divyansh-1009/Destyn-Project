@@ -553,21 +553,91 @@ export default function WelcomePage() {
 										<option value="">Select your gender</option>
 										<option value="male">Male</option>
 										<option value="female">Female</option>
-										<option value="other">Other</option>
 									</select>
 								</div>
 								<div style={{ width: '100%', maxWidth: 340 }}>
 									<label style={{ fontWeight: 600, display: 'block', marginBottom: 6, color: '#222' }}>Interested in dating</label>
 									<select value={preference} onChange={e => { setPreference(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], preference: e.target.value } })); }} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, color: '#111', background: '#fff' }}>
 										<option value="">Select preference</option>
-										<option value="male">Men</option>
-										<option value="female">Women</option>
-										<option value="any">Anyone</option>
+										<option value="male">Male</option>
+										<option value="female">Female</option>
 									</select>
 								</div>
 								<div style={{ width: '100%', maxWidth: 340 }}>
 									<label style={{ fontWeight: 600, display: 'block', marginBottom: 6, color: '#222' }}>Date of Birth</label>
-									<input type="date" value={dob} onChange={e => { setDob(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], dob: e.target.value } })); }} style={{ width: '100%', padding: 10, borderRadius: 8, border: '1px solid #ccc', fontSize: 15, color: '#111', background: '#fff' }} />
+									<input 
+										type="date" 
+										value={dob} 
+										onChange={e => { 
+											const inputDate = e.target.value;
+                                            const selectedDate = new Date(inputDate);
+                                            const today = new Date();
+                                            
+                                            // First validate that the date actually exists (handles cases like Feb 31)
+                                            if (isNaN(selectedDate.getTime())) {
+                                                // Invalid date format - don't update state
+                                                setAnswers(prev => ({ 
+                                                    ...prev, 
+                                                    [currentQ.id]: { 
+                                                        ...prev[currentQ.id], 
+                                                        dob: inputDate,
+                                                        isValidDob: false,
+                                                        errorMessage: "Invalid date selected" 
+                                                    } 
+                                                }));
+                                                setDob(inputDate);
+                                                return;
+                                            }
+                                            
+                                            // Calculate age
+                                            let age = today.getFullYear() - selectedDate.getFullYear();
+                                            const monthDiff = today.getMonth() - selectedDate.getMonth();
+                                            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
+                                                age--;
+                                            }
+                                            
+                                            setDob(inputDate);
+                                            
+                                            // Validate age range
+                                            if (age >= 18 && age <= 100) {
+                                                setAnswers(prev => ({ 
+                                                    ...prev, 
+                                                    [currentQ.id]: { 
+                                                        ...prev[currentQ.id], 
+                                                        dob: inputDate,
+                                                        isValidDob: true,
+                                                        errorMessage: null
+                                                    } 
+                                                }));
+                                            } else {
+                                                setAnswers(prev => ({ 
+                                                    ...prev, 
+                                                    [currentQ.id]: { 
+                                                        ...prev[currentQ.id], 
+                                                        dob: inputDate,
+                                                        isValidDob: false,
+                                                        errorMessage: age < 18 ? "You must be at least 18 years old" : "Age cannot exceed 100 years" 
+                                                    } 
+                                                }));
+                                            }
+										}} 
+										style={{ 
+											width: '100%', 
+											padding: 10, 
+											borderRadius: 8, 
+											border: `1px solid ${answers[currentQ.id]?.isValidDob === false ? '#ff4d4d' : '#ccc'}`, 
+											fontSize: 15, 
+											color: '#111', 
+											background: '#fff' 
+										}} 
+										max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+										min={new Date(new Date().setFullYear(new Date().getFullYear() - 100)).toISOString().split('T')[0]}
+									/>
+									{answers[currentQ.id]?.isValidDob === false && (
+										<p style={{ color: '#ff4d4d', fontSize: 12, marginTop: 4 }}>
+											Incorrect Age
+										</p>
+									)}
 								</div>
 							</div>
 						)}
