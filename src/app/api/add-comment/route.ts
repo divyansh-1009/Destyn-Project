@@ -3,9 +3,9 @@ import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
 export async function POST(req: NextRequest) {
-  const { confessionId, comment, userEmail, userName } = await req.json();
+  const { confessionId, comment, userEmail } = await req.json();
 
-  if (!confessionId || !comment || !userEmail || !userName) {
+  if (!confessionId || !comment || !userEmail) {
     return NextResponse.json(
       { error: "Missing required fields" },
       { status: 400 }
@@ -16,6 +16,10 @@ export async function POST(req: NextRequest) {
   const db = client.db("datingapp");
 
   try {
+    // Fetch user's name from the database
+    const userResponse = await db.collection("responses").findOne({ email: userEmail });
+    const userName = userResponse?.name || userEmail; // Fallback to email if name not found
+
     const commentDoc = {
       id: new Date().getTime().toString(), // Simple unique ID
       comment,

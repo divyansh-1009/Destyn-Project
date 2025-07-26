@@ -274,7 +274,6 @@ export default function Feed() {
           confessionId,
           comment: commentText.trim(),
           userEmail: session.user.email,
-          userName: session.user.name || session.user.email,
         }),
       });
 
@@ -300,10 +299,11 @@ export default function Feed() {
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
-    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    const diffInMinutes = (now.getTime() - date.getTime()) / (1000 * 60);
+    const diffInHours = diffInMinutes / 60;
 
     if (diffInHours < 1) {
-      return "Just now";
+      return `${Math.floor(diffInMinutes)}m ago`;
     } else if (diffInHours < 24) {
       return `${Math.floor(diffInHours)}h ago`;
     } else {
