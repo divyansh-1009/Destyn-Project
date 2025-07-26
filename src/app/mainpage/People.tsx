@@ -335,8 +335,12 @@ export default function People() {
 
   // Helper: get interests as array
   function getInterests(user: User) {
+    // First check for the updated interests field, then fall back to q2
     if (user.answers && user.answers.interests) {
       return user.answers.interests.split(",").map((i) => i.trim()).filter(Boolean);
+    }
+    if (user.answers && user.answers.q2) {
+      return user.answers.q2.split(",").map((i) => i.trim()).filter(Boolean);
     }
     return [];
   }
@@ -349,7 +353,9 @@ export default function People() {
 
   // Helper: get about (if present)
   function getAbout(user: User) {
-    if (user.answers && user.answers.about) return user.answers.about;
+    // First check for the updated bio field, then fall back to q1
+    if (user.answers && user.answers.bio) return user.answers.bio;
+    if (user.answers && user.answers.q1) return user.answers.q1;
     return undefined;
   }
 

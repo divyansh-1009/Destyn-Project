@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
+import { cleanName } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
     // Use the "datingapp" database
     const db = client.db("datingapp");
     await db.collection("responses").insertOne({
-      name,
+      name: cleanName(name),
       email,
       answers,
       createdAt: new Date(),

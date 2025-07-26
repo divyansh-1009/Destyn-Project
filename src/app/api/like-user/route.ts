@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       const user1AnswersArr = Object.values(user1?.answers || {});
       const user2AnswersArr = Object.values(user2?.answers || {});
       // Compute similarities (only answers)
-      const getSimilarities = (arr1 = [], arr2 = []) => arr1.filter((item) => arr2.includes(item));
+      const getSimilarities = (arr1: any[] = [], arr2: any[] = []) => arr1.filter((item) => arr2.includes(item));
       const similarAnswers = getSimilarities(user1AnswersArr, user2AnswersArr);
       // Store in matches collection (store both email orders for easy lookup)
       const matchDoc = {

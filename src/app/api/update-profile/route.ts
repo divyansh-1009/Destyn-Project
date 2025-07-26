@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
+import { cleanName } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,7 +32,12 @@ export async function POST(req: NextRequest) {
     const setObj: { [key: string]: any } = { updatedAt: new Date().toISOString() };
     for (const field of allowedFields) {
       if (body[field] !== undefined) {
-        setObj[field] = body[field];
+        // Clean the name if it's the name field
+        if (field === "name" && body[field]) {
+          setObj[field] = cleanName(body[field]);
+        } else {
+          setObj[field] = body[field];
+        }
       }
     }
 

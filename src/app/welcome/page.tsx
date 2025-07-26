@@ -399,7 +399,7 @@ export default function WelcomePage() {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					email: session.user.email,
-					name: session.user.name,
+					name: session.user.name, // The name will be cleaned in the API route
 					answers: updatedAnswers,
 				}),
 			});

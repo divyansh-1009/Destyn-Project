@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       );
     }
     const updated = await db.collection("confessions").findOne({ _id: confessionObjectId });
-    return NextResponse.json({ success: true, reactions: updated.reactions || {} });
+    return NextResponse.json({ success: true, reactions: updated?.reactions || {} });
   } catch (error) {
     console.error("Error updating reaction:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

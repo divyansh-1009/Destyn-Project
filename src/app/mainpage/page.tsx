@@ -14,6 +14,7 @@ import FAQs from "./FAQs";
 import Feedback from "./Feedback";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import TypographyWhiteImage from "../../assets/Typography_white.png";
 
 const NAV_OPTIONS = [
   { key: "feed", label: "Feed" },
@@ -259,8 +260,16 @@ export default function MainPage() {
             gap: "12px",
           }}
         >
-          {/* Replace with your actual logo */}
-          <span style={{ fontWeight: "700", fontSize: "20px" }}>Destyn</span>
+          {/* Logo */}
+          <img
+            src={TypographyWhiteImage.src}
+            alt="Destyn Logo"
+            style={{
+              height: "32px",
+              width: "auto",
+              objectFit: "contain"
+            }}
+          />
         </div>
 
         {/* Different navigation options for top navbar */}
