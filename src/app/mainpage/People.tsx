@@ -4,12 +4,15 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import React from "react";
 
+// First, update the User type to ensure bio and interests are properly typed
 type User = {
   name: string;
   email: string;
   answers: Record<string, string>;
   profilePhoto?: string;
   profilePhotos?: string[];
+  bio?: string;
+  interests?: string[] | string;
 };
 
 const QUESTION_LABELS = {
@@ -79,7 +82,6 @@ export default function People() {
     setLoading(true);
     
     try {
-      // Fetch users and liked users simultaneously
       const [usersResponse, likedResponse] = await Promise.all([
         fetch("/api/get-users", {
           method: "POST",
@@ -97,17 +99,15 @@ export default function People() {
       const likedData = await likedResponse.json();
       
       const allUsers = usersData.users || [];
-      const liked = likedData.liked || [];
-      
-      // Get the current user's email
-      const currentUserEmail = session.user.email.toLowerCase();
+      const likedUsers = likedData.likedUsers || [];
       
       // Filter out already liked users and current user
       let availableUsers = allUsers.filter((user: User) => 
-        !liked.includes(user.email) && user.email !== session.user.email
+        !likedUsers.includes(user.email) && user.email !== session.user.email
       );
       
       // Apply batch-based filtering rules
+      const currentUserEmail = session.user.email.toLowerCase();
       if (currentUserEmail.startsWith("b22") && currentUserEmail.endsWith("@iitj.ac.in")) {
         availableUsers = availableUsers.filter((user: User) => {
           const email = user.email.toLowerCase();
@@ -150,7 +150,7 @@ export default function People() {
       availableUsers = shuffleArray(availableUsers);
       
       setUsers(availableUsers);
-      setLikedUsers(liked);
+      setLikedUsers(likedData.likedUsers || []);
       setCurrent(0);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -333,32 +333,6 @@ export default function People() {
     return age;
   }
 
-  // Helper: get interests as array
-  function getInterests(user: User) {
-    // First check for the updated interests field, then fall back to q2
-    if (user.answers && user.answers.interests) {
-      return user.answers.interests.split(",").map((i) => i.trim()).filter(Boolean);
-    }
-    if (user.answers && user.answers.q2) {
-      return user.answers.q2.split(",").map((i) => i.trim()).filter(Boolean);
-    }
-    return [];
-  }
-
-  // Helper: get school (if present)
-  function getSchool(user: User) {
-    if (user.answers && user.answers.school) return user.answers.school;
-    return undefined;
-  }
-
-  // Helper: get about (if present)
-  function getAbout(user: User) {
-    // First check for the updated bio field, then fall back to q1
-    if (user.answers && user.answers.bio) return user.answers.bio;
-    if (user.answers && user.answers.q1) return user.answers.q1;
-    return undefined;
-  }
-
   // Helper: get major (if present)
   function getMajor(user: User) {
     if (user.answers && user.answers.major) return user.answers.major;
@@ -369,6 +343,50 @@ export default function People() {
   function getDistance(user: User) {
     if (user.answers && user.answers.distance) return user.answers.distance;
     return undefined;
+  }
+
+  // Helper: get school (if present)
+  function getSchool(user: User) {
+    if (user.answers && user.answers.school) return user.answers.school;
+    return undefined;
+  }
+
+  // Helper: get about (if present) 
+  function getAbout(user: User) {
+    console.log('Getting about for user:', user.email);
+    console.log('User data:', {
+      bio: user.bio,
+      answers: user.answers,
+      q1: user.answers?.q1
+    });
+    
+    if (user.bio) {
+      console.log('Using bio:', user.bio);
+      return user.bio;
+    }
+    if (user.answers?.q1) {
+      console.log('Using answers.q1:', user.answers.q1);
+      return user.answers.q1;
+    }
+    console.log('No bio or q1 found');
+    return undefined;
+  }
+
+  // Helper: get interests as array
+  function getInterests(user: User) {
+    // First check for interests field directly 
+    if (user.interests) {
+      return Array.isArray(user.interests)
+        ? user.interests
+        : user.interests.split(",").map((i) => i.trim()).filter(Boolean);
+    }
+    // Finally fall back to answers.q2
+    if (user.answers?.q2) {
+      return Array.isArray(user.answers.q2)
+        ? user.answers.q2
+        : user.answers.q2.split(",").map((i) => i.trim()).filter(Boolean);
+    }
+    return [];
   }
 
   return (

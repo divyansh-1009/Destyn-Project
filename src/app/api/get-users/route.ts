@@ -6,17 +6,32 @@ export async function POST(req: NextRequest) {
   const client = await clientPromise;
   const db = client.db("datingapp");
 
-  // Get the current user's preference
+  // Get the current user's preference from answers.q3
   const currentUser = await db.collection("responses").findOne({ email });
-  if (!currentUser || !currentUser.preference) {
+  if (!currentUser || !currentUser.answers?.q3?.preference) {
     return NextResponse.json({ users: [] });
   }
 
-  // Exclude the current user and filter by gender matching preference
+  // Get the user's preference from q3
+  const userPreference = currentUser.answers.q3.preference;
+
+  // Exclude the current user and filter by gender matching preference from q3
   const users = await db
     .collection("responses")
-    .find({ email: { $ne: email }, gender: currentUser.preference })
-    .project({ name: 1, email: 1, answers: 1, profilePhoto: 1, _id: 0 })
+    .find({ 
+      email: { $ne: email },
+      "answers.q3.gender": userPreference // Match users whose gender matches the current user's preference
+    })
+    .project({ 
+      name: 1, 
+      email: 1, 
+      answers: 1, 
+      profilePhoto: 1,
+      bio: 1,
+      interests: 1,
+      _id: 0 
+    })
     .toArray();
+
   return NextResponse.json({ users });
 }
