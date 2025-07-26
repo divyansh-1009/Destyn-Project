@@ -2,22 +2,34 @@
 
 import { signIn, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import TypographyImage from "../assets/Typography.png"; // Import the image
 
 export default function LoginPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (status !== "loading") {
       setHasInitialized(true);
     }
   }, [status]);
+
+  useEffect(() => {
+    // Check for authentication error in URL parameters
+    const error = searchParams.get('error');
+    if (error === 'AccessDenied') {
+      setError('Access denied. Only users with authorized college email domains can access this application.');
+    } else if (error) {
+      setError('Authentication failed. Please try again.');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (status === "authenticated" && session?.user?.email) {
@@ -46,11 +58,13 @@ export default function LoginPage() {
 
   const handleSignIn = async () => {
     setIsSigningIn(true);
+    setError(null); // Clear any previous errors
     try {
       await signIn("google");
     } catch (error) {
       console.error("Sign in error:", error);
       setIsSigningIn(false);
+      setError('Authentication failed. Please try again.');
     }
   };
 
@@ -168,6 +182,16 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500 bg-opacity-20 border border-red-400 rounded-lg max-w-md">
+            <p className="text-red-200 text-sm font-medium">{error}</p>
+            <p className="text-red-300 text-xs mt-2">
+              Allowed domains: iitj.ac.in, nlujodhpur.ac.in, mbm.ac.in, nift.ac.in, jietjodhpur.ac.in, aiimsjodhpur.edu.in
+            </p>
+          </div>
+        )}
 
         <button
           className="mt-30 md:mt-0 group flex items-center justify-center w-full max-w-xs px-6 py-4 mt-8 bg-gradient-to-r from-teal-400 to-cyan-500 text-white font-bold rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-cyan-300"

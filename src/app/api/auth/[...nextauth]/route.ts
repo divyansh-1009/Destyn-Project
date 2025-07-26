@@ -22,6 +22,16 @@ declare module "next-auth" {
   }
 }
 
+// Allowed email domains
+const ALLOWED_DOMAINS = [
+  'iitj.ac.in',
+  'nlujodhpur.ac.in',
+  'mbm.ac.in',
+  'nift.ac.in',
+  'jietjodhpur.ac.in',
+  'aiimsjodhpur.edu.in'
+];
+
 const handler = NextAuth({
   adapter: MongoDBAdapter(clientPromise),
   secret: process.env.NEXTAUTH_SECRET,
@@ -32,6 +42,24 @@ const handler = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Check if the user's email domain is allowed
+      if (user.email) {
+        const emailDomain = user.email.split('@')[1]?.toLowerCase();
+        
+        if (!emailDomain || !ALLOWED_DOMAINS.includes(emailDomain)) {
+          console.log(`Access denied for email: ${user.email} (domain: ${emailDomain})`);
+          return '/?error=AccessDenied'; // Redirect with error parameter
+        }
+        
+        console.log(`Access granted for email: ${user.email} (domain: ${emailDomain})`);
+        return true; // Allow access
+      }
+      
+      // If no email, deny access
+      console.log('Access denied: No email provided');
+      return '/?error=AccessDenied'; // Redirect with error parameter
+    },
     async session({ session, user }) {
       if (session.user) {
         session.user.id = user.id;
@@ -49,6 +77,10 @@ const handler = NextAuth({
       else if (new URL(url).origin === baseUrl) return url;
       return baseUrl;
     },
+  },
+  pages: {
+    signIn: '/', // Redirect to home page if sign in fails
+    error: '/', // Redirect to home page on error
   },
   debug: process.env.NODE_ENV === 'development',
 });

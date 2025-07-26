@@ -2,9 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  experimental: {
-    serverComponentsExternalPackages: ['sharp']
-  },
+  serverExternalPackages: ['sharp'],
   // Configure for larger file uploads
   async headers() {
     return [
