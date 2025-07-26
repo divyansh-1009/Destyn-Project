@@ -19,6 +19,36 @@ export function middleware(request: NextRequest) {
     
     return response
   }
+
+  // Handle access denied redirects and clear cookies
+  if (request.nextUrl.pathname === '/' && request.nextUrl.searchParams.get('error') === 'AccessDenied') {
+    const response = NextResponse.next()
+    
+    // Clear authentication cookies when access is denied
+    const cookiesToClear = [
+      'next-auth.session-token',
+      'next-auth.csrf-token', 
+      'next-auth.callback-url',
+      '__Secure-next-auth.session-token',
+      '__Secure-next-auth.csrf-token',
+      '__Secure-next-auth.callback-url',
+      'auth-token',
+      'user-session'
+    ]
+
+    cookiesToClear.forEach(cookieName => {
+      response.cookies.set(cookieName, '', {
+        expires: new Date(0),
+        path: '/',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+      })
+    })
+
+    console.log('Middleware: Cleared cookies due to access denial')
+    return response
+  }
   
   return NextResponse.next()
 }
@@ -26,6 +56,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/api/upload-photo',
-    '/api/:path*'
+    '/api/:path*',
+    '/'
   ],
 } 

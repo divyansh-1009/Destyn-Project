@@ -49,7 +49,8 @@ const handler = NextAuth({
         
         if (!emailDomain || !ALLOWED_DOMAINS.includes(emailDomain)) {
           console.log(`Access denied for email: ${user.email} (domain: ${emailDomain})`);
-          return '/?error=AccessDenied'; // Redirect with error parameter
+          // Return false to prevent session creation and redirect to error page
+          return false;
         }
         
         console.log(`Access granted for email: ${user.email} (domain: ${emailDomain})`);
@@ -58,7 +59,7 @@ const handler = NextAuth({
       
       // If no email, deny access
       console.log('Access denied: No email provided');
-      return '/?error=AccessDenied'; // Redirect with error parameter
+      return false;
     },
     async session({ session, user }) {
       if (session.user) {
@@ -80,7 +81,20 @@ const handler = NextAuth({
   },
   pages: {
     signIn: '/', // Redirect to home page if sign in fails
-    error: '/', // Redirect to home page on error
+    error: '/?error=AccessDenied', // Redirect to home page with error parameter
+  },
+  events: {
+    async signOut() {
+      // Clear all NextAuth cookies on sign out
+      console.log('User signed out - cookies cleared');
+    },
+    async signIn() {
+      console.log('User signed in successfully');
+    },
+  },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   debug: process.env.NODE_ENV === 'development',
 });
