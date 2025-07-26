@@ -62,7 +62,8 @@ const handler = NextAuth({
       return false;
     },
     async session({ session, user }) {
-      if (session.user) {
+      // Add null checks to prevent session errors
+      if (session.user && user) {
         session.user.id = user.id;
       }
       return session;
@@ -93,7 +94,7 @@ const handler = NextAuth({
     },
   },
   session: {
-    strategy: "jwt",
+    strategy: "database",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   debug: process.env.NODE_ENV === 'development',

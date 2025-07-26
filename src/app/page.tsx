@@ -52,6 +52,7 @@ function LoginPageContent() {
   const [hasInitialized, setHasInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isClearingSession, setIsClearingSession] = useState(false);
+  const [hasProcessedError, setHasProcessedError] = useState(false);
 
   useEffect(() => {
     if (status !== "loading") {
@@ -62,8 +63,9 @@ function LoginPageContent() {
   useEffect(() => {
     // Check for authentication error in URL parameters
     const error = searchParams.get('error');
-    if (error === 'AccessDenied') {
+    if (error === 'AccessDenied' && !hasProcessedError) {
       setError('Access denied. Only users with authorized college email domains can access this application.');
+      setHasProcessedError(true);
       // Clear all authentication cookies when access is denied
       setIsClearingSession(true);
       clearAuthCookies().then(() => {
@@ -71,8 +73,9 @@ function LoginPageContent() {
         signOut({ redirect: false });
         setIsClearingSession(false);
       });
-    } else if (error) {
+    } else if (error && !hasProcessedError) {
       setError('Authentication failed. Please try again.');
+      setHasProcessedError(true);
       // Clear cookies for any authentication error
       setIsClearingSession(true);
       clearAuthCookies().then(() => {
@@ -80,7 +83,7 @@ function LoginPageContent() {
         setIsClearingSession(false);
       });
     }
-  }, [searchParams]);
+  }, [searchParams, hasProcessedError]);
 
   useEffect(() => {
     // Only redirect if user is authenticated AND has a valid session AND not clearing session
@@ -108,6 +111,10 @@ function LoginPageContent() {
         return;
       }
       
+      // Clear any previous errors since we have a valid session
+      setError(null);
+      setHasProcessedError(false);
+      
       setIsRedirecting(true); // Set redirecting state immediately
       // Check if user exists in DB
       fetch("/api/user-exists", {
@@ -134,18 +141,21 @@ function LoginPageContent() {
   const handleSignIn = async () => {
     setIsSigningIn(true);
     setError(null); // Clear any previous errors
+    setHasProcessedError(false); // Reset error processing flag
     
-    // Force clear any existing session before signing in
-    try {
-      await fetch('/api/force-signout', { method: 'POST' });
-      await signOut({ redirect: false });
-      await clearAuthCookies();
-      
-      // Add a small delay to ensure cookies are cleared
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-    } catch (error) {
-      console.error('Error clearing session:', error);
+    // Only clear session if there was a previous error
+    if (error) {
+      try {
+        await fetch('/api/force-signout', { method: 'POST' });
+        await signOut({ redirect: false });
+        await clearAuthCookies();
+        
+        // Add a small delay to ensure cookies are cleared
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+      } catch (error) {
+        console.error('Error clearing session:', error);
+      }
     }
     
     try {
