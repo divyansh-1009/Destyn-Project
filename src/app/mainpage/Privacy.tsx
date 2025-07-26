@@ -691,9 +691,391 @@ export default function Privacy({ onClose }: { onClose: () => void }) {
                         </ul>
                       </td>
                     </tr>
+                    <tr>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <p style={{ fontWeight: "600", color: "#e0e0e0", marginBottom: "8px" }}>To keep you and other members safe on our service and across Destyn, including:</p>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Preventing, detecting, and fighting against violations of our Terms, fraud, and other illegal or unauthorized activities</li>
+                          <li style={{ marginBottom: "6px" }}>Developing and improving tools to prevent, detect, and fight against violations of our Terms, fraud, and other illegal or unauthorized activities</li>
+                          <li style={{ marginBottom: "6px" }}>Preventing recurrences, notably by preventing individuals who violate our Terms from creating a new account</li>
+                          <li style={{ marginBottom: "6px" }}>Letting individuals who submit a report know what we've done about it</li>
+                          <li>Verifying your identity</li>
+                        </ul>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Performance of our contract with you</li>
+                          <li style={{ marginBottom: "6px" }}>Our legitimate interest: It is in our legitimate interest and that of our members to keep them safe</li>
+                          <li style={{ marginBottom: "6px" }}>Protection of your vital interests and that of other members</li>
+                          <li style={{ marginBottom: "6px" }}>Compliance with legal obligations that apply to us, such as taking down illicit content</li>
+                          <li>Your consent (where sensitive data or other type of data that requires consent is processed)</li>
+                        </ul>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Account Data</li>
+                          <li style={{ marginBottom: "6px" }}>Profile Data</li>
+                          <li style={{ marginBottom: "6px" }}>Content</li>
+                          <li style={{ marginBottom: "6px" }}>Purchase Data</li>
+                          <li style={{ marginBottom: "6px" }}>Third Party Data</li>
+                          <li style={{ marginBottom: "6px" }}>Customer Support Data</li>
+                          <li style={{ marginBottom: "6px" }}>Usage Data</li>
+                          <li style={{ marginBottom: "6px" }}>Technical Data</li>
+                          <li style={{ marginBottom: "6px" }}>Face Geometry Data</li>
+                          <li>ID Data</li>
+                        </ul>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <p style={{ fontWeight: "600", color: "#e0e0e0", marginBottom: "8px" }}>To comply with applicable law, establish, exercise, and defend legal claims & rights, including:</p>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Preserving data to comply – and evidence compliance – with applicable law</li>
+                          <li style={{ marginBottom: "6px" }}>Supporting investigations and defending potential or ongoing litigation, regulatory action or dispute</li>
+                          <li style={{ marginBottom: "6px" }}>Responding to lawful requests from law enforcement, courts, regulators, and other third parties</li>
+                          <li style={{ marginBottom: "6px" }}>Reporting illegal or infringing content to law enforcement, government or other authorities</li>
+                          <li style={{ marginBottom: "6px" }}>Establishing, exercising, or defending ongoing or threatened claims</li>
+                          <li>Sharing data with law enforcement or partners to combat abusive or illegal behavior</li>
+                        </ul>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li style={{ marginBottom: "6px" }}>Our legitimate interest: It is in our legitimate interest to comply with applicable law and protect ourselves, our members and others, including as part of investigations, legal proceedings, and other disputes</li>
+                          <li style={{ marginBottom: "6px" }}>Protection of your vital interests and that of other members</li>
+                          <li>Compliance with legal obligations applying to us, such as responding to law enforcement requests for information</li>
+                        </ul>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <ul style={{ paddingLeft: "20px", margin: "0" }}>
+                          <li>None</li>
+                        </ul>
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
+            </section>
+
+            <div style={{ 
+              width: "100%", 
+              height: "4px",
+              background: "linear-gradient(90deg, #667eea, #764ba2)",
+              borderRadius: "2px",
+              margin: "24px 0 12px 0"
+            }} />
+
+            <section>
+              <h2
+                style={{
+                  fontSize: "22px",
+                  fontWeight: "600",
+                  marginBottom: "16px",
+                  color: "#fff",
+                }}
+              >
+                5. How We Share Data
+              </h2>
+              
+              <p>
+                Since our goal is to help you make meaningful connections, some of your information is of course visible to other members on the service.
+              </p>
+            </section>
+
+            <div style={{ 
+              width: "100%", 
+              height: "4px",
+              background: "linear-gradient(90deg, #667eea, #764ba2)",
+              borderRadius: "2px",
+              margin: "24px 0 12px 0"
+            }} />
+
+            <section>
+              <h2
+                style={{
+                  fontSize: "22px",
+                  fontWeight: "600",
+                  marginBottom: "16px",
+                  color: "#fff",
+                }}
+              >
+                6. Your Rights
+              </h2>
+              
+              <p>
+                We want you to be in control of your data, so we want to remind you of the following rights, options and tools available to you.
+              </p>
+
+              <div style={{ marginTop: "32px", overflowX: "auto" }}>
+                <table style={{ 
+                  width: "100%", 
+                  borderCollapse: "collapse", 
+                  fontSize: "14px",
+                  color: "#ccc",
+                  border: "1px solid #333"
+                }}>
+                  <thead>
+                    <tr>
+                      <th style={{ 
+                        padding: "16px", 
+                        textAlign: "left", 
+                        borderBottom: "2px solid #333",
+                        background: "rgba(102, 126, 234, 0.1)",
+                        color: "#fff",
+                        width: "50%"
+                      }}>
+                        YOUR RIGHTS
+                      </th>
+                      <th style={{ 
+                        padding: "16px", 
+                        textAlign: "left", 
+                        borderBottom: "2px solid #333",
+                        background: "rgba(102, 126, 234, 0.1)",
+                        color: "#fff",
+                        width: "50%"
+                      }}>
+                        HOW TO EXERCISE IT
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <p style={{ fontWeight: "600", color: "#e0e0e0", marginBottom: "8px" }}>Access, Portability or To Know</p>
+                        <p style={{ margin: "0" }}>Right to be informed of the personal data we process about you and/or ask for a copy of it</p>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <p style={{ margin: "0" }}>You can access and review some data directly by logging into your account.</p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <p style={{ fontWeight: "600", color: "#e0e0e0", marginBottom: "8px" }}>Rectification or Correction</p>
+                        <p style={{ margin: "0" }}>Right to amend or update your data where it's inaccurate or incomplete</p>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <p style={{ margin: "0" }}>You can update your data directly within the service by simply updating your profile.</p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <p style={{ fontWeight: "600", color: "#e0e0e0", marginBottom: "8px" }}>Deletion or Erasure</p>
+                        <p style={{ margin: "0" }}>Right to delete personal data</p>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top"
+                      }}>
+                        <p style={{ margin: "0" }}>You can delete some of the data you provided us directly within the service. You can also close your account as explained, and we'll delete your data as laid out in this Privacy Policy.</p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <p style={{ fontWeight: "600", color: "#e0e0e0", marginBottom: "8px" }}>Objection (Opt-out) or Restriction</p>
+                        <p style={{ margin: "0" }}>Right to object to us processing personal data or to request that we temporarily or permanently stop processing personal data</p>
+                      </td>
+                      <td style={{ 
+                        padding: "16px", 
+                        borderBottom: "1px solid #333",
+                        verticalAlign: "top",
+                        background: "rgba(0, 0, 0, 0.2)"
+                      }}>
+                        <p style={{ margin: "0" }}>You can directly opt-out from certain of your data processing in your account settings. you wish to object to or restrict the data.</p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p style={{ marginTop: "24px" }}>
+                For your protection and the protection of all of our members, we may ask you for information to verify your identity or authority to act on behalf of a member before we can answer the above requests. We wouldn't want someone else to get in control of your data!
+              </p>
+
+              <p style={{ marginTop: "16px" }}>
+                Keep in mind, we may reject requests, including if we are unable to authenticate you, if the request is unlawful or invalid, or if it may infringe on trade secrets or intellectual property or the privacy or other rights of someone else. If you wish to receive information relating to another member, such as a copy of any messages you received from them, the other member will have to make a request themselves.
+              </p>
+            </section>
+
+            <div style={{ 
+              width: "100%", 
+              height: "4px",
+              background: "linear-gradient(90deg, #667eea, #764ba2)",
+              borderRadius: "2px",
+              margin: "24px 0 12px 0"
+            }} />
+
+            <section>
+              <h2
+                style={{
+                  fontSize: "22px",
+                  fontWeight: "600",
+                  marginBottom: "16px",
+                  color: "#fff",
+                }}
+              >
+                7. How Long Do We Retain Your Data
+              </h2>
+              
+              <p>
+                We want the connections you make through our service to last forever, but we keep your personal data only as long as necessary for legitimate business reasons (as laid out in Section 4) and as permitted by applicable law.
+              </p>
+
+              <p style={{ marginTop: "16px" }}>
+                If you decide to stop using our service, you can close your account, and your profile will no longer be visible to other members.
+              </p>
+
+              <p style={{ marginTop: "16px" }}>
+                Following account closure, we delete your data as laid out below:
+              </p>
+
+              <ol style={{ paddingLeft: "20px", marginTop: "16px" }}>
+                <li style={{ marginBottom: "12px" }}>
+                  To protect the safety and security of our members, we implement a safety retention window of three months following account closure or up to two years following an account ban. During this period, we keep your data to investigate unlawful or harmful conduct. The retention of data during this safety retention window is based on our legitimate interest as well as that of potential third-party victims.
+                </li>
+                <li style={{ marginBottom: "12px" }}>
+                  We maintain limited data on the basis of our legitimate interest: we keep customer care records and supporting data as well as imprecise location of download/purchase for five years in support of our safety efforts, to support our customer care decisions, enforce our rights and enable us to defend ourselves in the event of a claim, profile data for one year in anticipation of potential litigation, for the establishment, exercise or defence of legal claims, and data necessary to prevent members who were banned from opening a new account for as long as necessary to ensure the safety and vital interests of our members.
+                </li>
+                <li style={{ marginBottom: "12px" }}>
+                  Finally, we maintain data based on our legitimate interest where there is an outstanding or potential issue, claim or dispute requiring us to keep data, in particular if we receive a valid legal subpoena or request asking us to preserve data (in which case we would need to keep the data to comply with our legal obligations) or if data would otherwise be necessary as part of legal proceedings.
+                </li>
+              </ol>
+
+              <p style={{ marginTop: "16px" }}>
+                Where and as legally permitted, we may maintain and use data that, by itself, cannot identify or be attributed specifically to you for the purposes described in this Privacy Policy, including to improve our service and create new features, technologies, and services and keep Destyn services safe.
+              </p>
+            </section>
+
+            <div style={{ 
+              width: "100%", 
+              height: "4px",
+              background: "linear-gradient(90deg, #667eea, #764ba2)",
+              borderRadius: "2px",
+              margin: "24px 0 12px 0"
+            }} />
+
+            <section>
+              <h2
+                style={{
+                  fontSize: "22px",
+                  fontWeight: "600",
+                  marginBottom: "16px",
+                  color: "#fff",
+                }}
+              >
+                8. Children's Privacy
+              </h2>
+              
+              <p>
+                Our service is restricted to individuals who are 18 years of age or older. We do not permit individuals under the age of 18 on our platform. If you suspect that a member is under the age of 18, please use the reporting mechanism available on the service.
+              </p>
+            </section>
+
+            <div style={{ 
+              width: "100%", 
+              height: "4px",
+              background: "linear-gradient(90deg, #667eea, #764ba2)",
+              borderRadius: "2px",
+              margin: "24px 0 12px 0"
+            }} />
+
+            <section>
+              <h2
+                style={{
+                  fontSize: "22px",
+                  fontWeight: "600",
+                  marginBottom: "16px",
+                  color: "#fff",
+                }}
+              >
+                9. Privacy Policy Changes
+              </h2>
+              
+              <p>
+                This policy may change over time. We're always looking for new and innovative ways to help you build meaningful connections and strive to make sure explanations of our data practices remain up-to-date. We will notify you before material changes take effect so that you have time to review the changes.
+              </p>
+            </section>
+
+            <div style={{ 
+              width: "100%", 
+              height: "4px",
+              background: "linear-gradient(90deg, #667eea, #764ba2)",
+              borderRadius: "2px",
+              margin: "24px 0 12px 0"
+            }} />
+
+            <section>
+              <h2
+                style={{
+                  fontSize: "22px",
+                  fontWeight: "600",
+                  marginBottom: "16px",
+                  color: "#fff",
+                }}
+              >
+                10. How to Contact Us
+              </h2>
+              
+              <p>
+                If you have questions about this Privacy Policy, contact us through feedback option.
+              </p>
+
+              <p style={{ marginTop: "24px", fontStyle: "italic", color: "#e0e0e0" }}>
+                Well, that's it! You've made it to the end of our Privacy Policy. We hope it was as engaging and clear as we tried to make it. Now, let's get out there and start making some memories! We're excited to be on this journey with you.
+              </p>
             </section>
 
           <div
@@ -705,7 +1087,7 @@ export default function Privacy({ onClose }: { onClose: () => void }) {
             }}
           >
             <p style={{ margin: "0", color: "#888", fontSize: "14px" }}>
-              © 2023-2025 Destyn. All rights reserved.
+              © 2025 Destyn. All rights reserved.
             </p>
           </div>
         </div>

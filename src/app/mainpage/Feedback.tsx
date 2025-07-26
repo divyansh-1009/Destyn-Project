@@ -4,7 +4,7 @@ interface FeedbackProps {
   onClose: () => void;
 }
 
-const INSTAGRAM_URL = "https://instagram.com/your_instagram_handle"; // Replace with your actual handle
+const INSTAGRAM_URL = "https://instagram.com/destyn_official"; 
 
 const Feedback: React.FC<FeedbackProps> = ({ onClose }) => {
   return (
