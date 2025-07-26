@@ -169,8 +169,9 @@ export default function Chat() {
       });
   }, [selected, session?.user?.email]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim() || !session?.user?.email || !selected) return;
+    
     const room = [session.user.email, selected.email].sort().join("--");
     const msg = {
       room,
@@ -180,12 +181,29 @@ export default function Chat() {
       timestamp: new Date().toISOString(),
     };
 
-    // Mark this message as sent to prevent duplicates
-    sentMessagesRef.current.add(`${msg.timestamp}-${msg.message}`);
+    try {
+      // First store the message in MongoDB
+      const response = await fetch("/api/save-message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(msg),
+      });
 
-    socketRef.current?.emit("chat message", msg);
-    setMessages((prev) => [...prev, msg]);
-    setInput("");
+      if (!response.ok) {
+        throw new Error("Failed to save message");
+      }
+
+      // Mark this message as sent to prevent duplicates
+      sentMessagesRef.current.add(`${msg.timestamp}-${msg.message}`);
+
+      // Then emit through socket
+      socketRef.current?.emit("chat message", msg);
+      setMessages((prev) => [...prev, msg]);
+      setInput("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Failed to send message. Please try again.");
+    }
   };
 
   // Function to go back to matches list on mobile
