@@ -327,9 +327,9 @@ export default function WelcomePage() {
 			return;
 		}
 
-		// Validate file size (max 5MB)
-		if (file.size > 5 * 1024 * 1024) {
-			alert("File size must be less than 5MB");
+		// Validate file size (max 10MB)
+		if (file.size > 10 * 1024 * 1024) {
+			alert("File size must be less than 10MB");
 			return;
 		}
 
@@ -473,7 +473,7 @@ export default function WelcomePage() {
 			>
 				<div
 					style={{
-						background: "#fff",
+						background: "#111", // Changed from "#fff" to black
 						borderRadius: "20px",
 						padding: "40px 30px",
 						maxWidth: "600px",
@@ -495,7 +495,7 @@ export default function WelcomePage() {
 						style={{
 							fontSize: "28px",
 							fontWeight: "700",
-							color: "#333",
+							color: "#fff", // Changed from "#333" to white
 							marginBottom: "16px",
 						}}
 					>
@@ -504,7 +504,7 @@ export default function WelcomePage() {
 					<p
 						style={{
 							fontSize: "16px",
-							color: "#666",
+							color: "#999", // Changed from "#666" to lighter grey
 							lineHeight: "1.6",
 							marginBottom: "30px",
 						}}
@@ -515,7 +515,7 @@ export default function WelcomePage() {
 						onClick={goToMainPage}
 						style={{
 							padding: "16px 40px",
-							background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
+							background: "#667eea", // Changed to solid color to match other buttons
 							color: "#fff",
 							border: "none",
 							borderRadius: "10px",
@@ -554,7 +554,7 @@ export default function WelcomePage() {
 		>
 			<div
 				style={{
-					background: "#fff",
+					background: "#111", // Changed from "#fff" to dark
 					borderRadius: "20px",
 					padding: "20px",
 					maxWidth: "600px",
@@ -567,7 +567,7 @@ export default function WelcomePage() {
 				{/* Progress Bar */}
 				<div
 					style={{
-						background: "#f0f0f0",
+						background: "#222", // Changed from "#f0f0f0" to darker
 						height: "12px",
 						borderRadius: "10px",
 						marginTop: "5px",
@@ -591,8 +591,8 @@ export default function WelcomePage() {
 				<div
 					style={{
 						textAlign: "center",
-						color: "#666",
-						fontSize: "12px", // Reduced from 14px
+						color: "#999", // Changed from "#666" to lighter
+						fontSize: "12px",
 						marginBottom: "20px",
 					}}
 				>
@@ -604,7 +604,7 @@ export default function WelcomePage() {
 					style={{
 						fontSize: isMobile ? "18px" : "20px",
 						fontWeight: "600",
-						color: "#333",
+						color: "#fff", // Changed from "#333" to white
 						marginBottom: "30px",
 						textAlign: "center",
 						lineHeight: "1.4",
@@ -700,7 +700,7 @@ export default function WelcomePage() {
 						>
 							Upload a clear photo of yourself. This will help others recognize you.
 							<br />
-							Supported formats: JPG, PNG (Max 5MB)
+							Supported formats: JPG, PNG (Max 10MB)
 						</p>
 					</div>
 				) : (
@@ -717,7 +717,16 @@ export default function WelcomePage() {
 								value={bio}
 								onChange={e => { setBio(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: e.target.value })); }}
 								placeholder="Tell us about yourself..."
-								style={{ width: '100%', minHeight: 80, borderRadius: 8, border: '1px solid #ccc', padding: 10, fontSize: 14, color: '#111' }}
+								style={{ 
+									width: '100%', 
+									minHeight: 80, 
+									borderRadius: 8, 
+									border: '1px solid #333', // Darker border
+									padding: 10, 
+									fontSize: 14, 
+									color: '#fff', // White text
+									background: '#1a1a1a', // Dark background
+								}}
 							/>
 						)}
 						{currentQ.isInterests && (
@@ -763,7 +772,14 @@ export default function WelcomePage() {
 								width: '100%'
 							}}>
 								<div style={{ width: '100%', maxWidth: 340 }}>
-									<label style={{ fontWeight: 600, display: 'block', marginBottom: 6, color: '#222' }}>Gender</label>
+									<label style={{ 
+										fontWeight: 600, 
+										display: 'block', 
+										marginBottom: 6, 
+										color: '#fff'  // Changed from '#222' to white
+									}}>
+										Gender
+									</label>
 									<select 
 										value={gender} 
 										onChange={e => { setGender(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], gender: e.target.value } })); }} 
@@ -771,10 +787,10 @@ export default function WelcomePage() {
 											width: '100%', 
 											padding: '10px', 
 											borderRadius: '8px', 
-											border: '1px solid #ccc', 
+											border: '1px solid #333', // Darker border
 											fontSize: window.innerWidth < 768 ? '14px' : '15px', 
-											color: '#111', 
-											background: '#fff',
+											color: '#fff', // White text
+											background: '#1a1a1a', // Dark background
 											appearance: 'auto' // Ensures proper display on mobile
 										}}
 									>
@@ -784,7 +800,14 @@ export default function WelcomePage() {
 									</select>
 								</div>
 								<div style={{ width: '100%', maxWidth: 340 }}>
-									<label style={{ fontWeight: 600, display: 'block', marginBottom: 6, color: '#222' }}>Interested in dating</label>
+									<label style={{ 
+										fontWeight: 600, 
+										display: 'block', 
+										marginBottom: 6, 
+										color: '#fff'  // Changed from '#222' to white
+									}}>
+										Interested in dating
+									</label>
 									<select 
 										value={preference} 
 										onChange={e => { setPreference(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], preference: e.target.value } })); }} 
@@ -792,10 +815,10 @@ export default function WelcomePage() {
 											width: '100%', 
 											padding: '10px', 
 											borderRadius: '8px', 
-											border: '1px solid #ccc', 
+											border: '1px solid #333', // Darker border
 											fontSize: window.innerWidth < 768 ? '14px' : '15px', 
-											color: '#111', 
-											background: '#fff',
+											color: '#fff', // White text
+											background: '#1a1a1a', // Dark background
 											appearance: 'auto' // Ensures proper display on mobile
 										}}
 									>
@@ -805,7 +828,14 @@ export default function WelcomePage() {
 									</select>
 								</div>
 								<div style={{ width: '100%', maxWidth: 340 }}>
-									<label style={{ fontWeight: 600, display: 'block', marginBottom: 6, color: '#222' }}>Date of Birth</label>
+									<label style={{ 
+										fontWeight: 600, 
+										display: 'block', 
+										marginBottom: 6, 
+										color: '#fff'  // Changed from '#222' to white
+									}}>
+										Date of Birth
+									</label>
 									<input 
 										type="date" 
 										value={dob} 
@@ -866,10 +896,10 @@ export default function WelcomePage() {
 											width: '100%', 
 											padding: 10, 
 											borderRadius: 8, 
-											border: `1px solid ${answers[currentQ.id]?.isValidDob === false ? '#ff4d4d' : '#ccc'}`, 
+											border: `1px solid ${answers[currentQ.id]?.isValidDob === false ? '#ff4d4d' : '#333'}`, // Darker border with error color
 											fontSize: 15, 
-											color: '#111', 
-											background: '#fff' 
+											color: '#fff', // White text
+											background: '#1a1a1a' // Dark background
 										}} 
 										max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
 										min={new Date(new Date().setFullYear(new Date().getFullYear() - 100)).toISOString().split('T')[0]}
@@ -888,16 +918,16 @@ export default function WelcomePage() {
 								style={{
 									display: "flex",
 									alignItems: "center",
-									padding: "10px 15px", // Reduced padding
-									border:
-										answers[currentQ.id] === opt
-											? "2px solid #667eea"
-											: "2px solid #e0e0e0",
-									borderRadius: "10px", // Slightly smaller border radius
+									padding: "10px 15px",
+									border: answers[currentQ.id] === opt
+										? "2px solid #667eea"
+										: "2px solid #333", // Changed from "#e0e0e0" to darker
+									borderRadius: "10px",
 									cursor: "pointer",
 									transition: "all 0.2s ease",
-									background:
-										answers[currentQ.id] === opt ? "#f8f9ff" : "#fff",
+									background: answers[currentQ.id] === opt 
+										? "rgba(102, 126, 234, 0.2)" // Semi-transparent highlight
+										: "#1a1a1a", // Dark background for options
 								}}
 							>
 								<input
@@ -907,14 +937,14 @@ export default function WelcomePage() {
 									checked={answers[currentQ.id] === opt}
 									onChange={() => handleChange(currentQ.id, opt)}
 									style={{
-										marginRight: "10px", // Reduced margin
-										transform: "scale(1.1)", // Slightly smaller input size
+										marginRight: "10px",
+										transform: "scale(1.1)",
 									}}
 								/>
 								<span
 									style={{
-										fontSize: "13px", // Reduced font size
-										color: "#333",
+										fontSize: "13px",
+										color: "#fff", // Changed from "#333" to white
 										lineHeight: "1.4",
 									}}
 								>
@@ -938,15 +968,14 @@ export default function WelcomePage() {
 						disabled={currentQuestion === 0}
 						style={{
 							padding: "12px 24px",
-							background:
-								currentQuestion === 0 ? "#e0e0e0" : "#f0f0f0",
-							color: currentQuestion === 0 ? "#999" : "#333",
+							background: "#667eea", // Changed to match Choose Photo button
+							color: "#fff",
 							border: "none",
 							borderRadius: "8px",
-							cursor:
-								currentQuestion === 0 ? "not-allowed" : "pointer",
-							fontSize: "14px", // Reduced from 16px
+							cursor: currentQuestion === 0 ? "not-allowed" : "pointer",
+							fontSize: "14px",
 							fontWeight: "500",
+							opacity: currentQuestion === 0 ? "0.5" : "1", // Use opacity for disabled state
 						}}
 					>
 						Previous
@@ -958,20 +987,14 @@ export default function WelcomePage() {
 							disabled={!canProceed || isSubmitting}
 							style={{
 								padding: "12px 32px",
-								background:
-									canProceed && !isSubmitting
-										? "#667eea"
-										: "#e0e0e0",
-								color:
-									canProceed && !isSubmitting ? "#fff" : "#999",
+								background: "#667eea", // Changed to match Choose Photo button
+								color: "#fff",
 								border: "none",
 								borderRadius: "8px",
-								cursor:
-									canProceed && !isSubmitting
-										? "pointer"
-										: "not-allowed",
-								fontSize: "14px", // Reduced from 16px
+								cursor: canProceed && !isSubmitting ? "pointer" : "not-allowed",
+								fontSize: "14px",
 								fontWeight: "600",
+								opacity: (!canProceed || isSubmitting) ? "0.5" : "1", // Use opacity for disabled state
 							}}
 						>
 							{isSubmitting ? "Submitting..." : "Complete Profile"}
@@ -982,13 +1005,14 @@ export default function WelcomePage() {
 							disabled={!canProceed}
 							style={{
 								padding: "12px 24px",
-								background: canProceed ? "#667eea" : "#e0e0e0",
-								color: canProceed ? "#fff" : "#999",
+								background: "#667eea", // Changed to match Choose Photo button
+								color: "#fff",
 								border: "none",
 								borderRadius: "8px",
 								cursor: canProceed ? "pointer" : "not-allowed",
-								fontSize: "16px",
+								fontSize: "14px", // Changed to match other buttons
 								fontWeight: "500",
+								opacity: !canProceed ? "0.5" : "1", // Use opacity for disabled state
 							}}
 						>
 							Next

@@ -421,18 +421,15 @@ function MainPageContent() {
                   textAlign: "center",
                   width: "100%",
                   marginBottom: "14px", // 60% of previous 24px
-                  boxShadow: active === opt.key ? "0 2px 8px rgba(0,112,243,0.08)" : "none",
                 }}
                 onMouseEnter={(e) => {
                   if (active !== opt.key) {
                     (e.target as HTMLElement).style.color = "#fff";
-                    (e.target as HTMLElement).style.background = "#222";
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (active !== opt.key) {
                     (e.target as HTMLElement).style.color = "#bbb";
-                    (e.target as HTMLElement).style.background = "none";
                   }
                 }}
               >

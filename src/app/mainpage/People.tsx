@@ -99,12 +99,17 @@ export default function People() {
       const likedData = await likedResponse.json();
       
       const allUsers = usersData.users || [];
-      const likedUsers = likedData.likedUsers || [];
+      const likedUsers = likedData.liked || [];
+      
+      console.log('Debug - All users:', allUsers.length);
+      console.log('Debug - Liked users:', likedUsers);
       
       // Filter out already liked users and current user
       let availableUsers = allUsers.filter((user: User) => 
         !likedUsers.includes(user.email) && user.email !== session.user.email
       );
+      
+      console.log('Debug - Available users after filtering:', availableUsers.length);
       
       // Apply batch-based filtering rules
       const currentUserEmail = session.user.email.toLowerCase();
@@ -150,7 +155,7 @@ export default function People() {
       availableUsers = shuffleArray(availableUsers);
       
       setUsers(availableUsers);
-      setLikedUsers(likedData.likedUsers || []);
+      setLikedUsers(likedData.liked || []);
       setCurrent(0);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -259,7 +264,7 @@ export default function People() {
             ((e.target as HTMLButtonElement).style.background = "#23232b")
           }
         >
-          🔄 Refresh
+           Refresh
         </button>
       </div>
     );
@@ -281,9 +286,14 @@ export default function People() {
       // Update liked users list locally
       setLikedUsers(prev => [...prev, user.email]);
       
+      console.log('Debug - Liked user:', user.email);
+      console.log('Debug - Updated liked users list:', [...likedUsers, user.email]);
+      
       // Remove this user from the list
       const newUsers = users.filter((_, index) => index !== current);
       setUsers(newUsers);
+      
+      console.log('Debug - Users after removal:', newUsers.length);
       
       // Adjust current index if needed
       if (current >= newUsers.length && newUsers.length > 0) {
@@ -583,24 +593,25 @@ export default function People() {
           onClick={fetchUsers}
           style={{
             padding: "8px 16px",
-            background: "transparent",
-            color: "#666",
+            background: "#fff", // Changed from transparent to white
+            color: "#333", // Changed from #666 to darker for better contrast
             border: "1px solid #333",
             borderRadius: 6,
-            fontSize: 12,
+            fontSize: "14px", // Increased from 12px
+            fontWeight: "600", // Added bold
             cursor: "pointer",
             transition: "all 0.2s"
           }}
           onMouseEnter={(e) => {
-            (e.target as HTMLButtonElement).style.color = "#fff";
-            (e.target as HTMLButtonElement).style.borderColor = "#666";
+            (e.target as HTMLButtonElement).style.background = "#f0f0f0"; // Hover effect
+            (e.target as HTMLButtonElement).style.color = "#111";
           }}
           onMouseLeave={(e) => {
-            (e.target as HTMLButtonElement).style.color = "#666";
-            (e.target as HTMLButtonElement).style.borderColor = "#333";
+            (e.target as HTMLButtonElement).style.background = "#fff";
+            (e.target as HTMLButtonElement).style.color = "#333";
           }}
         >
-          🔄 Check for new people
+           Check for new people
         </button>
       </div>
     </div>

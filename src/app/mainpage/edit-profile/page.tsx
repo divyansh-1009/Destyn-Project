@@ -87,6 +87,19 @@ export default function EditProfile() {
     const files = Array.from(e.target.files || []);
     const allowed = Math.max(0, 6 - photos.length);
     const newFiles = files.slice(0, allowed);
+    
+    // Validate file sizes
+    for (const file of newFiles) {
+      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        alert('File size must be less than 10MB');
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        alert('Please select only image files');
+        return;
+      }
+    }
+    
     if (photos.length + newFiles.length > 6) {
       alert('You can upload up to 6 photos.');
     }

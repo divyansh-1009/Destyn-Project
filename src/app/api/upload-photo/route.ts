@@ -15,6 +15,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      return NextResponse.json(
+        { error: "Only image files are allowed" },
+        { status: 400 }
+      );
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        { error: "File size must be less than 10MB" },
+        { status: 400 }
+      );
+    }
+
+    // Validate file size minimum (at least 1KB)
+    const minSize = 1024; // 1KB in bytes
+    if (file.size < minSize) {
+      return NextResponse.json(
+        { error: "File size must be at least 1KB" },
+        { status: 400 }
+      );
+    }
+
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);

@@ -24,6 +24,17 @@ function ReactionButton({
 }) {
   const [anim, setAnim] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
       <button
@@ -37,15 +48,15 @@ function ReactionButton({
           background: hasReacted ? "#0070f3" : "#222",
           color: hasReacted ? "#fff" : "#ccc",
           border: hasReacted ? "2px solid #0070f3" : "1px solid #333",
-          borderRadius: 20,
-          padding: "6px 14px",
-          fontSize: 18,
+          borderRadius: isMobile ? 16 : 20,
+          padding: isMobile ? "4px 10px" : "6px 14px",
+          fontSize: isMobile ? 14 : 18,
           fontWeight: 600,
           cursor: disabled ? "not-allowed" : "pointer",
           boxShadow: hasReacted ? "0 2px 8px #0070f355" : "none",
           display: "flex",
           alignItems: "center",
-          gap: 6,
+          gap: isMobile ? 4 : 6,
           transition: "all 0.2s",
           outline: hasReacted ? "2px solid #0070f3" : undefined,
           transform: anim ? "scale(1.2)" : "scale(1)",
@@ -57,7 +68,7 @@ function ReactionButton({
         onFocus={() => setShowTooltip(true)}
         onBlur={() => setShowTooltip(false)}
       >
-        {emoji} <span style={{ fontSize: 14, marginLeft: 4 }}>{count > 0 ? count : ""}</span>
+        {emoji} <span style={{ fontSize: isMobile ? 11 : 14, marginLeft: isMobile ? 2 : 4 }}>{count > 0 ? count : ""}</span>
       </button>
       {showTooltip && users.length > 0 && (
         <div
