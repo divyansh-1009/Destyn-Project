@@ -14,7 +14,8 @@ const SOCKET_URL = typeof window !== "undefined" ? window.location.origin : "";
 
 export default function Chat() {
   const { data: session } = useSession();
-  const [matches, setMatches] = useState<any[]>([]);
+  const [newMatches, setNewMatches] = useState<any[]>([]);
+  const [activeChats, setActiveChats] = useState<any[]>([]);
   const [selected, setSelected] = useState<any | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
@@ -26,6 +27,7 @@ export default function Chat() {
   const [selectedProfile, setSelectedProfile] = useState<any | null>(null); // For selected user's profile
   const [currentUserProfile, setCurrentUserProfile] = useState<any | null>(null); // For current user's profile
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'new' | 'chats'>('new'); // Track which tab is active
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const sentMessagesRef = useRef<Set<string>>(new Set());
@@ -67,7 +69,8 @@ export default function Chat() {
     })
       .then((res) => res.json())
       .then((data) => {
-        setMatches(data.matches || []);
+        setNewMatches(data.newMatches || []);
+        setActiveChats(data.activeChats || []);
       });
   }, [session?.user?.email]);
 
@@ -200,6 +203,20 @@ export default function Chat() {
       socketRef.current?.emit("chat message", msg);
       setMessages((prev) => [...prev, msg]);
       setInput("");
+
+      // Refresh matches to update the categorization
+      setTimeout(() => {
+        fetch("/api/get-matches", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: session.user.email }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            setNewMatches(data.newMatches || []);
+            setActiveChats(data.activeChats || []);
+          });
+      }, 1000);
     } catch (error) {
       console.error("Error sending message:", error);
       alert("Failed to send message. Please try again.");
@@ -216,8 +233,15 @@ export default function Chat() {
     return arr1.filter((item) => arr2.includes(item));
   }, []);
 
-  // Remove fetching and computing similarities on chat open
-  // Instead, use the similarities from the selected match object
+  // Get the current list based on active tab
+  const getCurrentList = () => {
+    return activeTab === 'new' ? newMatches : activeChats;
+  };
+
+  // Get the title for the current tab
+  const getTabTitle = () => {
+    return activeTab === 'new' ? 'New Matches' : 'Chats';
+  };
 
   return (
     <div
@@ -260,15 +284,58 @@ export default function Chat() {
               💬 Matches
             </h3>
           </div>
+
+          {/* Tab Navigation */}
+          <div
+            style={{
+              display: "flex",
+              borderBottom: "1px solid #333",
+              background: "#0a0a0a",
+            }}
+          >
+            <button
+              onClick={() => setActiveTab('new')}
+              style={{
+                flex: 1,
+                padding: "12px 16px",
+                background: activeTab === 'new' ? "#0070f3" : "transparent",
+                color: activeTab === 'new' ? "#fff" : "#666",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "600",
+                transition: "all 0.2s",
+              }}
+            >
+              New Matches ({newMatches.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('chats')}
+              style={{
+                flex: 1,
+                padding: "12px 16px",
+                background: activeTab === 'chats' ? "#0070f3" : "transparent",
+                color: activeTab === 'chats' ? "#fff" : "#666",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "600",
+                transition: "all 0.2s",
+              }}
+            >
+              Chats ({activeChats.length})
+            </button>
+          </div>
+
           <div
             style={{
               padding: 12,
               flex: 1,
               overflowY: "auto",
-              maxHeight: isMobile ? "calc(100vh - 240px)" : "auto",
+              maxHeight: isMobile ? "calc(100vh - 280px)" : "auto",
             }}
           >
-            {matches.length === 0 && (
+            {getCurrentList().length === 0 && (
               <div
                 style={{
                   padding: 20,
@@ -277,10 +344,13 @@ export default function Chat() {
                   fontSize: "14px",
                 }}
               >
-                No matches yet. Start liking people to see them here!
+                {activeTab === 'new' 
+                  ? "No new matches yet. Start liking people to see them here!"
+                  : "No active chats yet. Send a message to start chatting!"
+                }
               </div>
             )}
-            {matches.map((user: any, index: number) => (
+            {getCurrentList().map((user: any, index: number) => (
               <div
                 key={`${user.email}-${index}`}
                 style={{
@@ -345,7 +415,17 @@ export default function Chat() {
                   >
                     {user.name || user.email}
                   </div>
-                  {/* Removed email display from sidebar */}
+                  {activeTab === 'new' && (
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "#0070f3",
+                        marginTop: "2px",
+                      }}
+                    >
+                      ✨ New match!
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -411,10 +491,20 @@ export default function Chat() {
                     >
                       💬 {selected.name}
                     </div>
-                    {/* Removed email display from here */}
+                    {/* Show if this is a new match */}
+                    {newMatches.find(match => match.email === selected.email) && (
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#0070f3",
+                          fontWeight: "500",
+                        }}
+                      >
+                        ✨ New match - send a message to start chatting!
+                      </div>
+                    )}
                   </div>
                 </div>
-                {/* Remove block/report buttons from here and dropdown */}
               </div>
 
               <div
@@ -667,7 +757,8 @@ export default function Chat() {
                   });
                   alert("Report submitted. Thank you!");
                   // Instantly remove the match and clear chat
-                  setMatches((prev) => prev.filter((u) => u.email !== selected.email));
+                  setNewMatches((prev) => prev.filter((u) => u.email !== selected.email));
+                  setActiveChats((prev) => prev.filter((u) => u.email !== selected.email));
                   setSelected(null);
                 }}
                 type="user"

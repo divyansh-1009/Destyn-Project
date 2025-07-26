@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Feed from "./Feed";
 import People from "./People";
 import Chat from "./Chat";
@@ -31,7 +31,8 @@ const TOP_NAV_OPTIONS = [
   { key: "Feedback", label: "Feedback" },
 ];
 
-export default function MainPage() {
+// Component that uses useSearchParams
+function MainPageContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -480,5 +481,62 @@ export default function MainPage() {
         </nav>
       )}
     </div>
+  );
+}
+
+// Main component with Suspense wrapper
+export default function MainPage() {
+  return (
+    <Suspense fallback={
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          color: "#fff",
+        }}
+      >
+        <div
+          style={{
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              width: "60px",
+              height: "60px",
+              border: "4px solid rgba(255,255,255,0.3)",
+              borderTop: "4px solid #fff",
+              borderRadius: "50%",
+              margin: "0 auto 20px",
+              animation: "spin 1s linear infinite",
+            }}
+          ></div>
+          <p
+            style={{
+              fontSize: "16px",
+              fontWeight: "500",
+            }}
+          >
+            Loading...
+          </p>
+
+          <style jsx>{`
+            @keyframes spin {
+              0% {
+                transform: rotate(0deg);
+              }
+              100% {
+                transform: rotate(360deg);
+              }
+            }
+          `}</style>
+        </div>
+      </div>
+    }>
+      <MainPageContent />
+    </Suspense>
   );
 }

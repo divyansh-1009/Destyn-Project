@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import BlockConfirmModal from "../BlockConfirmModal";
 import ReportModal from "../ReportModal";
 import { useSession } from "next-auth/react";
 
-export default function UserProfilePage() {
+// Component that uses useSearchParams
+function UserProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session } = useSession();
@@ -225,5 +226,51 @@ export default function UserProfilePage() {
         targetEmail={email || ""}
       />
     </div>
+  );
+}
+
+// Main component with Suspense wrapper
+export default function UserProfilePage() {
+  return (
+    <Suspense fallback={
+      <div style={{ 
+        minHeight: "100vh", 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center", 
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", 
+        color: "#fff" 
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div
+            style={{
+              width: "60px",
+              height: "60px",
+              border: "4px solid rgba(255,255,255,0.3)",
+              borderTop: "4px solid #fff",
+              borderRadius: "50%",
+              margin: "0 auto 20px",
+              animation: "spin 1s linear infinite",
+            }}
+          ></div>
+          <p style={{ fontSize: "16px", fontWeight: "500" }}>
+            Loading profile...
+          </p>
+
+          <style jsx>{`
+            @keyframes spin {
+              0% {
+                transform: rotate(0deg);
+              }
+              100% {
+                transform: rotate(360deg);
+              }
+            }
+          `}</style>
+        </div>
+      </div>
+    }>
+      <UserProfileContent />
+    </Suspense>
   );
 } 
