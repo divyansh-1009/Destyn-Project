@@ -107,6 +107,7 @@ interface Confession {
     userEmail: string;
     userName: string;
     createdAt: string;
+    reactions?: string[]; // Array of user emails who reacted
   }>;
 }
 
@@ -202,6 +203,33 @@ export default function Feed() {
     });
     const data = await res.json();
     setConfessions((prev) => prev.map(c => c._id === confessionId ? { ...c, reactions: data.reactions } : c));
+  };
+
+  const handleCommentReaction = async (confessionId: string, commentId: string, hasReacted: boolean) => {
+    if (!session?.user?.email) return;
+    const res = await fetch("/api/add-comment-reaction", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        confessionId,
+        commentId,
+        userEmail: session.user.email,
+        action: hasReacted ? "remove" : "add",
+      }),
+    });
+    const data = await res.json();
+    setConfessions((prev) => prev.map(c => 
+      c._id === confessionId 
+        ? { 
+            ...c, 
+            comments: c.comments.map((comment: any) => 
+              comment.id === commentId 
+                ? { ...comment, reactions: data.reactions }
+                : comment
+            )
+          }
+        : c
+    ));
   };
 
   const handleSubmitConfession = async () => {
@@ -718,6 +746,56 @@ export default function Feed() {
                             >
                               {comment.comment}
                             </p>
+                            {/* Comment +1 Reaction */}
+                            <div style={{ 
+                              display: "flex", 
+                              justifyContent: "flex-end", 
+                              marginTop: 8,
+                              alignItems: "center",
+                              gap: 6
+                            }}>
+                              <button
+                                onClick={() => {
+                                  const hasReacted = comment.reactions?.includes(session?.user?.email || '');
+                                  handleCommentReaction(confession._id, comment.id, hasReacted || false);
+                                }}
+                                disabled={!session?.user?.email}
+                                style={{
+                                  background: comment.reactions?.includes(session?.user?.email || '') 
+                                    ? "rgba(102, 126, 234, 0.3)" 
+                                    : "rgba(255, 255, 255, 0.1)",
+                                  border: "1px solid rgba(102, 126, 234, 0.3)",
+                                  color: comment.reactions?.includes(session?.user?.email || '') 
+                                    ? "#667eea" 
+                                    : "#888",
+                                  borderRadius: "6px",
+                                  padding: "4px 8px",
+                                  fontSize: "11px",
+                                  cursor: session?.user?.email ? "pointer" : "not-allowed",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 4,
+                                  transition: "all 0.2s",
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (session?.user?.email) {
+                                    e.currentTarget.style.background = "rgba(102, 126, 234, 0.2)";
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (session?.user?.email) {
+                                    e.currentTarget.style.background = comment.reactions?.includes(session?.user?.email || '') 
+                                      ? "rgba(102, 126, 234, 0.3)" 
+                                      : "rgba(255, 255, 255, 0.1)";
+                                  }
+                                }}
+                              >
+                                <span style={{ fontSize: "12px" }}>➕</span>
+                                {(comment.reactions?.length || 0) > 0 && (
+                                  <span>{comment.reactions?.length}</span>
+                                )}
+                              </button>
+                            </div>
                           </div>
                         ))}
                       
