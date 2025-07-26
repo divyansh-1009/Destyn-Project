@@ -656,6 +656,7 @@ export default function Feed() {
                     >
                       {/* Show limited number of comments based on the current count */}
                       {confession.comments
+                        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) // Sort by newest first
                         .slice(0, commentCounts[confession._id] || 3) // Show only the tracked number (default 3)
                         .map((comment: any) => (
                           <div
