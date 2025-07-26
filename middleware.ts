@@ -5,12 +5,17 @@ export function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/api/upload-photo')) {
     const response = NextResponse.next()
     
-    // Set headers for larger file uploads
+    // Set headers for larger file uploads (10MB)
     response.headers.set('max-http-buffer-size', '10mb')
     response.headers.set('Content-Type', 'multipart/form-data')
     
     // Increase timeout for large file uploads
     response.headers.set('Connection', 'keep-alive')
+    response.headers.set('Transfer-Encoding', 'chunked')
+    
+    // Set additional headers for better upload handling
+    response.headers.set('X-Accel-Buffering', 'no')
+    response.headers.set('Cache-Control', 'no-cache')
     
     return response
   }

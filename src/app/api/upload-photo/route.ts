@@ -92,3 +92,12 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+// Configure the API route for larger file uploads
+export const config = {
+  api: {
+    bodyParser: false, // Disable body parser for file uploads
+    responseLimit: false, // Disable response size limit
+  },
+  maxDuration: 60, // Allow up to 60 seconds for upload processing
+};
