@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { v4 as uuidv4 } from 'uuid';
 
 const INTEREST_OPTIONS = [
 	"Music", "Movies", "Sports", "Travel", "Reading", "Cooking", "Dancing", "Gaming", "Art", "Photography", "Fitness", "Yoga", "Meditation", "Technology", "Science", "Nature", "Animals", "Fashion", "Shopping", "Writing", "Blogging", "Volunteering", "Gardening", "Hiking", "Cycling", "Swimming", "Board Games", "Podcasts", "DIY", "Cars"
@@ -181,7 +182,7 @@ export default function WelcomePage() {
 	const [answers, setAnswers] = useState<{ [key: string]: any }>({});
 	const [currentQuestion, setCurrentQuestion] = useState(0);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+	const [photos, setPhotos] = useState<{ id: string, preview: string, fileOrUrl: File | string }[]>([]);
 	const [uploading, setUploading] = useState(false);
 	const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 	const [gender, setGender] = useState("");
@@ -211,10 +212,17 @@ export default function WelcomePage() {
 
 			if (response.ok) {
 				const data = await response.json();
-				if (data.profilePhoto) {
-					setProfilePhoto(data.profilePhoto);
-					// Also update the answers state
-					setAnswers((prev) => ({ ...prev, q0: data.profilePhoto }));
+				// Handle both single profilePhoto and array of profilePhotos
+				const photoUrls = data.profilePhotos || (data.profilePhoto ? [data.profilePhoto] : []);
+				const loadedPhotos = photoUrls.map((url: string) => ({ 
+					id: uuidv4(), 
+					preview: url, 
+					fileOrUrl: url 
+				}));
+				setPhotos(loadedPhotos);
+				// Update the answers state with the first photo as profile photo
+				if (loadedPhotos.length > 0) {
+					setAnswers((prev) => ({ ...prev, q0: loadedPhotos[0].preview }));
 				}
 				if (data.bio) setBio(data.bio);
 				if (data.interests) setSelectedInterests(data.interests);
@@ -318,41 +326,57 @@ export default function WelcomePage() {
 	};
 
 	const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-		const file = event.target.files?.[0];
-		if (!file || !session?.user?.email) return;
+		const files = Array.from(event.target.files || []);
+		if (!files.length || !session?.user?.email) return;
 
-		// Validate file type
-		if (!file.type.startsWith("image/")) {
-			alert("Please select an image file");
-			return;
+		// Validate file types and sizes
+		for (const file of files) {
+			if (!file.type.startsWith("image/")) {
+				alert("Please select only image files");
+				return;
+			}
+			if (file.size > 10 * 1024 * 1024) {
+				alert("File size must be less than 10MB");
+				return;
+			}
 		}
 
-		// Validate file size (max 10MB)
-		if (file.size > 10 * 1024 * 1024) {
-			alert("File size must be less than 10MB");
+		// Check if adding these files would exceed the limit
+		if (photos.length + files.length > 6) {
+			alert('You can upload up to 6 photos.');
 			return;
 		}
 
 		setUploading(true);
 
 		try {
-			const formData = new FormData();
-			formData.append("photo", file);
-			formData.append("userEmail", session.user.email);
+			// Upload each file and add to photos array
+			for (const file of files) {
+				const formData = new FormData();
+				formData.append("photo", file);
+				formData.append("userEmail", session.user.email);
 
-			const response = await fetch("/api/upload-photo", {
-				method: "POST",
-				body: formData,
-			});
+				const response = await fetch("/api/upload-photo", {
+					method: "POST",
+					body: formData,
+				});
 
-			if (response.ok) {
-				const data = await response.json();
-				setProfilePhoto(data.photoUrl);
-				// Mark this question as answered
-				setAnswers((prev) => ({ ...prev, q0: data.photoUrl }));
-			} else {
-				const error = await response.json();
-				alert(`Upload failed: ${error.error}`);
+				if (response.ok) {
+					const data = await response.json();
+					const newPhoto = { 
+						id: uuidv4(), 
+						preview: data.photoUrl, 
+						fileOrUrl: data.photoUrl 
+					};
+					setPhotos(prev => [...prev, newPhoto]);
+					// Update answers with the first photo as profile photo
+					if (photos.length === 0) {
+						setAnswers((prev) => ({ ...prev, q0: data.photoUrl }));
+					}
+				} else {
+					const error = await response.json();
+					alert(`Upload failed: ${error.error}`);
+				}
 			}
 		} catch (error) {
 			console.error("Error uploading photo:", error);
@@ -362,28 +386,41 @@ export default function WelcomePage() {
 		}
 	};
 
-	const handleDeletePhoto = async () => {
-		if (!profilePhoto || !session?.user?.email) return;
+	const handleDeletePhoto = async (id: string) => {
+		const photoToDelete = photos.find(photo => photo.id === id);
+		if (!photoToDelete || !session?.user?.email) return;
 
-		try {
-			const response = await fetch("/api/delete-photo", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					email: session.user.email,
-					photoUrl: profilePhoto
-				}),
-			});
+		// If it's an existing photo URL (not a new file), delete from Cloudinary
+		if (typeof photoToDelete.fileOrUrl === 'string' && photoToDelete.fileOrUrl.startsWith('http')) {
+			try {
+				const response = await fetch("/api/delete-photo", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						email: session.user.email,
+						photoUrl: photoToDelete.fileOrUrl
+					}),
+				});
 
-			if (response.ok) {
-				setProfilePhoto(null);
-				// Remove from answers
-				setAnswers((prev) => ({ ...prev, q0: null }));
-			} else {
-				console.error("Failed to delete photo from Cloudinary");
+				if (!response.ok) {
+					console.error("Failed to delete photo from Cloudinary");
+				}
+			} catch (error) {
+				console.error("Error deleting photo:", error);
 			}
-		} catch (error) {
-			console.error("Error deleting photo:", error);
+		}
+
+		// Remove from local state
+		setPhotos(prev => prev.filter((photo) => photo.id !== id));
+		
+		// Update answers - if this was the first photo, update q0 to the new first photo
+		if (photos.length > 0 && photos[0].id === id) {
+			const remainingPhotos = photos.filter(photo => photo.id !== id);
+			if (remainingPhotos.length > 0) {
+				setAnswers((prev) => ({ ...prev, q0: remainingPhotos[0].preview }));
+			} else {
+				setAnswers((prev) => ({ ...prev, q0: null }));
+			}
 		}
 	};
 
@@ -402,11 +439,14 @@ export default function WelcomePage() {
 	const handleSubmit = async () => {
 		setIsSubmitting(true);
 		try {
+			// Get all photo URLs in order
+			const photoUrls = photos.map(photo => photo.preview);
+			
 			// Store all data in the answers object
 			const updatedAnswers = {
 				...answers,
-				// Make sure q0 has the profile photo
-				q0: profilePhoto,
+				// Make sure q0 has the first photo as profile photo
+				q0: photos.length > 0 ? photos[0].preview : null,
 				// Make sure q1 has the bio
 				q1: bio,
 				// Make sure q2 has the interests
@@ -426,6 +466,7 @@ export default function WelcomePage() {
 					email: session.user.email,
 					name: session.user.name, // The name will be cleaned in the API route
 					answers: updatedAnswers,
+					profilePhotos: photoUrls, // Send all photos
 				}),
 			});
 			
@@ -444,7 +485,7 @@ export default function WelcomePage() {
 	const currentQ = QUESTIONS[currentQuestion];
 	const isLastQuestion = currentQuestion === QUESTIONS.length - 1;
 	const isPhotoQuestion = currentQ.isPhotoUpload;
-	const canProceed = isPhotoQuestion ? !!profilePhoto : answers[currentQ.id];
+	const canProceed = isPhotoQuestion ? photos.length > 0 : answers[currentQ.id];
 
 	// Return loading state while checking completion
 	if (isCheckingCompletion) {
@@ -650,98 +691,120 @@ export default function WelcomePage() {
 							marginBottom: "40px",
 						}}
 					>
-						{/* Photo Preview Area */}
+						{/* Photos Grid */}
 						<div
 							style={{
-								width: "150px",
-								height: "150px",
-								borderRadius: "50%",
-								background: "#f0f0f0",
-								overflow: "hidden",
-								display: "flex",
+								display: "grid",
+								gridTemplateColumns: "repeat(3, 90px)",
+								gridAutoRows: "110px",
+								gap: 18,
 								alignItems: "center",
+								marginBottom: 10,
 								justifyContent: "center",
-								border: "2px solid #e0e0e0",
-								position: "relative",
+								width: "100%",
+								maxWidth: 350,
+								marginLeft: "auto",
+								marginRight: "auto",
 							}}
 						>
-							{uploading ? (
-								<div>⏳</div>
-							) : profilePhoto ? (
-								<>
-									<img
-										src={profilePhoto}
-										alt="Profile Preview"
-										style={{
-											width: "100%",
-											height: "100%",
-											objectFit: "cover",
-										}}
+							{photos.map((photo, idx) => (
+								<div
+									key={photo.id}
+									style={{
+										width: 90,
+										height: 90,
+										borderRadius: 20,
+										background: "#333",
+										position: "relative",
+										boxShadow: "0 2px 8px rgba(79,195,247,0.2)",
+										marginRight: 0,
+										marginBottom: 0,
+										border: idx === 0 ? "2px solid #4FC3F7" : "2px solid #333",
+										display: "flex",
+										alignItems: "center",
+										justifyContent: "center",
+									}}
+								>
+									<img 
+										src={photo.preview} 
+										alt="Profile" 
+										style={{ 
+											width: "100%", 
+											height: "100%", 
+											borderRadius: 20, 
+											objectFit: "cover", 
+											pointerEvents: "none" 
+										}} 
 									/>
-									{/* Delete Button */}
 									<button
-										onClick={handleDeletePhoto}
+										type="button"
+										onClick={() => handleDeletePhoto(photo.id)}
 										style={{
 											position: "absolute",
-											top: "5px",
-											right: "5px",
-											background: "#ff4444",
-											color: "#fff",
+											top: 2,
+											right: 2,
+											background: "#000000",
+											color: "#4FC3F7",
 											border: "none",
 											borderRadius: "50%",
-											width: "24px",
-											height: "24px",
-											fontSize: "14px",
-											fontWeight: "bold",
+											width: 28,
+											height: 28,
+											fontWeight: 700,
+											fontSize: 20,
 											cursor: "pointer",
+											boxShadow: "0 1px 4px rgba(79,195,247,0.3)",
 											display: "flex",
 											alignItems: "center",
 											justifyContent: "center",
-											boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+											transition: "background 0.18s, color 0.18s, box-shadow 0.18s",
 										}}
-										title="Delete photo"
+										aria-label="Delete photo"
 									>
 										×
 									</button>
-								</>
-							) : (
-								<div
-									style={{
-										fontSize: "48px",
-										color: "#ccc",
-									}}
-								>
-									👤
+									{idx === 0 && (
+										<div style={{ 
+											position: "absolute", 
+											left: 0, 
+											bottom: 0, 
+											background: "linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)", 
+											color: "#000000", 
+											fontSize: 11, 
+											fontWeight: 700, 
+											borderRadius: "0 12px 0 20px", 
+											padding: "2px 10px", 
+											letterSpacing: 0.5 
+										}}>
+											Profile
+										</div>
+									)}
 								</div>
+							))}
+							{photos.length < 6 && (
+								<label style={{ 
+									width: 90, 
+									height: 90, 
+									border: "2px dashed #4FC3F7", 
+									borderRadius: 20, 
+									display: "flex", 
+									alignItems: "center", 
+									justifyContent: "center", 
+									fontSize: 38, 
+									color: "#4FC3F7", 
+									cursor: "pointer", 
+									background: "#1a1a1a" 
+								}}>
+									+
+									<input 
+										type="file" 
+										accept="image/*" 
+										multiple 
+										style={{ display: "none" }} 
+										onChange={handlePhotoUpload} 
+									/>
+								</label>
 							)}
 						</div>
-
-						{/* Upload Button */}
-						<button
-							onClick={triggerFileInput}
-							disabled={uploading}
-							style={{
-								padding: "12px 24px",
-								background: uploading ? "#e0e0e0" : "#667eea",
-								color: uploading ? "#999" : "#fff",
-								border: "none",
-								borderRadius: "8px",
-								cursor: uploading ? "not-allowed" : "pointer",
-								fontSize: "14px",
-								fontWeight: "600",
-							}}
-						>
-							{uploading ? "Uploading..." : profilePhoto ? "Change Photo" : "Choose Photo"}
-						</button>
-
-						{/* Hidden File Input */}
-						<input
-							ref={fileInputRef}
-							type="file"
-							accept="image/*"
-							onChange={handlePhotoUpload}
-							style={{ display: "none" }}
-						/>
 
 						{/* Helper Text */}
 						<p
@@ -751,9 +814,12 @@ export default function WelcomePage() {
 								textAlign: "center",
 							}}
 						>
-							Upload a clear photo of yourself. This will help others recognize you.
-							<br />
-							Supported formats: JPG, PNG (Max 10MB)
+							Add up to 6 photos. First photo will be your main profile picture.
+							{photos.length === 0 && (
+								<span style={{ color: "#ff4444", display: "block", marginTop: 4 }}>
+									• At least one photo required
+								</span>
+							)}
 						</p>
 					</div>
 				) : (
