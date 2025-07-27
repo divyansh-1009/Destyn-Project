@@ -362,6 +362,31 @@ export default function WelcomePage() {
 		}
 	};
 
+	const handleDeletePhoto = async () => {
+		if (!profilePhoto || !session?.user?.email) return;
+
+		try {
+			const response = await fetch("/api/delete-photo", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					email: session.user.email,
+					photoUrl: profilePhoto
+				}),
+			});
+
+			if (response.ok) {
+				setProfilePhoto(null);
+				// Remove from answers
+				setAnswers((prev) => ({ ...prev, q0: null }));
+			} else {
+				console.error("Failed to delete photo from Cloudinary");
+			}
+		} catch (error) {
+			console.error("Error deleting photo:", error);
+		}
+	};
+
 	const handleNext = () => {
 		if (currentQuestion < QUESTIONS.length - 1) {
 			setCurrentQuestion((prev) => prev + 1);
@@ -637,20 +662,48 @@ export default function WelcomePage() {
 								alignItems: "center",
 								justifyContent: "center",
 								border: "2px solid #e0e0e0",
+								position: "relative",
 							}}
 						>
 							{uploading ? (
 								<div>⏳</div>
 							) : profilePhoto ? (
-								<img
-									src={profilePhoto}
-									alt="Profile Preview"
-									style={{
-										width: "100%",
-										height: "100%",
-										objectFit: "cover",
-									}}
-								/>
+								<>
+									<img
+										src={profilePhoto}
+										alt="Profile Preview"
+										style={{
+											width: "100%",
+											height: "100%",
+											objectFit: "cover",
+										}}
+									/>
+									{/* Delete Button */}
+									<button
+										onClick={handleDeletePhoto}
+										style={{
+											position: "absolute",
+											top: "5px",
+											right: "5px",
+											background: "#ff4444",
+											color: "#fff",
+											border: "none",
+											borderRadius: "50%",
+											width: "24px",
+											height: "24px",
+											fontSize: "14px",
+											fontWeight: "bold",
+											cursor: "pointer",
+											display: "flex",
+											alignItems: "center",
+											justifyContent: "center",
+											boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+										}}
+										title="Delete photo"
+									>
+										×
+									</button>
+								</>
 							) : (
 								<div
 									style={{

@@ -108,7 +108,31 @@ export default function EditProfile() {
   };
 
   // Delete photo
-  const handleDeletePhoto = (id: string) => {
+  const handleDeletePhoto = async (id: string) => {
+    const photoToDelete = photos.find(photo => photo.id === id);
+    if (!photoToDelete) return;
+
+    // If it's an existing photo URL (not a new file), delete from Cloudinary
+    if (typeof photoToDelete.fileOrUrl === 'string' && photoToDelete.fileOrUrl.startsWith('http')) {
+      try {
+        const response = await fetch("/api/delete-photo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: session?.user?.email,
+            photoUrl: photoToDelete.fileOrUrl
+          }),
+        });
+
+        if (!response.ok) {
+          console.error("Failed to delete photo from Cloudinary");
+        }
+      } catch (error) {
+        console.error("Error deleting photo:", error);
+      }
+    }
+
+    // Remove from local state
     setPhotos(prev => prev.filter((photo) => photo.id !== id));
   };
 
