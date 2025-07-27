@@ -461,21 +461,39 @@ export default function Chat() {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   {isMobile && (
-                    <button
-                      onClick={handleBackToMatches}
-                      style={{
-                        background: "transparent",
-                        border: "none",
-                        color: "#0070f3",
-                        cursor: "pointer",
-                        fontSize: "20px",
-                        padding: 0,
-                        marginRight: 8,
-                      }}
-                    >
-                      ←
-                    </button>
-                  )}
+                      <button
+                        onClick={handleBackToMatches}
+                        style={{
+                          width: "38px",
+                          height: "38px",
+                          borderRadius: "50%",
+                          background: "#222",
+                          border: "1px solid #333",
+                          color: "#0070f3",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          marginRight: 8,
+                          transition: "background 0.2s, border-color 0.2s, color 0.2s",
+                          fontSize: "20px",
+                        }}
+                        onMouseEnter={e => {
+                          (e.target as HTMLButtonElement).style.background = "#333";
+                          (e.target as HTMLButtonElement).style.color = "#fff";
+                          (e.target as HTMLButtonElement).style.borderColor = "#0070f3";
+                        }}
+                        onMouseLeave={e => {
+                          (e.target as HTMLButtonElement).style.background = "#222";
+                          (e.target as HTMLButtonElement).style.color = "#0070f3";
+                          (e.target as HTMLButtonElement).style.borderColor = "#333";
+                        }}
+                      >
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M15 19L8 12L15 5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    )}
                   <div>
                     <div
                       style={{
@@ -698,29 +716,43 @@ export default function Chat() {
                   />
                   <button
                     style={{
-                      padding: isMobile ? "10px 16px" : "14px 24px",
-                      borderRadius: 25,
-                      background: isBlocked ? "#333" : "#0070f3",
+                      width: "38px",
+                      height: "38px",
+                      borderRadius: "50%",
+                      background: isBlocked || !input.trim() ? "#666" : "linear-gradient(135deg, #25D366, #128C7E)",
                       color: "white",
                       border: "none",
-                      cursor: isBlocked ? "not-allowed" : "pointer",
-                      fontSize: isMobile ? "14px" : "16px",
-                      fontWeight: "600",
-                      transition: "background 0.2s",
+                      cursor: isBlocked || !input.trim() ? "not-allowed" : "pointer",
                       opacity: isBlocked ? 0.6 : 1,
+                      transition: "all 0.2s ease",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      padding: 0,
+                      boxShadow: !isBlocked && input.trim() ? "0 2px 8px rgba(0, 0, 0, 0.2)" : "none",
                     }}
-                    onClick={() => { if (!isBlocked) sendMessage(); }}
-                    disabled={isBlocked}
+                    onClick={() => { if (!isBlocked && input.trim()) sendMessage(); }}
+                    disabled={isBlocked || !input.trim()}
                     onMouseEnter={(e) =>
                       ((e.target as HTMLButtonElement).style.background =
-                        isBlocked ? "#333" : "#0056b3")
+                        isBlocked || !input.trim() ? "#666" : "#128C7E")
                     }
                     onMouseLeave={(e) =>
                       ((e.target as HTMLButtonElement).style.background =
-                        isBlocked ? "#333" : "#0070f3")
+                        isBlocked || !input.trim() ? "#666" : "linear-gradient(135deg, #25D366, #128C7E)")
                     }
                   >
-                    {isMobile ? "→" : "Send"}
+                    {/* WhatsApp-style paper plane icon */}
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      width="20" 
+                      height="20" 
+                      viewBox="0 0 24 24" 
+                      fill="white"
+                      style={{ display: "block" }}
+                    >
+                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                    </svg>
                   </button>
                 </div>
               </div>
