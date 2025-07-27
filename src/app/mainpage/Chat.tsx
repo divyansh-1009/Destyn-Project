@@ -471,7 +471,9 @@ export default function Chat() {
                       }}
                     >
                       {lastMessages[user.email].sender === session?.user?.email ? 'You: ' : ''}
-                      {lastMessages[user.email].message}
+                      {lastMessages[user.email].message.length > 12
+                        ? lastMessages[user.email].message.slice(0, 12) + '...'
+                        : lastMessages[user.email].message}
                     </div>
                   )}
                 </div>
@@ -652,99 +654,118 @@ export default function Chat() {
                   </div>
                 )}
 
-                {messages.filter((msg, idx) => msg.sender !== 'system' || idx !== messages.findIndex(m => m.sender === 'system')).map((msg, idx) => (
-                  <div
-                    key={`${msg.timestamp}-${idx}`}
-                    style={{ margin: "12px 0" }}
-                  >
+                {messages.filter((msg, idx) => msg.sender !== 'system' || idx !== messages.findIndex(m => m.sender === 'system')).map((msg, idx, arr) => {
+                  // Determine if this is the last message in a cluster (same sender, same minute)
+                  const currentSender = msg.sender;
+                  const currentDate = new Date(msg.timestamp);
+                  const currentMinute = currentDate.getHours() + ':' + currentDate.getMinutes();
+                  const nextMsg = arr[idx + 1];
+                  let showTime = false;
+                  if (!nextMsg) {
+                    showTime = true;
+                  } else {
+                    const nextSender = nextMsg.sender;
+                    const nextDate = new Date(nextMsg.timestamp);
+                    const nextMinute = nextDate.getHours() + ':' + nextDate.getMinutes();
+                    if (nextSender !== currentSender || nextMinute !== currentMinute) {
+                      showTime = true;
+                    }
+                  }
+                  return (
                     <div
-                      style={{
-                        textAlign:
-                          msg.sender === session?.user?.email ? "right" : "left",
-                        maxWidth: isMobile ? "85%" : "70%",
-                        margin:
-                          msg.sender === session?.user?.email
-                            ? "0 0 0 auto"
-                            : "0 auto 0 0",
-                      }}
+                      key={`${msg.timestamp}-${idx}`}
+                      style={{ margin: "12px 0" }}
                     >
                       <div
                         style={{
-                          padding: "12px 16px",
-                          borderRadius: 18,
-                          background:
-                            msg.sender === session?.user?.email
-                              ? "#0070f3"
-                              : "#1a1a1a",
-                          color:
-                            msg.sender === session?.user?.email
-                              ? "white"
-                              : "#fff",
-                          border:
-                            msg.sender === session?.user?.email
-                              ? "none"
-                              : "1px solid #333",
-                          display: "inline-block",
-                          wordBreak: "break-word",
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                          textAlign:
+                            msg.sender === session?.user?.email ? "right" : "left",
+                          maxWidth: isMobile ? "85%" : "70%",
+                          marginLeft:
+                            msg.sender === session?.user?.email ? "auto" : (isMobile ? 8 : 20),
+                          marginRight:
+                            msg.sender === session?.user?.email ? 0 : "auto",
                         }}
                       >
-                        {msg.message}
-                      </div>
-
-                      {/* Message Reactions - Always show existing reactions */}
-                      {msg.reactions && Object.keys(msg.reactions).length > 0 && (
                         <div
                           style={{
-                            display: "flex",
-                            gap: "4px",
-                            marginTop: "8px",
-                            flexWrap: "wrap",
-                            justifyContent:
+                            padding: "12px 16px",
+                            borderRadius: 18,
+                            background:
                               msg.sender === session?.user?.email
-                                ? "flex-end"
-                                : "flex-start",
+                                ? "#0070f3"
+                                : "#1a1a1a",
+                            color:
+                              msg.sender === session?.user?.email
+                                ? "white"
+                                : "#fff",
+                            border:
+                              msg.sender === session?.user?.email
+                                ? "none"
+                                : "1px solid #333",
+                            display: "inline-block",
+                            wordBreak: "break-word",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                            textAlign: msg.sender === session?.user?.email ? "right" : "left",
                           }}
                         >
-                          {Object.entries(msg.reactions).map(
-                            ([reaction, count]) => (
-                              <span
-                                key={reaction}
-                                style={{
-                                  background: "rgba(0,0,0,0.7)",
-                                  padding: "4px 8px",
-                                  borderRadius: "12px",
-                                  fontSize: "12px",
-                                  color: "#fff",
-                                  border: "1px solid rgba(255,255,255,0.1)",
-                                }}
-                              >
-                                {reaction} {String(count)}
-                              </span>
-                            )
-                          )}
+                          {msg.message}
                         </div>
-                      )}
-
-                      <div
-                        style={{
-                          fontSize: "10px",
-                          color: "#666",
-                          marginTop: 6,
-                          textAlign:
-                            msg.sender === session?.user?.email
-                              ? "right"
-                              : "left",
-                        }}
-                      >
-                        {new Date(msg.timestamp).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {/* Message Reactions - Always show existing reactions */}
+                        {msg.reactions && Object.keys(msg.reactions).length > 0 && (
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "4px",
+                              marginTop: "8px",
+                              flexWrap: "wrap",
+                              justifyContent:
+                                msg.sender === session?.user?.email
+                                  ? "flex-end"
+                                  : "flex-start",
+                            }}
+                          >
+                            {Object.entries(msg.reactions).map(
+                              ([reaction, count]) => (
+                                <span
+                                  key={reaction}
+                                  style={{
+                                    background: "rgba(0,0,0,0.7)",
+                                    padding: "4px 8px",
+                                    borderRadius: "12px",
+                                    fontSize: "12px",
+                                    color: "#fff",
+                                    border: "1px solid rgba(255,255,255,0.1)",
+                                  }}
+                                >
+                                  {reaction} {String(count)}
+                                </span>
+                              )
+                            )}
+                          </div>
+                        )}
+                        {showTime && (
+                          <div
+                            style={{
+                              fontSize: "10px",
+                              color: "#666",
+                              marginTop: 6,
+                              textAlign:
+                                msg.sender === session?.user?.email
+                                  ? "right"
+                                  : "left",
+                            }}
+                          >
+                            {currentDate.toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <div ref={messagesEndRef} />
               </div>
 
