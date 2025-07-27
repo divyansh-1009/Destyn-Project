@@ -443,6 +443,7 @@ export default function Chat() {
             background: "#0a0a0a",
             height: isMobile ? "calc(100vh - 120px)" : "auto",
             position: "relative",
+            paddingTop: isMobile ? 35 : 0, // Add top padding to prevent overlap with sticky navbar
           }}
         >
           {selected ? (
