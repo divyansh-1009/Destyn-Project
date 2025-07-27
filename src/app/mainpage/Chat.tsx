@@ -51,13 +51,29 @@ export default function Chat() {
   }, []);
 
   // Auto-scroll to bottom when new messages arrive
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (immediate = false) => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: immediate ? "auto" : "smooth" 
+      });
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Use immediate scroll when messages are first loaded (no smooth animation)
+    const isInitialLoad = messages.length > 0 && loading === false;
+    scrollToBottom(!isInitialLoad);
+  }, [messages, loading]);
+
+  // Scroll to bottom when a new chat is selected
+  useEffect(() => {
+    if (selected && messages.length > 0) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        scrollToBottom(true);
+      }, 50);
+    }
+  }, [selected]);
 
   // Fetch matches on mount
   useEffect(() => {
@@ -165,6 +181,10 @@ export default function Chat() {
       .then((data) => {
         setMessages(data.messages || []);
         setLoading(false);
+        // Immediately scroll to bottom after messages are loaded
+        setTimeout(() => {
+          scrollToBottom(true);
+        }, 100);
       })
       .catch(() => {
         setMessages([]);
