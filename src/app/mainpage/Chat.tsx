@@ -50,14 +50,20 @@ export default function Chat() {
     return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
-  // Auto-scroll to bottom when new messages arrive
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  // Auto-scroll to bottom
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({ behavior });
   };
 
+  // When messages change (new message), scroll smoothly
   useEffect(() => {
-    scrollToBottom();
+    scrollToBottom("smooth");
   }, [messages]);
+
+  // When opening a chat (selected changes), scroll instantly
+  useEffect(() => {
+    if (selected) scrollToBottom("auto");
+  }, [selected]);
 
   // Fetch matches on mount
   useEffect(() => {

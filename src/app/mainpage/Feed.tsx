@@ -127,6 +127,16 @@ export default function Feed() {
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
   const [confessionPlaceholder, setConfessionPlaceholder] = useState("Spill the tea...");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -460,8 +470,16 @@ export default function Feed() {
       {/* Minimal Confession Input */}
       <div
         style={{
-          position: "relative",
-          marginBottom: 24,
+          position: "fixed",
+          left: isMobile ? 0 : 90, // Leave space for left nav on desktop
+          right: 0,
+          bottom: isMobile ? 56 : 0,
+          zIndex: 1001,
+          background: "#000",
+          padding: "16px 20px 12px 20px",
+          borderTop: "1px solid #333",
+          boxShadow: "0 -4px 20px rgba(0,0,0,0.15)",
+          // Remove maxWidth and margin for full width
         }}
       >
         <textarea
@@ -470,6 +488,18 @@ export default function Feed() {
           onChange={(e) => setNewConfession(e.target.value)}
           placeholder={confessionPlaceholder}
           maxLength={800}
+          style={{
+            width: "100%",
+            boxSizing: "border-box",
+            paddingRight: 48, // space for button
+            minWidth: 0,
+          }}
+          onKeyDown={e => {
+            if (e.key === "Enter" && !e.shiftKey && newConfession.trim()) {
+              e.preventDefault();
+              handleSubmitConfession();
+            }
+          }}
         />
         {newConfession.length > 0 && (
           <div 
@@ -535,7 +565,8 @@ export default function Feed() {
       <div style={{ 
         display: "flex", 
         flexDirection: "column", 
-        gap: 78, // Increased gap from 20 to 28px for better spacing
+        gap: 78,
+        paddingBottom: isMobile ? 120 : 80, // Less padding on desktop, more on mobile for nav
       }}>
         {confessions.length === 0 && !loading ? (
           <div
