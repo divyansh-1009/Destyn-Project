@@ -64,7 +64,7 @@ function LoginPageContent() {
     // Check for authentication error in URL parameters
     const error = searchParams.get('error');
     if (error === 'AccessDenied' && !hasProcessedError) {
-      setError('Access denied. Only users with authorized college email domains can access this application.');
+      setError('HOLD UP! You are not on the list. Only folks with verified college emails can vibe with this app.');
       setHasProcessedError(true);
       // Clear all authentication cookies when access is denied
       setIsClearingSession(true);
@@ -104,7 +104,7 @@ function LoginPageContent() {
         console.log('Unauthorized domain detected in session, signing out');
         setIsClearingSession(true);
         signOut({ redirect: false });
-        setError('Access denied. Only users with authorized college email domains can access this application.');
+        setError(' HOLD UP! You are not on the list. Only folks with verified college emails can vibe with this app.');
         clearAuthCookies().then(() => {
           setIsClearingSession(false);
         });
@@ -318,16 +318,18 @@ function LoginPageContent() {
           <div className="mb-6 p-4 bg-red-500 bg-opacity-20 border border-red-400 rounded-lg max-w-md">
             <p className="text-red-200 text-sm font-medium">{error}</p>
             <p className="text-red-300 text-xs mt-2">
-              Allowed domains: iitj.ac.in, nlujodhpur.ac.in, mbm.ac.in, nift.ac.in, jietjodhpur.ac.in, aiimsjodhpur.edu.in
+            We're talking : 
+            <span className="font-bold"> iitj.ac.in, nlujodhpur.ac.in, mbm.ac.in, nift.ac.in, jietjodhpur.ac.in, aiimsjodhpur.edu.in</span>
             </p>
             <p className="text-red-300 text-xs mt-1">
-              Your session has been cleared for security. You can try again with a different email.
+            Your session’s been wiped for safety.<br/>
+            Wanna try again? Use a legit college email.
             </p>
           </div>
         )}
 
         <button
-          className="mt-30 md:mt-0 group flex items-center justify-center w-full max-w-xs px-6 py-4 mt-8 bg-gradient-to-r from-teal-400 to-cyan-500 text-white font-bold rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-cyan-300"
+          className=" md:mt-0 group flex items-center justify-center w-full max-w-xs px-6 py-4 mt-8 bg-gradient-to-r from-teal-400 to-cyan-500 text-white font-bold rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-cyan-300"
           onClick={handleSignIn}
           disabled={isSigningIn}
         >
