@@ -512,6 +512,7 @@ export default function Chat() {
                   flex: 1,
                   overflowY: "auto",
                   padding: 20,
+                  paddingBottom: 0,
                   background: "#0a0a0a",
                   backgroundImage:
                     "radial-gradient(circle at 1px 1px, #1a1a1a 1px, transparent 0)",
@@ -648,70 +649,6 @@ export default function Chat() {
                 ))}
                 <div ref={messagesEndRef} />
               </div>
-
-              <div
-                style={{
-                  padding: isMobile ? "12px" : "20px",
-                  borderTop: "1px solid #333",
-                  background: "#111",
-                }}
-              >
-                <div style={{ display: "flex", gap: isMobile ? 8 : 12 }}>
-                  <input
-                    style={{
-                      flex: 1,
-                      padding: isMobile ? "10px 16px" : "14px 20px",
-                      borderRadius: 25,
-                      border: "1px solid #333",
-                      background: "#0a0a0a",
-                      color: "#fff",
-                      outline: "none",
-                      fontSize: isMobile ? "14px" : "16px",
-                      transition: "border-color 0.2s",
-                    }}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !isBlocked) sendMessage();
-                    }}
-                    onFocus={(e) =>
-                      ((e.target as HTMLInputElement).style.borderColor =
-                        "#0070f3")
-                    }
-                    onBlur={(e) =>
-                      ((e.target as HTMLInputElement).style.borderColor = "#333")
-                    }
-                    placeholder={isBlocked ? "You have blocked this user. You cannot send messages." : "Type a message..."}
-                    disabled={isBlocked}
-                  />
-                  <button
-                    style={{
-                      padding: isMobile ? "10px 16px" : "14px 24px",
-                      borderRadius: 25,
-                      background: isBlocked ? "#333" : "#0070f3",
-                      color: "white",
-                      border: "none",
-                      cursor: isBlocked ? "not-allowed" : "pointer",
-                      fontSize: isMobile ? "14px" : "16px",
-                      fontWeight: "600",
-                      transition: "background 0.2s",
-                      opacity: isBlocked ? 0.6 : 1,
-                    }}
-                    onClick={() => { if (!isBlocked) sendMessage(); }}
-                    disabled={isBlocked}
-                    onMouseEnter={(e) =>
-                      ((e.target as HTMLButtonElement).style.background =
-                        isBlocked ? "#333" : "#0056b3")
-                    }
-                    onMouseLeave={(e) =>
-                      ((e.target as HTMLButtonElement).style.background =
-                        isBlocked ? "#333" : "#0070f3")
-                    }
-                  >
-                    {isMobile ? "→" : "Send"}
-                  </button>
-                </div>
-              </div>
               <BlockConfirmModal
                 open={blockModalOpen}
                 onClose={() => setBlockModalOpen(false)}
@@ -810,6 +747,76 @@ export default function Chat() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Typing box - positioned above bottom navigation */}
+      {selected && (
+        <div
+          style={{
+            padding: isMobile ? "12px" : "20px",
+            borderTop: "1px solid #333",
+            background: "#111",
+            position: "sticky",
+            bottom: 0,
+            zIndex: 100,
+          }}
+        >
+          <div style={{ display: "flex", gap: isMobile ? 8 : 12 }}>
+            <input
+              style={{
+                flex: 1,
+                padding: isMobile ? "10px 16px" : "14px 20px",
+                borderRadius: 25,
+                border: "1px solid #333",
+                background: "#0a0a0a",
+                color: "#fff",
+                outline: "none",
+                fontSize: isMobile ? "14px" : "16px",
+                transition: "border-color 0.2s",
+              }}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !isBlocked) sendMessage();
+              }}
+              onFocus={(e) =>
+                ((e.target as HTMLInputElement).style.borderColor =
+                  "#0070f3")
+              }
+              onBlur={(e) =>
+                ((e.target as HTMLInputElement).style.borderColor = "#333")
+              }
+              placeholder={isBlocked ? "You have blocked this user. You cannot send messages." : "Type a message..."}
+              disabled={isBlocked}
+            />
+            <button
+              style={{
+                padding: isMobile ? "10px 16px" : "14px 24px",
+                borderRadius: 25,
+                background: isBlocked ? "#333" : "#0070f3",
+                color: "white",
+                border: "none",
+                cursor: isBlocked ? "not-allowed" : "pointer",
+                fontSize: isMobile ? "14px" : "16px",
+                fontWeight: "600",
+                transition: "background 0.2s",
+                opacity: isBlocked ? 0.6 : 1,
+              }}
+              onClick={() => { if (!isBlocked) sendMessage(); }}
+              disabled={isBlocked}
+              onMouseEnter={(e) =>
+                ((e.target as HTMLButtonElement).style.background =
+                  isBlocked ? "#333" : "#0056b3")
+              }
+              onMouseLeave={(e) =>
+                ((e.target as HTMLButtonElement).style.background =
+                  isBlocked ? "#333" : "#0070f3")
+              }
+            >
+              {isMobile ? "→" : "Send"}
+            </button>
+          </div>
         </div>
       )}
     </div>
