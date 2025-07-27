@@ -15,28 +15,7 @@ export default function Profile() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Function to calculate dynamic font size based on text length
-  const getDynamicFontSize = (text: string, maxWidth: number = 200) => {
-    if (!text) return '30px';
-    
-    const baseSize = 30;
-    const minSize = 16;
-    const maxSize = 30;
-    
-    // Estimate character width (approximate for most fonts)
-    const avgCharWidth = 18; // pixels per character
-    const estimatedWidth = text.length * avgCharWidth;
-    
-    if (estimatedWidth <= maxWidth) {
-      return `${maxSize}px`;
-    }
-    
-    // Calculate proportional size
-    const ratio = maxWidth / estimatedWidth;
-    const calculatedSize = Math.max(minSize, Math.floor(baseSize * ratio));
-    
-    return `${calculatedSize}px`;
-  };
+
 
   useEffect(() => {
     if (!session?.user?.email) return;
@@ -339,13 +318,13 @@ export default function Profile() {
           {/* User Info */}
           <div style={{ flex: 1 }}>
             <div style={{ 
-              fontSize: getDynamicFontSize(profile?.name || 'User Name', 200), 
+              fontSize: '30px', 
               fontWeight: 'bold', 
               marginBottom: '4px',
               color: '#ffffff',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
+              wordWrap: 'break-word',
+              overflowWrap: 'break-word',
+              lineHeight: '1.2'
             }}>
               {profile?.name || 'User Name'}
             </div>
