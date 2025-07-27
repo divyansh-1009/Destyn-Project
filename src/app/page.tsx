@@ -4,7 +4,6 @@ import { signIn, useSession, signOut } from "next-auth/react";
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
-import TypographyImage from "../assets/Typography.png"; // Import the image
 
 // Function to clear all authentication-related cookies
 const clearAuthCookies = async () => {
@@ -242,11 +241,7 @@ function LoginPageContent() {
         <div className="z-10 flex flex-col items-center justify-center text-white text-center flex-grow">
           <div className="flex items-center mb-8 -mt-50 md:mt-0">
             <div>
-              <img
-                src={TypographyImage.src}
-                alt="Destyn Logo"
-                className="w-48 md:w-64 lg:w-72 object-contain"
-              />
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">Destyn</h1>
               <p className="text-xl md:text-2xl font-light tracking-widest">
                 Dil se Date tak...
               </p>
@@ -269,78 +264,183 @@ function LoginPageContent() {
   }
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-[#8A2BE2] via-[#6A1B9A] to-[#4A148C] flex flex-col items-center justify-center p-4 font-sans">
-      {/* Background shapes */}
-      <div className="absolute bottom-0 left-0 w-full h-1/3 opacity-50">
-        <svg
-          viewBox="0 0 1440 320"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-[250px]"
-        >
-          <path
-            fill="#9C27B0"
-            fillOpacity="0.5"
-            d="M0,224L40,213.3C80,203,160,181,240,186.7C320,192,400,224,480,240C560,256,640,256,720,234.7C800,213,880,171,960,149.3C1040,128,1120,128,1200,149.3C1280,171,1360,213,1400,234.7L1440,256L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"
-          ></path>
-        </svg>
-      </div>
-      <div className="absolute bottom-0 left-0 w-full h-1/2 opacity-40">
-        <svg
-          viewBox="0 0 1440 320"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full"
-        >
-          <path
-            fill="#AB47BC"
-            fillOpacity="0.6"
-            d="M0,160L48,176C96,192,192,224,288,218.7C384,213,480,171,576,149.3C672,128,768,128,864,154.7C960,181,1056,235,1152,240C1248,245,1344,203,1392,181.3L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
-          ></path>
-        </svg>
-      </div>
+    <div className="min-h-screen bg-black text-white">
+      {/* Header */}
+      <nav className="fixed top-0 w-full bg-black bg-opacity-90 backdrop-blur-sm z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <div className="text-2xl font-bold text-white">Destyn</div>
+            <div className="hidden md:flex space-x-8">
+              <a href="#about" className="text-white hover:text-gray-300 transition-colors">About</a>
+              <a href="#services" className="text-white hover:text-gray-300 transition-colors">Services</a>
+              <a href="#faq" className="text-white hover:text-gray-300 transition-colors">F.A.Q</a>
+            </div>
+          </div>
+        </div>
+      </nav>
 
-      <div className="z-10 flex flex-col items-center justify-center text-white text-center flex-grow">
-        <div className="flex items-center mb-8 -mt-50 md:mt-0">
-          <div>
-            {/* Replace the text "DESTYN" with the image */}
-            <img
-              src={TypographyImage.src}
-              alt="Destyn Logo"
-              className="w-48 md:w-64 lg:w-72 object-contain"
-            />
-            <p className="text-xl md:text-2xl font-light tracking-widest">
-              Dil se Date tak...
+      {/* Hero Section */}
+      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('https://images.cdn-files-a.com/ready_uploads/media/8115971/2000_605e19e75fc0c.jpg')",
+            backgroundPosition: "center center",
+            opacity: 0.5
+          }}
+        ></div>
+        
+        {/* Content */}
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6" style={{ fontSize: "49px" }}>
+            Destyn
+          </h1>
+          <div className="w-24 h-1 bg-white mx-auto mb-8"></div>
+          <h2 className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto" style={{ fontSize: "19px" }}>
+            Experience the joy of meaningful student relationships with Destyn, your trusted companion for love and friendship.
+          </h2>
+          
+          {/* Error Message */}
+          {error && (
+            <div className="mb-8 p-6 bg-red-500 bg-opacity-20 border border-red-400 rounded-lg max-w-md mx-auto">
+              <p className="text-red-200 text-sm font-medium mb-2">{error}</p>
+              <p className="text-red-300 text-xs">
+                We're talking: <span className="font-bold">iitj.ac.in, nlujodhpur.ac.in, mbm.ac.in, nift.ac.in, jietjodhpur.ac.in, aiimsjodhpur.edu.in</span>
+              </p>
+              <p className="text-red-300 text-xs mt-1">
+                Your session's been wiped for safety.<br/>
+                Wanna try again? Use a legit college email.
+              </p>
+            </div>
+          )}
+
+          {/* Login Button */}
+          <button
+            className="group flex items-center justify-center w-full max-w-xs px-8 py-4 mx-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-blue-300"
+            onClick={handleSignIn}
+            disabled={isSigningIn}
+          >
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-4 transition-transform duration-300 group-hover:rotate-12">
+              <FcGoogle size={24} />
+            </div>
+            <span className="text-lg">
+              {isSigningIn ? "Signing in..." : "Login"}
+            </span>
+          </button>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="py-20 bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-4xl mx-auto">
+            <h2 className="text-4xl md:text-6xl font-bold mb-8" style={{ fontSize: "73px" }}>
+              About Destyn
+            </h2>
+            <div className="w-24 h-1 bg-white mx-auto mb-8"></div>
+            <p className="text-xl md:text-2xl leading-relaxed" style={{ fontSize: "25px" }}>
+              At Destyn, we provide a platform exclusively for college students to foster genuine connections. Developed by students for students, our focus is on creating a safe and respectful environment that enhances campus life through meaningful relationships and promotes mental well-being.
             </p>
           </div>
         </div>
+      </section>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-500 bg-opacity-20 border border-red-400 rounded-lg max-w-md">
-            <p className="text-red-200 text-sm font-medium">{error}</p>
-            <p className="text-red-300 text-xs mt-2">
-            We're talking : 
-            <span className="font-bold"> iitj.ac.in, nlujodhpur.ac.in, mbm.ac.in, nift.ac.in, jietjodhpur.ac.in, aiimsjodhpur.edu.in</span>
-            </p>
-            <p className="text-red-300 text-xs mt-1">
-            Your session’s been wiped for safety.<br/>
-            Wanna try again? Use a legit college email.
-            </p>
+      {/* Services Section */}
+      <section id="services" className="py-20 bg-black">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-6xl font-bold mb-8">Services</h2>
+            <div className="w-24 h-1 bg-white mx-auto"></div>
           </div>
-        )}
+          
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div className="text-center">
+              <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
+                <span className="text-4xl">✓</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Verified Community</h3>
+              <p className="text-gray-300">Ensuring authenticity through exclusive college email ID verification.</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-r from-green-600 to-blue-600 flex items-center justify-center">
+                <span className="text-4xl">🛡️</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Safe Environment</h3>
+              <p className="text-gray-300">Safe Environment ensures your physical and digital spaces remain secure, promoting peace of mind, love, and healthy dating.</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center">
+                <span className="text-4xl">💝</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Emotional Support</h3>
+              <p className="text-gray-300">Find your best match and focus on respectful communication and mental well-being.</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        <button
-          className=" md:mt-0 group flex items-center justify-center w-full max-w-xs px-6 py-4 mt-8 bg-gradient-to-r from-teal-400 to-cyan-500 text-white font-bold rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-cyan-300"
-          onClick={handleSignIn}
-          disabled={isSigningIn}
-        >
-          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mr-4 transition-transform duration-300 group-hover:rotate-12">
-            <FcGoogle size={24} />
+      {/* FAQ Section */}
+      <section id="faq" className="py-20 bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-6xl font-bold mb-8">F.A.Q</h2>
+            <div className="w-24 h-1 bg-white mx-auto"></div>
           </div>
-          <span className="text-lg">
-            {isSigningIn ? "Signing in..." : "Sign in with Google"}
-          </span>
-        </button>
-      </div>
+          
+          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            <div className="bg-gray-800 p-6 rounded-lg">
+              <h3 className="text-xl font-bold mb-4">What is Destyn?</h3>
+              <p className="text-gray-300">
+                Destyn is a student-centric dating and connection platform designed exclusively for college students. We aim to help you find real, meaningful relationships — be it romantic, emotional, or supportive — with people from your city and nearby top-tier colleges.
+              </p>
+            </div>
+            
+            <div className="bg-gray-800 p-6 rounded-lg">
+              <h3 className="text-xl font-bold mb-4">Who can join Destyn?</h3>
+              <p className="text-gray-300">
+                Only verified college students are allowed on the platform. We use your college ID and email verification to ensure authenticity and create a trusted student-only community.
+              </p>
+            </div>
+            
+            <div className="bg-gray-800 p-6 rounded-lg">
+              <h3 className="text-xl font-bold mb-4">Is Destyn a dating app or a social app?</h3>
+              <p className="text-gray-300">
+                It's both — but with heart. While dating is a major feature, Destyn is also a space for emotional connection, friendship, and self-discovery. It's for those who want to connect deeply — not just swipe mindlessly.
+              </p>
+            </div>
+            
+            <div className="bg-gray-800 p-6 rounded-lg">
+              <h3 className="text-xl font-bold mb-4">How does Destyn verify users?</h3>
+              <p className="text-gray-300">
+                We require:<br/>
+                • A valid college ID or email for verification<br/>
+                • Basic personal details for age and identity confirmation<br/>
+                This ensures that only genuine students enter the platform, creating a respectful and safe space for all.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-black py-8">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="text-center md:text-left mb-4 md:mb-0">
+              <div className="text-xl font-bold mb-2">Destyn</div>
+              <div className="text-gray-400">Copyright © 2025 All rights reserved</div>
+            </div>
+            <div className="flex space-x-6">
+              <a href="#about" className="text-white hover:text-gray-300 transition-colors">About</a>
+              <a href="#services" className="text-white hover:text-gray-300 transition-colors">Services</a>
+              <a href="#faq" className="text-white hover:text-gray-300 transition-colors">F.A.Q</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -349,24 +449,11 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-[#8A2BE2] via-[#6A1B9A] to-[#4A148C] flex flex-col items-center justify-center p-4 font-sans">
-        <div className="z-10 flex flex-col items-center justify-center text-white text-center flex-grow">
-          <div className="flex items-center mb-8 -mt-50 md:mt-0">
-            <div>
-              <img
-                src={TypographyImage.src}
-                alt="Destyn Logo"
-                className="w-48 md:w-64 lg:w-72 object-contain"
-              />
-              <p className="text-xl md:text-2xl font-light tracking-widest">
-                Dil se Date tak...
-              </p>
-            </div>
-          </div>
-          <div className="mt-8">
-            <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="mt-4 text-white">Loading...</p>
-          </div>
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Destyn</h1>
+          <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4">Loading...</p>
         </div>
       </div>
     }>
