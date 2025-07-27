@@ -319,7 +319,9 @@ function LoginPageContent() {
         <nav className="fixed top-0 w-full bg-black bg-opacity-90 backdrop-blur-sm z-50">
           <div className="container mx-auto px-4 py-4">
             <div className="flex justify-between items-center">
-              <div className="text-2xl font-bold text-white">Destyn</div>
+              <div className="text-2xl font-bold text-white flex items-center">
+                <img src="/Typography_white.png" alt="Destyn Logo" className="h-10 w-auto object-contain" style={{filter: 'drop-shadow(0 1px 4px #34398c)'}} />
+              </div>
               <div className="hidden md:flex space-x-8">
                 {sectionIds.map((id) => (
                   <a
@@ -366,9 +368,7 @@ function LoginPageContent() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
           >
-            <h1 className="text-5xl md:text-7xl font-bold mb-6" style={{ fontSize: "49px" }}>
-              Destyn
-            </h1>
+            <img src="/Typography_white.png" alt="Destyn Logo" className="mx-auto mb-6 h-16 md:h-24 w-auto object-contain" style={{filter: 'drop-shadow(0 1px 4px #34398c)'}} />
             <div className="w-24 h-1 bg-white mx-auto mb-8"></div>
             <h2 className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto" style={{ fontSize: "19px" }}>
               Experience the joy of meaningful student relationships with Destyn, your trusted companion for love and friendship.
@@ -559,7 +559,9 @@ function LoginPageContent() {
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="text-center md:text-left mb-4 md:mb-0">
-                <div className="text-xl font-bold mb-2">Destyn</div>
+                <div className="text-xl font-bold mb-2 flex items-center">
+                  <img src="/Typography_white.png" alt="Destyn Logo" className="h-8 w-auto object-contain" style={{filter: 'drop-shadow(0 1px 4px #34398c)'}} />
+                </div>
                 <div className="text-gray-400">Copyright © 2025 All rights reserved</div>
               </div>
               <div className="flex space-x-6">

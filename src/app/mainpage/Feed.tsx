@@ -389,9 +389,9 @@ export default function Feed() {
       
       .gossip-textarea {
         width: 100%;
-        min-height: 48px;
+        min-height: 38px;
         max-height: 150px;
-        padding: 12px 100px 12px 16px;
+        padding: 0 16px;
         border-radius: 24px;
         border: 1px solid rgba(51, 51, 51, 0.7);
         background: rgba(17, 17, 17, 0.7);
@@ -404,6 +404,16 @@ export default function Feed() {
         overflow-y: auto;
         box-sizing: border-box;
         transition: height 0.2s ease;
+        display: flex;
+        align-items: center;
+      }
+      .gossip-textarea::placeholder {
+        color: #aaa;
+        opacity: 1;
+        display: flex;
+        align-items: center;
+        line-height: 38px;
+        height: 38px;
       }
       
       @media (max-width: 600px) {
@@ -441,8 +451,12 @@ export default function Feed() {
         }
         
         .gossip-textarea {
-          padding: 10px 65px 10px 12px !important;
+          padding: 0 12px !important;
           font-size: 13px !important;
+        }
+        .gossip-textarea::placeholder {
+          line-height: 38px;
+          height: 38px;
         }
       }
     `;
@@ -479,86 +493,107 @@ export default function Feed() {
           padding: "16px 20px 12px 20px",
           borderTop: "1px solid #333",
           boxShadow: "0 -4px 20px rgba(0,0,0,0.15)",
-          // Remove maxWidth and margin for full width
         }}
       >
-        <textarea
-          className="gossip-textarea"
-          value={newConfession}
-          onChange={(e) => setNewConfession(e.target.value)}
-          placeholder={confessionPlaceholder}
-          maxLength={800}
-          style={{
-            width: "100%",
-            boxSizing: "border-box",
-            paddingRight: 48, // space for button
-            minWidth: 0,
-          }}
-          onKeyDown={e => {
-            if (e.key === "Enter" && !e.shiftKey && newConfession.trim()) {
-              e.preventDefault();
-              handleSubmitConfession();
-            }
-          }}
-        />
-        {newConfession.length > 0 && (
-          <div 
-            className={`char-count ${
-              newConfession.length > 700 ? "near-limit" : ""
-            } ${newConfession.length > 750 ? "at-limit" : ""}`}
+        <div style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          position: 'relative',
+          width: '100%',
+          gap: 12,
+        }}>
+          <textarea
+            className="gossip-textarea"
+            value={newConfession}
+            onChange={(e) => setNewConfession(e.target.value)}
+            placeholder={confessionPlaceholder}
+            maxLength={800}
+            style={{
+              flex: 1,
+              minHeight: 38,
+              maxHeight: 150,
+              height: '38px',
+              boxSizing: "border-box",
+              resize: "none",
+              borderRadius: 24,
+              border: "1px solid rgba(51, 51, 51, 0.7)",
+              background: "rgba(17, 17, 17, 0.7)",
+              backdropFilter: "blur(10px)",
+              color: "#fff",
+              fontSize: 14,
+              outline: 'none',
+              fontFamily: 'inherit',
+              overflowY: 'auto',
+              padding: '0 16px',
+              transition: 'height 0.2s ease',
+            }}
+            onInput={e => {
+              const target = e.target as HTMLTextAreaElement;
+              target.style.height = '38px';
+              target.style.height = Math.min(target.scrollHeight, 150) + 'px';
+            }}
+            onKeyDown={e => {
+              if (e.key === "Enter" && !e.shiftKey && newConfession.trim()) {
+                e.preventDefault();
+                handleSubmitConfession();
+              }
+            }}
+          />
+          <button
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: '50%',
+              background: newConfession.trim() ? "linear-gradient(135deg, #25D366, #128C7E)" : "#666",
+              color: "white",
+              border: "none",
+              cursor: newConfession.trim() ? "pointer" : "not-allowed",
+              opacity: loading ? 0.7 : 1,
+              transition: "all 0.2s ease",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 0,
+              boxShadow: newConfession.trim() ? "0 2px 8px rgba(0, 0, 0, 0.2)" : "none",
+              marginLeft: 8,
+            }}
+            onClick={handleSubmitConfession}
+            disabled={loading || !newConfession.trim()}
           >
-            {newConfession.length}/800
-          </div>
-        )}
-        <button
-          style={{
-            position: "absolute",
-            top: "50%",
-            right: "12px",
-            transform: "translateY(-50%)",
-            width: "38px",
-            height: "38px",
-            borderRadius: "50%",
-            background: newConfession.trim() ? "linear-gradient(135deg, #25D366, #128C7E)" : "#666", // WhatsApp gradient when active
-            color: "white",
-            border: "none",
-            cursor: newConfession.trim() ? "pointer" : "not-allowed",
-            opacity: loading ? 0.7 : 1,
-            transition: "all 0.2s ease",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 0,
-            boxShadow: newConfession.trim() ? "0 2px 8px rgba(0, 0, 0, 0.2)" : "none",
-          }}
-          onClick={handleSubmitConfession}
-          disabled={loading || !newConfession.trim()}
-        >
-          {loading ? (
-            // Loading spinner
-            <div
-              style={{
-                width: "18px",
-                height: "18px",
-                border: "2px solid rgba(255,255,255,0.3)",
-                borderTop: "2px solid white",
-                borderRadius: "50%",
-                animation: "spin 1s linear infinite",
-              }}
-            />
-          ) : (
-            // Fixed WhatsApp-style send icon (microphone/paper plane)
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="white"
+            {loading ? (
+              <div
+                style={{
+                  width: "18px",
+                  height: "18px",
+                  border: "2px solid rgba(255,255,255,0.3)",
+                  borderTop: "2px solid white",
+                  borderRadius: "50%",
+                  animation: "spin 1s linear infinite",
+                }}
+              />
+            ) : (
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="white"
+              >
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+              </svg>
+            )}
+          </button>
+          {newConfession.length > 0 && (
+            <div 
+              className={`char-count ${
+                newConfession.length > 700 ? "near-limit" : ""
+              } ${newConfession.length > 750 ? "at-limit" : ""}`}
+              style={{ position: 'absolute', bottom: 8, right: 60 }}
             >
-              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-            </svg>
+              {newConfession.length}/800
+            </div>
           )}
-        </button>
+        </div>
       </div>
 
       {/* Confessions Feed */}
@@ -638,6 +673,7 @@ export default function Feed() {
                   >
                     {confession.confession}
                   </p>
+                  
                   <div
                     style={{
                       display: "flex",
