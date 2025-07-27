@@ -244,7 +244,7 @@ function MainPageContent() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "16px 24px",
+          padding: "8px 16px",
           borderBottom: "1px solid #333",
           background: "#111",
           boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
@@ -392,7 +392,7 @@ function MainPageContent() {
         {!isMobile && (
           <div
             style={{
-              width: "120px", // Slightly narrower for a sleeker look
+              width: "90px", // Reduced from 120px to 90px (75% of current width)
               borderRight: "1px solid #333",
               background: "#111",
               padding: "32px 8px",
@@ -465,7 +465,7 @@ function MainPageContent() {
             display: "flex",
             justifyContent: "space-around",
             borderTop: "1px solid #333",
-            padding: "16px 0",
+            padding: "12px 0",
             background: "#111",
             backdropFilter: "blur(10px)",
             boxShadow: "0 -4px 20px rgba(0,0,0,0.3)",
