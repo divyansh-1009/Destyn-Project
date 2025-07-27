@@ -7,6 +7,10 @@ import { FcGoogle } from "react-icons/fc";
 import { ParallaxProvider, Parallax } from "react-scroll-parallax";
 import { motion } from "framer-motion";
 import { useRef } from "react";
+import FAQs from "./mainpage/FAQs";
+import Privacy from "./mainpage/Privacy";
+import Guidelines from "./mainpage/Guidelines";
+import AboutUs from "./mainpage/AboutUs";
 
 // Function to clear all authentication-related cookies
 const clearAuthCookies = async () => {
@@ -66,6 +70,7 @@ function useScrollSpy(sectionIds: string[]) {
   return activeId;
 }
 
+
 // Service card data
 const SERVICES = [
   {
@@ -99,6 +104,8 @@ function LoginPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [isClearingSession, setIsClearingSession] = useState(false);
   const [hasProcessedError, setHasProcessedError] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [modal, setModal] = useState<null | "faq" | "privacy" | "guidelines" | "aboutus">(null);
   const sectionIds = ["about", "services", "faq"];
   const activeSection = useScrollSpy(sectionIds);
 
@@ -322,31 +329,57 @@ function LoginPageContent() {
               <div className="text-2xl font-bold text-white flex items-center">
                 <img src="/Typography_white.png" alt="Destyn Logo" className="h-10 w-auto object-contain" style={{filter: 'drop-shadow(0 1px 4px #34398c)'}} />
               </div>
-              <div className="hidden md:flex space-x-8">
-                {sectionIds.map((id) => (
-                  <a
-                    key={id}
-                    href={`#${id}`}
-                    className={`relative text-white transition-colors duration-200 px-2 py-1 ${
-                      activeSection === id ? "font-bold text-blue-400" : "hover:text-blue-300"
-                    }`}
+              <div className="flex items-center space-x-4">
+                <div className="hidden md:flex space-x-8">
+                  {sectionIds.map((id) => (
+                    <a
+                      key={id}
+                      href={`#${id}`}
+                      className={`relative text-white transition-colors duration-200 px-2 py-1 ${
+                        activeSection === id ? "font-bold text-blue-400" : "hover:text-blue-300"
+                      }`}
+                    >
+                      <span>{id.charAt(0).toUpperCase() + id.slice(1)}</span>
+                      {/* Animated underline */}
+                      <motion.span
+                        layoutId="nav-underline"
+                        className="absolute left-0 right-0 -bottom-1 h-0.5 bg-blue-400 rounded"
+                        style={{
+                          opacity: activeSection === id ? 1 : 0,
+                          transition: "opacity 0.2s"
+                        }}
+                      />
+                    </a>
+                  ))}
+                </div>
+                {/* Hamburger/More menu */}
+                <div className="ml-4 relative">
+                  <button
+                    aria-label="More options"
+                    className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-800 focus:outline-none"
+                    onClick={() => setMoreOpen((v) => !v)}
                   >
-                    <span>{id.charAt(0).toUpperCase() + id.slice(1)}</span>
-                    {/* Animated underline */}
-                    <motion.span
-                      layoutId="nav-underline"
-                      className="absolute left-0 right-0 -bottom-1 h-0.5 bg-blue-400 rounded"
-                      style={{
-                        opacity: activeSection === id ? 1 : 0,
-                        transition: "opacity 0.2s"
-                      }}
-                    />
-                  </a>
-                ))}
+                    {/* Hamburger icon */}
+                    <span style={{ display: 'inline-block', fontSize: 28, lineHeight: 1 }}>&#9776;</span>
+                  </button>
+                  {moreOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-black border border-gray-700 rounded-lg shadow-lg z-50">
+                      <button className="block w-full text-left px-4 py-3 text-white hover:bg-gray-800" onClick={() => { setModal("faq"); setMoreOpen(false); }}>FAQ</button>
+                      <button className="block w-full text-left px-4 py-3 text-white hover:bg-gray-800" onClick={() => { setModal("privacy"); setMoreOpen(false); }}>Privacy Policy</button>
+                      <button className="block w-full text-left px-4 py-3 text-white hover:bg-gray-800" onClick={() => { setModal("guidelines"); setMoreOpen(false); }}>Guidelines</button>
+                      <button className="block w-full text-left px-4 py-3 text-white hover:bg-gray-800" onClick={() => { setModal("aboutus"); setMoreOpen(false); }}>About Us</button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </nav>
+        {/* Modals for More menu */}
+        {modal === "faq" && <FAQs onClose={() => setModal(null)} onShowPrivacy={() => { setModal("privacy"); }} />}
+        {modal === "privacy" && <Privacy onClose={() => setModal(null)} />}
+        {modal === "guidelines" && <Guidelines onClose={() => setModal(null)} />}
+        {modal === "aboutus" && <AboutUs onClose={() => setModal(null)} />}
 
         {/* Hero Section with Parallax */}
         <section className="relative h-screen flex items-center justify-center overflow-hidden">
@@ -409,17 +442,34 @@ function LoginPageContent() {
 
         {/* Discover Connections Section */}
         <motion.section
-          className="flex flex-col md:flex-row items-center justify-center py-16 px-4 md:px-0"
+          className="relative flex flex-col md:flex-row items-center justify-center py-16 px-4 md:px-0 min-h-[60vh]"
           style={{
-            background: 'linear-gradient(90deg, #fff 0%, #f5f6fa 40%, #34398c 100%)',
+            background: `linear-gradient(120deg, #fbb040 0%, #6a1b9a 100%), radial-gradient(circle at 60% 40%, #fbb04033 0%, #6a1b9a22 80%)`,
+            overflow: 'hidden',
           }}
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.8 }}
         >
+          {/* Blurred background image layer */}
+          <img
+            src="/discover-connection.png"
+            alt="Blurred background"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              filter: 'blur(32px) brightness(0.7)',
+              zIndex: 0,
+              pointerEvents: 'none',
+            }}
+          />
           {/* Left: Text */}
-          <div className="md:w-1/2 w-full flex flex-col items-start justify-center px-4 md:px-16 mb-10 md:mb-0">
+          <div className="md:w-1/2 w-full flex flex-col items-start justify-center px-4 md:px-16 mb-10 md:mb-0 relative z-10">
             <h2 className="font-serif text-5xl md:text-6xl font-bold mb-6 leading-tight text-[#34398c]">Discover<br/>Connections</h2>
             <div className="w-24 h-1 bg-[#34398c] mb-8"></div>
             <p className="font-serif text-xl md:text-2xl leading-relaxed text-[#34398c]">
@@ -427,14 +477,31 @@ function LoginPageContent() {
             </p>
           </div>
           {/* Right: Image with overlay */}
-          <div className="md:w-1/2 w-full flex items-center justify-center relative">
+          <div className="md:w-1/2 w-full flex items-center justify-center relative z-10">
             <div className="absolute rounded-xl shadow-2xl w-[90%] h-[90%] bg-[#34398c] opacity-20 z-0" style={{filter:'blur(12px)'}}></div>
-            <img
-              src="/discover-connection.png"
-              alt="Discover Connections"
-              className="rounded-xl shadow-2xl max-w-full h-auto object-contain relative z-10"
-              style={{ minWidth: '250px', maxWidth: '400px', background: 'transparent' }}
-            />
+            <div
+              style={{
+                position: 'relative',
+                zIndex: 1,
+                borderRadius: '24px',
+                overflow: 'hidden',
+                boxShadow: '0 8px 40px 0 #fbb04055, 0 2px 24px 0 #6a1b9a44',
+                background: 'rgba(255,255,255,0.05)',
+                maxWidth: 400,
+                margin: '0 auto',
+              }}
+            >
+              <img
+                src="/discover-connection.png"
+                alt="Discover Connections"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  display: 'block',
+                  borderRadius: '24px',
+                }}
+              />
+            </div>
           </div>
         </motion.section>
 
@@ -497,8 +564,16 @@ function LoginPageContent() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5 }}
                 >
-                  <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center text-5xl bg-white bg-opacity-10 group-hover:bg-opacity-30 transition-all duration-300">
-                    {service.icon}
+                  <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-white bg-opacity-10 group-hover:bg-opacity-30 transition-all duration-300 overflow-hidden">
+                    {service.title === "Verified Community" && (
+                      <img src="/verified.avif" alt="Verified Community" className="w-full h-full object-cover" />
+                    )}
+                    {service.title === "Safe Environment" && (
+                      <img src="/security.jpg" alt="Safe Environment" className="w-full h-full object-cover" />
+                    )}
+                    {service.title === "Emotional Support" && (
+                      <img src="/connection.jpg" alt="Emotional Support" className="w-full h-full object-cover" />
+                    )}
                   </div>
                   <h3 className="text-2xl font-bold mb-4 group-hover:text-white transition-colors duration-200">{service.title}</h3>
                   <p className="text-gray-300 group-hover:text-white transition-colors duration-200">{service.desc}</p>
@@ -564,16 +639,69 @@ function LoginPageContent() {
                 </div>
                 <div className="text-gray-400">Copyright © 2025 All rights reserved</div>
               </div>
-              <div className="flex space-x-6">
-                {sectionIds.map((id) => (
+              <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
+                <div className="flex space-x-6">
+                  {sectionIds.map((id) => (
+                    <a
+                      key={id}
+                      href={`#${id}`}
+                      className={`text-white hover:text-gray-300 transition-colors scroll-smooth ${activeSection === id ? "font-bold text-blue-400" : ""}`}
+                    >
+                      {id.charAt(0).toUpperCase() + id.slice(1)}
+                    </a>
+                  ))}
+                </div>
+                <div className="flex space-x-4 mt-4 md:mt-0">
+                  {/* Instagram */}
                   <a
-                    key={id}
-                    href={`#${id}`}
-                    className={`text-white hover:text-gray-300 transition-colors scroll-smooth ${activeSection === id ? "font-bold text-blue-400" : ""}`}
+                    href="https://instagram.com/destyn_official"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white hover:text-pink-400 transition-colors duration-300 transform hover:scale-110"
+                    aria-label="Follow us on Instagram"
                   >
-                    {id.charAt(0).toUpperCase() + id.slice(1)}
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
                   </a>
-                ))}
+                  
+                  {/* X (Twitter) */}
+                  <a
+                    href="https://x.com/destyn_official"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white hover:text-gray-400 transition-colors duration-300 transform hover:scale-110"
+                    aria-label="Follow us on X"
+                  >
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                  </a>
+                  
+                  {/* LinkedIn */}
+                  <a
+                    href="https://www.linkedin.com/company/destyn4"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-white hover:text-blue-400 transition-colors duration-300 transform hover:scale-110"
+                    aria-label="Follow us on LinkedIn"
+                  >
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                    </svg>
+                  </a>
+                  
+                  {/* Gmail */}
+                  <a
+                    href="mailto:destyn4sup@gmail.com"
+                    className="text-white hover:text-red-400 transition-colors duration-300 transform hover:scale-110"
+                    aria-label="Email us"
+                  >
+                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-.904.732-1.636 1.636-1.636h.819L12 10.91l9.545-7.089h.819c.904 0 1.636.732 1.636 1.636z"/>
+                    </svg>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -586,21 +714,16 @@ function LoginPageContent() {
 // Main component with Suspense boundary
 export default function LoginPage() {
   return (
-    <>
-      <head>
-        <meta name="description" content="Event booking in Jodhpur made easy. Plan and book venues, vendors, and events online with Destyn. Your one-stop solution for seamless event planning. Explore now!" />
-      </head>
-      <Suspense fallback={
-        <div className="min-h-screen bg-black text-white flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold mb-4">Destyn</h1>
-              <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="mt-4">Loading...</p>
-          </div>
+    <Suspense fallback={
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Destyn</h1>
+            <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4">Loading...</p>
         </div>
-      }>
-        <LoginPageContent />
-      </Suspense>
-    </>
+      </div>
+    }>
+      <LoginPageContent />
+    </Suspense>
   );
 }
