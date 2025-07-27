@@ -440,7 +440,11 @@ function MainPageContent() {
         )}
 
         {/* Main content */}
-        <div style={{ flex: 1, overflow: "auto" }}>{Component}</div>
+        <div style={{ 
+          flex: 1, 
+          overflow: "auto",
+          paddingBottom: isMobile ? "calc(80px + env(safe-area-inset-bottom))" : "0"
+        }}>{Component}</div>
       </div>
 
       {/* Modals */}
@@ -466,11 +470,14 @@ function MainPageContent() {
             justifyContent: "space-around",
             borderTop: "1px solid #333",
             padding: "12px 0",
+            paddingBottom: "calc(12px + env(safe-area-inset-bottom))",
             background: "#111",
             backdropFilter: "blur(10px)",
             boxShadow: "0 -4px 20px rgba(0,0,0,0.3)",
-            position: "sticky",
+            position: "fixed",
             bottom: 0,
+            left: 0,
+            right: 0,
             zIndex: 1000,
           }}
         >
