@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import BlockConfirmModal from "./BlockConfirmModal";
 import ReportModal from "./ReportModal";
 
-// Add import for useCallback
+
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 
@@ -442,6 +442,7 @@ export default function Chat() {
             flexDirection: "column",
             background: "#0a0a0a",
             height: isMobile ? "calc(100vh - 120px)" : "auto",
+            position: "relative",
           }}
         >
           {selected ? (
@@ -511,11 +512,7 @@ export default function Chat() {
                 style={{
                   flex: 1,
                   overflowY: "auto",
-                  padding: 20,
-                  background: "#0a0a0a",
-                  backgroundImage:
-                    "radial-gradient(circle at 1px 1px, #1a1a1a 1px, transparent 0)",
-                  backgroundSize: "20px 20px",
+                  paddingBottom: isMobile ? 120 : 0, // Add enough padding for input + nav on mobile
                 }}
               >
                 {messages.find((msg) => msg.sender === 'system') && (
@@ -649,12 +646,26 @@ export default function Chat() {
                 <div ref={messagesEndRef} />
               </div>
 
+              {/* Chat input box - fixed on mobile */}
               <div
-                style={{
-                  padding: isMobile ? "12px" : "20px",
-                  borderTop: "1px solid #333",
-                  background: "#111",
-                }}
+                style={
+                  isMobile
+                    ? {
+                        position: "fixed",
+                        left: 0,
+                        right: 0,
+                        bottom: 56, // Height of bottom nav (adjust if needed)
+                        zIndex: 1001,
+                        padding: "12px",
+                        borderTop: "1px solid #333",
+                        background: "#111",
+                      }
+                    : {
+                        padding: "20px",
+                        borderTop: "1px solid #333",
+                        background: "#111",
+                      }
+                }
               >
                 <div style={{ display: "flex", gap: isMobile ? 8 : 12 }}>
                   <input
