@@ -608,537 +608,542 @@ export default function WelcomePage() {
 	const isMobile = windowWidth < 768;
 
 	return (
-		<div
-			style={{
-				minHeight: "100vh",
-				background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-				display: "flex",
-				alignItems: "center",
-				justifyContent: "center",
-				padding: "10px",
-			}}
-		>
+		<>
+			<head>
+				<meta name="description" content="Welcome to Destyn – your trusted partner for event booking in Jodhpur. Start planning your perfect event online today!" />
+			</head>
 			<div
 				style={{
-					background: "#111", // Changed from "#fff" to dark
-					borderRadius: "20px",
-					padding: "20px",
-					maxWidth: "600px",
-					width: "calc(100% - 20px)",
-					boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
-					margin: "20px auto",
-					overflow: "hidden",
+					minHeight: "100vh",
+					background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+					padding: "10px",
 				}}
 			>
-				{/* Progress Bar */}
 				<div
 					style={{
-						background: "#222", // Changed from "#f0f0f0" to darker
-						height: "12px",
-						borderRadius: "10px",
-						marginTop: "5px",
-						marginLeft: "5px",
-						marginRight: "5px",
-						marginBottom: "30px",
+						background: "#111", // Changed from "#fff" to dark
+						borderRadius: "20px",
+						padding: "20px",
+						maxWidth: "600px",
+						width: "calc(100% - 20px)",
+						boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
+						margin: "20px auto",
 						overflow: "hidden",
 					}}
 				>
+					{/* Progress Bar */}
 					<div
 						style={{
-							background: "#667eea",
-							height: "100%",
-							width: `${((currentQuestion + 1) / QUESTIONS.length) * 100}%`,
-							transition: "width 0.3s ease",
-						}}
-					/>
-				</div>
-
-				{/* Question Counter */}
-				<div
-					style={{
-						textAlign: "center",
-						color: "#999", // Changed from "#666" to lighter
-						fontSize: "12px",
-						marginBottom: "20px",
-					}}
-				>
-					Question {currentQuestion + 1} of {QUESTIONS.length}
-				</div>
-
-				{/* Question */}
-				<h2
-					style={{
-						fontSize: isMobile ? "18px" : "20px",
-						fontWeight: "600",
-						color: "#fff", // Changed from "#333" to white
-						marginBottom: "30px",
-						textAlign: "center",
-						lineHeight: "1.4",
-						padding: "0 10px",
-					}}
-				>
-					{currentQ.question}
-				</h2>
-
-				{/* Options or Photo Upload UI */}
-				{isPhotoQuestion ? (
-					<div
-						style={{
-							display: "flex",
-							flexDirection: "column",
-							alignItems: "center",
-							gap: "20px",
-							marginBottom: "40px",
+							background: "#222", // Changed from "#f0f0f0" to darker
+							height: "12px",
+							borderRadius: "10px",
+							marginTop: "5px",
+							marginLeft: "5px",
+							marginRight: "5px",
+							marginBottom: "30px",
+							overflow: "hidden",
 						}}
 					>
-						{/* Photos Grid */}
 						<div
 							style={{
-								display: "grid",
-								gridTemplateColumns: "repeat(3, 90px)",
-								gridAutoRows: "110px",
-								gap: 18,
+								background: "#667eea",
+								height: "100%",
+								width: `${((currentQuestion + 1) / QUESTIONS.length) * 100}%`,
+								transition: "width 0.3s ease",
+							}}
+						/>
+					</div>
+
+					{/* Question Counter */}
+					<div
+						style={{
+							textAlign: "center",
+							color: "#999", // Changed from "#666" to lighter
+							fontSize: "12px",
+							marginBottom: "20px",
+						}}
+					>
+						Question {currentQuestion + 1} of {QUESTIONS.length}
+					</div>
+
+					{/* Question */}
+					<h2
+						style={{
+							fontSize: isMobile ? "18px" : "20px",
+							fontWeight: "600",
+							color: "#fff", // Changed from "#333" to white
+							marginBottom: "30px",
+							textAlign: "center",
+							lineHeight: "1.4",
+							padding: "0 10px",
+						}}
+					>
+						{currentQ.question}
+					</h2>
+
+					{/* Options or Photo Upload UI */}
+					{isPhotoQuestion ? (
+						<div
+							style={{
+								display: "flex",
+								flexDirection: "column",
 								alignItems: "center",
-								marginBottom: 10,
-								justifyContent: "center",
-								width: "100%",
-								maxWidth: 350,
-								marginLeft: "auto",
-								marginRight: "auto",
+								gap: "20px",
+								marginBottom: "40px",
 							}}
 						>
-							{photos.map((photo, idx) => (
-								<div
-									key={photo.id}
-									style={{
-										width: 90,
-										height: 90,
-										borderRadius: 20,
-										background: "#333",
-										position: "relative",
-										boxShadow: "0 2px 8px rgba(79,195,247,0.2)",
-										marginRight: 0,
-										marginBottom: 0,
-										border: idx === 0 ? "2px solid #4FC3F7" : "2px solid #333",
-										display: "flex",
-										alignItems: "center",
-										justifyContent: "center",
-									}}
-								>
-									<img 
-										src={photo.preview} 
-										alt="Profile" 
-										style={{ 
-											width: "100%", 
-											height: "100%", 
-											borderRadius: 20, 
-											objectFit: "cover", 
-											pointerEvents: "none" 
-										}} 
-									/>
-									<button
-										type="button"
-										onClick={() => handleDeletePhoto(photo.id)}
+							{/* Photos Grid */}
+							<div
+								style={{
+									display: "grid",
+									gridTemplateColumns: "repeat(3, 90px)",
+									gridAutoRows: "110px",
+									gap: 18,
+									alignItems: "center",
+									marginBottom: 10,
+									justifyContent: "center",
+									width: "100%",
+									maxWidth: 350,
+									marginLeft: "auto",
+									marginRight: "auto",
+								}}
+							>
+								{photos.map((photo, idx) => (
+									<div
+										key={photo.id}
 										style={{
-											position: "absolute",
-											top: 2,
-											right: 2,
-											background: "#000000",
-											color: "#4FC3F7",
-											border: "none",
-											borderRadius: "50%",
-											width: 28,
-											height: 28,
-											fontWeight: 700,
-											fontSize: 20,
-											cursor: "pointer",
-											boxShadow: "0 1px 4px rgba(79,195,247,0.3)",
+											width: 90,
+											height: 90,
+											borderRadius: 20,
+											background: "#333",
+											position: "relative",
+											boxShadow: "0 2px 8px rgba(79,195,247,0.2)",
+											marginRight: 0,
+											marginBottom: 0,
+											border: idx === 0 ? "2px solid #4FC3F7" : "2px solid #333",
 											display: "flex",
 											alignItems: "center",
 											justifyContent: "center",
-											transition: "background 0.18s, color 0.18s, box-shadow 0.18s",
 										}}
-										aria-label="Delete photo"
 									>
-										×
-									</button>
-									{idx === 0 && (
-										<div style={{ 
-											position: "absolute", 
-											left: 0, 
-											bottom: 0, 
-											background: "linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)", 
-											color: "#000000", 
-											fontSize: 11, 
-											fontWeight: 700, 
-											borderRadius: "0 12px 0 20px", 
-											padding: "2px 10px", 
-											letterSpacing: 0.5 
-										}}>
-											Profile
-										</div>
-									)}
-								</div>
-							))}
-							{photos.length < 6 && (
-								<label style={{ 
-									width: 90, 
-									height: 90, 
-									border: "2px dashed #4FC3F7", 
-									borderRadius: 20, 
-									display: "flex", 
-									alignItems: "center", 
-									justifyContent: "center", 
-									fontSize: 38, 
-									color: "#4FC3F7", 
-									cursor: "pointer", 
-									background: "#1a1a1a" 
-								}}>
-									+
-									<input 
-										type="file" 
-										accept="image/*" 
-										multiple 
-										style={{ display: "none" }} 
-										onChange={handlePhotoUpload} 
-									/>
-								</label>
-							)}
-						</div>
+										<img 
+											src={photo.preview} 
+											alt="Profile" 
+											style={{ 
+												width: "100%", 
+												height: "100%", 
+												borderRadius: 20, 
+												objectFit: "cover", 
+												pointerEvents: "none" 
+											}} 
+										/>
+										<button
+											type="button"
+											onClick={() => handleDeletePhoto(photo.id)}
+											style={{
+												position: "absolute",
+												top: 2,
+												right: 2,
+												background: "#000000",
+												color: "#4FC3F7",
+												border: "none",
+												borderRadius: "50%",
+												width: 28,
+												height: 28,
+												fontWeight: 700,
+												fontSize: 20,
+												cursor: "pointer",
+												boxShadow: "0 1px 4px rgba(79,195,247,0.3)",
+												display: "flex",
+												alignItems: "center",
+												justifyContent: "center",
+												transition: "background 0.18s, color 0.18s, box-shadow 0.18s",
+											}}
+											aria-label="Delete photo"
+										>
+											×
+										</button>
+										{idx === 0 && (
+											<div style={{ 
+												position: "absolute", 
+												left: 0, 
+												bottom: 0, 
+												background: "linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)", 
+												color: "#000000", 
+												fontSize: 11, 
+												fontWeight: 700, 
+												borderRadius: "0 12px 0 20px", 
+												padding: "2px 10px", 
+												letterSpacing: 0.5 
+											}}>
+												Profile
+											</div>
+										)}
+									</div>
+								))}
+								{photos.length < 6 && (
+									<label style={{ 
+										width: 90, 
+										height: 90, 
+										border: "2px dashed #4FC3F7", 
+										borderRadius: 20, 
+										display: "flex", 
+										alignItems: "center", 
+										justifyContent: "center", 
+										fontSize: 38, 
+										color: "#4FC3F7", 
+										cursor: "pointer", 
+										background: "#1a1a1a" 
+									}}>
+										+
+										<input 
+											type="file" 
+											accept="image/*" 
+											multiple 
+											style={{ display: "none" }} 
+											onChange={handlePhotoUpload} 
+										/>
+									</label>
+								)}
+							</div>
 
-						{/* Helper Text */}
-						<p
+							{/* Helper Text */}
+							<p
+								style={{
+									fontSize: "12px",
+									color: "#666",
+									textAlign: "center",
+								}}
+							>
+								Add up to 6 photos. First photo will be your main profile picture.
+								{photos.length === 0 && (
+									<span style={{ color: "#ff4444", display: "block", marginTop: 4 }}>
+										• At least one photo required
+									</span>
+								)}
+							</p>
+						</div>
+					) : (
+						<div
 							style={{
-								fontSize: "12px",
-								color: "#666",
-								textAlign: "center",
+								display: "flex",
+								flexDirection: "column",
+								gap: "15px",
+								marginBottom: "40px",
 							}}
 						>
-							Add up to 6 photos. First photo will be your main profile picture.
-							{photos.length === 0 && (
-								<span style={{ color: "#ff4444", display: "block", marginTop: 4 }}>
-									• At least one photo required
-								</span>
+							{currentQ.isBio && (
+								<textarea
+									value={bio}
+									onChange={e => { setBio(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: e.target.value })); }}
+									placeholder="Tell us about yourself..."
+									style={{ 
+										width: '100%', 
+										minHeight: 80, 
+										borderRadius: 8, 
+										border: '1px solid #333', // Darker border
+										padding: 10, 
+										fontSize: 14, 
+										color: '#fff', // White text
+										background: '#1a1a1a', // Dark background
+									}}
+								/>
 							)}
-						</p>
-					</div>
-				) : (
-					<div
-						style={{
-							display: "flex",
-							flexDirection: "column",
-							gap: "15px",
-							marginBottom: "40px",
-						}}
-					>
-						{currentQ.isBio && (
-							<textarea
-								value={bio}
-								onChange={e => { setBio(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: e.target.value })); }}
-								placeholder="Tell us about yourself..."
-								style={{ 
-									width: '100%', 
-									minHeight: 80, 
-									borderRadius: 8, 
-									border: '1px solid #333', // Darker border
-									padding: 10, 
-									fontSize: 14, 
-									color: '#fff', // White text
-									background: '#1a1a1a', // Dark background
-								}}
-							/>
-						)}
-						{currentQ.isInterests && (
-							<div style={{ 
-								display: 'flex', 
-								flexWrap: 'wrap', 
-								gap: 8, 
-								marginBottom: 16,
-								justifyContent: 'center'
-							}}>
-								{INTEREST_OPTIONS.map(opt => (
-									<button
-										key={opt}
-										type="button"
-										onClick={() => {
-											setSelectedInterests(prev => prev.includes(opt) ? prev.filter(i => i !== opt) : [...prev, opt]);
-											setAnswers(prev => ({ ...prev, [currentQ.id]: prev[currentQ.id]?.includes(opt) ? prev[currentQ.id].filter((i: string) => i !== opt) : [...(prev[currentQ.id] || []), opt] }));
-										}}
+							{currentQ.isInterests && (
+								<div style={{ 
+									display: 'flex', 
+									flexWrap: 'wrap', 
+									gap: 8, 
+									marginBottom: 16,
+									justifyContent: 'center'
+								}}>
+									{INTEREST_OPTIONS.map(opt => (
+										<button
+											key={opt}
+											type="button"
+											onClick={() => {
+												setSelectedInterests(prev => prev.includes(opt) ? prev.filter(i => i !== opt) : [...prev, opt]);
+												setAnswers(prev => ({ ...prev, [currentQ.id]: prev[currentQ.id]?.includes(opt) ? prev[currentQ.id].filter((i: string) => i !== opt) : [...(prev[currentQ.id] || []), opt] }));
+											}}
+											style={{
+												background: selectedInterests.includes(opt) ? '#667eea' : '#f0f0f0',
+												color: selectedInterests.includes(opt) ? '#fff' : '#333',
+												border: 'none',
+												borderRadius: '16px',
+												padding: '8px 16px',
+												cursor: 'pointer',
+												fontWeight: 500,
+												margin: '4px',
+												fontSize: window.innerWidth < 768 ? '12px' : '14px',
+											}}
+										>
+											{opt}
+										</button>
+									))}
+								</div>
+							)}
+							{currentQ.isGenderPrefDob && (
+								<div style={{ 
+									display: 'flex', 
+									flexDirection: 'column', 
+									gap: window.innerWidth < 768 ? 16 : 24, 
+									alignItems: 'center', 
+									marginBottom: 32,
+									width: '100%'
+								}}>
+									<div style={{ width: '100%', maxWidth: 340 }}>
+										<label style={{ 
+											fontWeight: 600, 
+											display: 'block', 
+											marginBottom: 6, 
+											color: '#fff'  // Changed from '#222' to white
+										}}>
+											Gender
+										</label>
+										<select 
+											value={gender} 
+											onChange={e => { setGender(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], gender: e.target.value } })); }} 
+											style={{ 
+												width: '100%', 
+												padding: '10px', 
+												borderRadius: '8px', 
+												border: '1px solid #333', // Darker border
+												fontSize: window.innerWidth < 768 ? '14px' : '15px', 
+												color: '#fff', // White text
+												background: '#1a1a1a', // Dark background
+												appearance: 'auto' // Ensures proper display on mobile
+											}}
+										>
+											<option value="">Select your gender</option>
+											<option value="male">Male</option>
+											<option value="female">Female</option>
+										</select>
+									</div>
+									<div style={{ width: '100%', maxWidth: 340 }}>
+										<label style={{ 
+											fontWeight: 600, 
+											display: 'block', 
+											marginBottom: 6, 
+											color: '#fff'  // Changed from '#222' to white
+										}}>
+											Interested in dating
+										</label>
+										<select 
+											value={preference} 
+											onChange={e => { setPreference(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], preference: e.target.value } })); }} 
+											style={{ 
+												width: '100%', 
+												padding: '10px', 
+												borderRadius: '8px', 
+												border: '1px solid #333', // Darker border
+												fontSize: window.innerWidth < 768 ? '14px' : '15px', 
+												color: '#fff', // White text
+												background: '#1a1a1a', // Dark background
+												appearance: 'auto' // Ensures proper display on mobile
+											}}
+										>
+											<option value="">Select preference</option>
+											<option value="male">Male</option>
+											<option value="female">Female</option>
+										</select>
+									</div>
+									<div style={{ width: '100%', maxWidth: 340 }}>
+										<label style={{ 
+											fontWeight: 600, 
+											display: 'block', 
+											marginBottom: 6, 
+											color: '#fff'  // Changed from '#222' to white
+										}}>
+											Date of Birth
+										</label>
+										<input 
+											type="date" 
+											value={dob} 
+											onChange={e => { 
+												const inputDate = e.target.value;
+                                                const selectedDate = new Date(inputDate);
+                                                const today = new Date();
+                                                
+                                                // First validate that the date actually exists (handles cases like Feb 31)
+                                                if (isNaN(selectedDate.getTime())) {
+                                                    // Invalid date format - don't update state
+                                                    setAnswers(prev => ({ 
+                                                        ...prev, 
+                                                        [currentQ.id]: { 
+                                                            ...prev[currentQ.id], 
+                                                            dob: inputDate,
+                                                            isValidDob: false,
+                                                            errorMessage: "Invalid date selected" 
+                                                        } 
+                                                    }));
+                                                    setDob(inputDate);
+                                                    return;
+                                                }
+                                                
+                                                // Calculate age
+                                                let age = today.getFullYear() - selectedDate.getFullYear();
+                                                const monthDiff = today.getMonth() - selectedDate.getMonth();
+                                                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
+                                                    age--;
+                                                }
+                                                
+                                                setDob(inputDate);
+                                                
+                                                // Validate age range
+                                                if (age >= 18 && age <= 100) {
+                                                    setAnswers(prev => ({ 
+                                                        ...prev, 
+                                                        [currentQ.id]: { 
+                                                            ...prev[currentQ.id], 
+                                                            dob: inputDate,
+                                                            isValidDob: true,
+                                                            errorMessage: null
+                                                        } 
+                                                    }));
+                                                } else {
+                                                    setAnswers(prev => ({ 
+                                                        ...prev, 
+                                                        [currentQ.id]: { 
+                                                            ...prev[currentQ.id], 
+                                                            dob: inputDate,
+                                                            isValidDob: false,
+                                                            errorMessage: age < 18 ? "You must be at least 18 years old" : "Age cannot exceed 100 years" 
+                                                        } 
+                                                    }));
+                                                }
+											}} 
+											style={{ 
+												width: '100%', 
+												padding: 10, 
+												borderRadius: 8, 
+												border: `1px solid ${answers[currentQ.id]?.isValidDob === false ? '#ff4d4d' : '#333'}`, // Darker border with error color
+												fontSize: 15, 
+												color: '#fff', // White text
+												background: '#1a1a1a' // Dark background
+											}} 
+											max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
+											min={new Date(new Date().setFullYear(new Date().getFullYear() - 100)).toISOString().split('T')[0]}
+										/>
+										{answers[currentQ.id]?.isValidDob === false && (
+											<p style={{ color: '#ff4d4d', fontSize: 12, marginTop: 4 }}>
+												Incorrect Age
+											</p>
+										)}
+									</div>
+								</div>
+							)}
+							{currentQ.options?.map((opt) => (
+								<label
+									key={opt}
+									style={{
+										display: "flex",
+										alignItems: "center",
+										padding: "10px 15px",
+										border: answers[currentQ.id] === opt
+											? "2px solid #667eea"
+											: "2px solid #333", // Changed from "#e0e0e0" to darker
+										borderRadius: "10px",
+										cursor: "pointer",
+										transition: "all 0.2s ease",
+										background: answers[currentQ.id] === opt 
+											? "rgba(102, 126, 234, 0.2)" // Semi-transparent highlight
+											: "#1a1a1a", // Dark background for options
+									}}
+								>
+									<input
+										type="radio"
+										name={currentQ.id}
+										value={opt}
+										checked={answers[currentQ.id] === opt}
+										onChange={() => handleChange(currentQ.id, opt)}
 										style={{
-											background: selectedInterests.includes(opt) ? '#667eea' : '#f0f0f0',
-											color: selectedInterests.includes(opt) ? '#fff' : '#333',
-											border: 'none',
-											borderRadius: '16px',
-											padding: '8px 16px',
-											cursor: 'pointer',
-											fontWeight: 500,
-											margin: '4px',
-											fontSize: window.innerWidth < 768 ? '12px' : '14px',
+											marginRight: "10px",
+											transform: "scale(1.1)",
+										}}
+									/>
+									<span
+										style={{
+											fontSize: "13px",
+											color: "#fff", // Changed from "#333" to white
+											lineHeight: "1.4",
 										}}
 									>
 										{opt}
-									</button>
-								))}
-							</div>
-						)}
-						{currentQ.isGenderPrefDob && (
-							<div style={{ 
-								display: 'flex', 
-								flexDirection: 'column', 
-								gap: window.innerWidth < 768 ? 16 : 24, 
-								alignItems: 'center', 
-								marginBottom: 32,
-								width: '100%'
-							}}>
-								<div style={{ width: '100%', maxWidth: 340 }}>
-									<label style={{ 
-										fontWeight: 600, 
-										display: 'block', 
-										marginBottom: 6, 
-										color: '#fff'  // Changed from '#222' to white
-									}}>
-										Gender
-									</label>
-									<select 
-										value={gender} 
-										onChange={e => { setGender(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], gender: e.target.value } })); }} 
-										style={{ 
-											width: '100%', 
-											padding: '10px', 
-											borderRadius: '8px', 
-											border: '1px solid #333', // Darker border
-											fontSize: window.innerWidth < 768 ? '14px' : '15px', 
-											color: '#fff', // White text
-											background: '#1a1a1a', // Dark background
-											appearance: 'auto' // Ensures proper display on mobile
-										}}
-									>
-										<option value="">Select your gender</option>
-										<option value="male">Male</option>
-										<option value="female">Female</option>
-									</select>
-								</div>
-								<div style={{ width: '100%', maxWidth: 340 }}>
-									<label style={{ 
-										fontWeight: 600, 
-										display: 'block', 
-										marginBottom: 6, 
-										color: '#fff'  // Changed from '#222' to white
-									}}>
-										Interested in dating
-									</label>
-									<select 
-										value={preference} 
-										onChange={e => { setPreference(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], preference: e.target.value } })); }} 
-										style={{ 
-											width: '100%', 
-											padding: '10px', 
-											borderRadius: '8px', 
-											border: '1px solid #333', // Darker border
-											fontSize: window.innerWidth < 768 ? '14px' : '15px', 
-											color: '#fff', // White text
-											background: '#1a1a1a', // Dark background
-											appearance: 'auto' // Ensures proper display on mobile
-										}}
-									>
-										<option value="">Select preference</option>
-										<option value="male">Male</option>
-										<option value="female">Female</option>
-									</select>
-								</div>
-								<div style={{ width: '100%', maxWidth: 340 }}>
-									<label style={{ 
-										fontWeight: 600, 
-										display: 'block', 
-										marginBottom: 6, 
-										color: '#fff'  // Changed from '#222' to white
-									}}>
-										Date of Birth
-									</label>
-									<input 
-										type="date" 
-										value={dob} 
-										onChange={e => { 
-											const inputDate = e.target.value;
-                                            const selectedDate = new Date(inputDate);
-                                            const today = new Date();
-                                            
-                                            // First validate that the date actually exists (handles cases like Feb 31)
-                                            if (isNaN(selectedDate.getTime())) {
-                                                // Invalid date format - don't update state
-                                                setAnswers(prev => ({ 
-                                                    ...prev, 
-                                                    [currentQ.id]: { 
-                                                        ...prev[currentQ.id], 
-                                                        dob: inputDate,
-                                                        isValidDob: false,
-                                                        errorMessage: "Invalid date selected" 
-                                                    } 
-                                                }));
-                                                setDob(inputDate);
-                                                return;
-                                            }
-                                            
-                                            // Calculate age
-                                            let age = today.getFullYear() - selectedDate.getFullYear();
-                                            const monthDiff = today.getMonth() - selectedDate.getMonth();
-                                            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
-                                                age--;
-                                            }
-                                            
-                                            setDob(inputDate);
-                                            
-                                            // Validate age range
-                                            if (age >= 18 && age <= 100) {
-                                                setAnswers(prev => ({ 
-                                                    ...prev, 
-                                                    [currentQ.id]: { 
-                                                        ...prev[currentQ.id], 
-                                                        dob: inputDate,
-                                                        isValidDob: true,
-                                                        errorMessage: null
-                                                    } 
-                                                }));
-                                            } else {
-                                                setAnswers(prev => ({ 
-                                                    ...prev, 
-                                                    [currentQ.id]: { 
-                                                        ...prev[currentQ.id], 
-                                                        dob: inputDate,
-                                                        isValidDob: false,
-                                                        errorMessage: age < 18 ? "You must be at least 18 years old" : "Age cannot exceed 100 years" 
-                                                    } 
-                                                }));
-                                            }
-										}} 
-										style={{ 
-											width: '100%', 
-											padding: 10, 
-											borderRadius: 8, 
-											border: `1px solid ${answers[currentQ.id]?.isValidDob === false ? '#ff4d4d' : '#333'}`, // Darker border with error color
-											fontSize: 15, 
-											color: '#fff', // White text
-											background: '#1a1a1a' // Dark background
-										}} 
-										max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
-										min={new Date(new Date().setFullYear(new Date().getFullYear() - 100)).toISOString().split('T')[0]}
-									/>
-									{answers[currentQ.id]?.isValidDob === false && (
-										<p style={{ color: '#ff4d4d', fontSize: 12, marginTop: 4 }}>
-											Incorrect Age
-										</p>
-									)}
-								</div>
-							</div>
-						)}
-						{currentQ.options?.map((opt) => (
-							<label
-								key={opt}
-								style={{
-									display: "flex",
-									alignItems: "center",
-									padding: "10px 15px",
-									border: answers[currentQ.id] === opt
-										? "2px solid #667eea"
-										: "2px solid #333", // Changed from "#e0e0e0" to darker
-									borderRadius: "10px",
-									cursor: "pointer",
-									transition: "all 0.2s ease",
-									background: answers[currentQ.id] === opt 
-										? "rgba(102, 126, 234, 0.2)" // Semi-transparent highlight
-										: "#1a1a1a", // Dark background for options
-								}}
-							>
-								<input
-									type="radio"
-									name={currentQ.id}
-									value={opt}
-									checked={answers[currentQ.id] === opt}
-									onChange={() => handleChange(currentQ.id, opt)}
-									style={{
-										marginRight: "10px",
-										transform: "scale(1.1)",
-									}}
-								/>
-								<span
-									style={{
-										fontSize: "13px",
-										color: "#fff", // Changed from "#333" to white
-										lineHeight: "1.4",
-									}}
-								>
-									{opt}
-								</span>
-							</label>
-						))}
-					</div>
-				)}
+									</span>
+								</label>
+							))}
+						</div>
+					)}
 
-				{/* Navigation Buttons */}
-				<div
-					style={{
-						display: "flex",
-						justifyContent: "space-between",
-						alignItems: "center",
-					}}
-				>
-					<button
-						onClick={handlePrev}
-						disabled={currentQuestion === 0}
+					{/* Navigation Buttons */}
+					<div
 						style={{
-							padding: "12px 24px",
-							background: "#667eea", // Changed to match Choose Photo button
-							color: "#fff",
-							border: "none",
-							borderRadius: "8px",
-							cursor: currentQuestion === 0 ? "not-allowed" : "pointer",
-							fontSize: "14px",
-							fontWeight: "500",
-							opacity: currentQuestion === 0 ? "0.5" : "1", // Use opacity for disabled state
+							display: "flex",
+							justifyContent: "space-between",
+							alignItems: "center",
 						}}
 					>
-						Previous
-					</button>
-
-					{isLastQuestion ? (
 						<button
-							onClick={handleSubmit}
-							disabled={!canProceed || isSubmitting}
-							style={{
-								padding: "12px 32px",
-								background: "#667eea", // Changed to match Choose Photo button
-								color: "#fff",
-								border: "none",
-								borderRadius: "8px",
-								cursor: canProceed && !isSubmitting ? "pointer" : "not-allowed",
-								fontSize: "14px",
-								fontWeight: "600",
-								opacity: (!canProceed || isSubmitting) ? "0.5" : "1", // Use opacity for disabled state
-							}}
-						>
-							{isSubmitting ? "Submitting..." : "Complete Profile"}
-						</button>
-					) : (
-						<button
-							onClick={handleNext}
-							disabled={!canProceed}
+							onClick={handlePrev}
+							disabled={currentQuestion === 0}
 							style={{
 								padding: "12px 24px",
 								background: "#667eea", // Changed to match Choose Photo button
 								color: "#fff",
 								border: "none",
 								borderRadius: "8px",
-								cursor: canProceed ? "pointer" : "not-allowed",
-								fontSize: "14px", // Changed to match other buttons
+								cursor: currentQuestion === 0 ? "not-allowed" : "pointer",
+								fontSize: "14px",
 								fontWeight: "500",
-								opacity: !canProceed ? "0.5" : "1", // Use opacity for disabled state
+								opacity: currentQuestion === 0 ? "0.5" : "1", // Use opacity for disabled state
 							}}
 						>
-							Next
+							Previous
 						</button>
-					)}
+
+						{isLastQuestion ? (
+							<button
+								onClick={handleSubmit}
+								disabled={!canProceed || isSubmitting}
+								style={{
+									padding: "12px 32px",
+									background: "#667eea", // Changed to match Choose Photo button
+									color: "#fff",
+									border: "none",
+									borderRadius: "8px",
+									cursor: canProceed && !isSubmitting ? "pointer" : "not-allowed",
+									fontSize: "14px",
+									fontWeight: "600",
+									opacity: (!canProceed || isSubmitting) ? "0.5" : "1", // Use opacity for disabled state
+								}}
+							>
+								{isSubmitting ? "Submitting..." : "Complete Profile"}
+							</button>
+						) : (
+							<button
+								onClick={handleNext}
+								disabled={!canProceed}
+								style={{
+									padding: "12px 24px",
+									background: "#667eea", // Changed to match Choose Photo button
+									color: "#fff",
+									border: "none",
+									borderRadius: "8px",
+									cursor: canProceed ? "pointer" : "not-allowed",
+									fontSize: "14px", // Changed to match other buttons
+									fontWeight: "500",
+									opacity: !canProceed ? "0.5" : "1", // Use opacity for disabled state
+								}}
+							>
+								Next
+							</button>
+						)}
+					</div>
 				</div>
 			</div>
-		</div>
+		</>
 	);
 }

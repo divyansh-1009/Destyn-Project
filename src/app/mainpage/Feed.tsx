@@ -497,107 +497,86 @@ export default function Feed() {
           padding: "16px 20px 12px 20px",
           borderTop: "1px solid #333",
           boxShadow: "0 -4px 20px rgba(0,0,0,0.15)",
+          // Remove maxWidth and margin for full width
         }}
       >
-        <div style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          position: 'relative',
-          width: '100%',
-          gap: 12,
-        }}>
-          <textarea
-            className="gossip-textarea"
-            value={newConfession}
-            onChange={(e) => setNewConfession(e.target.value)}
-            placeholder={confessionPlaceholder}
-            maxLength={800}
-            style={{
-              flex: 1,
-              minHeight: 38,
-              maxHeight: 150,
-              height: '38px',
-              boxSizing: "border-box",
-              resize: "none",
-              borderRadius: 24,
-              border: "1px solid rgba(51, 51, 51, 0.7)",
-              background: "rgba(17, 17, 17, 0.7)",
-              backdropFilter: "blur(10px)",
-              color: "#fff",
-              fontSize: 14,
-              outline: 'none',
-              fontFamily: 'inherit',
-              overflowY: 'auto',
-              padding: '0 16px',
-              transition: 'height 0.2s ease',
-            }}
-            onInput={e => {
-              const target = e.target as HTMLTextAreaElement;
-              target.style.height = '38px';
-              target.style.height = Math.min(target.scrollHeight, 150) + 'px';
-            }}
-            onKeyDown={e => {
-              if (e.key === "Enter" && !e.shiftKey && newConfession.trim()) {
-                e.preventDefault();
-                handleSubmitConfession();
-              }
-            }}
-          />
-          <button
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: '50%',
-              background: newConfession.trim() ? "linear-gradient(135deg, #25D366, #128C7E)" : "#666",
-              color: "white",
-              border: "none",
-              cursor: newConfession.trim() ? "pointer" : "not-allowed",
-              opacity: loading ? 0.7 : 1,
-              transition: "all 0.2s ease",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: 0,
-              boxShadow: newConfession.trim() ? "0 2px 8px rgba(0, 0, 0, 0.2)" : "none",
-              marginLeft: 8,
-            }}
-            onClick={handleSubmitConfession}
-            disabled={loading || !newConfession.trim()}
+        <textarea
+          className="gossip-textarea"
+          value={newConfession}
+          onChange={(e) => setNewConfession(e.target.value)}
+          placeholder={confessionPlaceholder}
+          maxLength={800}
+          style={{
+            width: "100%",
+            boxSizing: "border-box",
+            paddingRight: 48, // space for button
+            minWidth: 0,
+          }}
+          onKeyDown={e => {
+            if (e.key === "Enter" && !e.shiftKey && newConfession.trim()) {
+              e.preventDefault();
+              handleSubmitConfession();
+            }
+          }}
+        />
+        {newConfession.length > 0 && (
+          <div 
+            className={`char-count ${
+              newConfession.length > 700 ? "near-limit" : ""
+            } ${newConfession.length > 750 ? "at-limit" : ""}`}
           >
-            {loading ? (
-              <div
-                style={{
-                  width: "18px",
-                  height: "18px",
-                  border: "2px solid rgba(255,255,255,0.3)",
-                  borderTop: "2px solid white",
-                  borderRadius: "50%",
-                  animation: "spin 1s linear infinite",
-                }}
-              />
-            ) : (
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="20" 
-                height="20" 
-                viewBox="0 0 24 24" 
-                fill="white"
-              >
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-              </svg>
-            )}
-          </button>
-          {newConfession.length > 0 && (
-            <div 
-              className={`char-count ${
-                newConfession.length > 700 ? "near-limit" : ""
-              } ${newConfession.length > 750 ? "at-limit" : ""}`}
-              style={{ position: 'absolute', bottom: 8, right: 60 }}
+            {newConfession.length}/800
+          </div>
+        )}
+        <button
+          style={{
+            position: "absolute",
+            top: "50%",
+            right: "12px",
+            transform: "translateY(-50%)",
+            width: "38px",
+            height: "38px",
+            borderRadius: "50%",
+            background: newConfession.trim() ? "linear-gradient(135deg, #25D366, #128C7E)" : "#666", // WhatsApp gradient when active
+            color: "white",
+            border: "none",
+            cursor: newConfession.trim() ? "pointer" : "not-allowed",
+            opacity: loading ? 0.7 : 1,
+            transition: "all 0.2s ease",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: 0,
+            boxShadow: newConfession.trim() ? "0 2px 8px rgba(0, 0, 0, 0.2)" : "none",
+          }}
+          onClick={handleSubmitConfession}
+          disabled={loading || !newConfession.trim()}
+        >
+          {loading ? (
+            // Loading spinner
+            <div
+              style={{
+                width: "18px",
+                height: "18px",
+                border: "2px solid rgba(255,255,255,0.3)",
+                borderTop: "2px solid white",
+                borderRadius: "50%",
+                animation: "spin 1s linear infinite",
+              }}
+            />
+          ) : (
+            // Fixed WhatsApp-style send icon (microphone/paper plane)
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="20" 
+              height="20" 
+              viewBox="0 0 24 24" 
+              fill="white"
             >
-              {newConfession.length}/800
-            </div>
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+            </svg>
           )}
-        </div>
+        </button>
       </div>
 
       {/* Confessions Feed */}
@@ -660,249 +639,221 @@ export default function Feed() {
                   }}
                 />
 
-                {/* Confession Content */}
-                <div style={{ marginBottom: 16, width: "100%" }}>
-                  <p
-                    className="gossip-text"
-                    style={{
-                      color: "#fff",
-                      fontSize: "16px",
-                      lineHeight: 1.6,
-                      margin: "0 0 12px 0",
-                      wordWrap: "break-word", // Allow breaking long words
-                      overflowWrap: "break-word", // Ensure text wraps
-                      whiteSpace: "pre-wrap", // Preserve whitespace but wrap text
-                      maxWidth: "100%", // Restrict to container width
-                    }}
-                  >
-                    {confession.confession}
-                  </p>
-                  
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span style={{ color: "#666", fontSize: "12px" }}>
-                      Anonymous • {formatTime(confession.createdAt)}
-                    </span>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <span style={{ color: "#666", fontSize: "12px" }}>
-                        {confession.comments.length} comments
-                      </span>
-                      <button
-                        style={{ background: "#ff9800", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", fontWeight: 600, cursor: "pointer", fontSize: 12 }}
-                        onClick={() => { setReportTarget(confession._id); setReportModalOpen(true); }}
-                      >
-                        Report
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                {/* Reactions Row */}
-                <div style={{ 
-                  display: "flex", 
-                  gap: 10, 
-                  margin: "10px 0 16px 0", // Increased bottom margin
-                  flexWrap: "wrap", // Allow wrapping on smaller screens
-                  width: "100%"
-                }}>
-                  {REACTIONS.map((emoji) => {
-                    const users = reactions[emoji] || [];
-                    const hasReacted = session?.user?.email && users.includes(session.user.email);
-                    return (
-                      <ReactionButton
-                        key={emoji}
-                        emoji={emoji}
-                        count={users.length}
-                        hasReacted={!!hasReacted}
-                        onClick={() => handleReaction(confession._id, emoji, hasReacted)}
-                        users={users}
-                        disabled={!session?.user?.email}
-                      />
-                    );
-                  })}
-                </div>
-                {/* Comments Section */}
-                {confession.comments.length > 0 && (
-                  <div
-                    style={{
-                      borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-                      paddingTop: 16,
-                      marginBottom: 16,
-                      width: "100%",
-                    }}
-                  >
-                    <h4
+                  {/* Confession Content */}
+                  <div style={{ marginBottom: 16, width: "100%" }}>
+                    <p
+                      className="gossip-text"
                       style={{
                         color: "#fff",
+                        fontSize: "16px",
+                        lineHeight: 1.6,
                         margin: "0 0 12px 0",
-                        fontSize: "14px",
-                        fontWeight: "600",
+                        wordWrap: "break-word", // Allow breaking long words
+                        overflowWrap: "break-word", // Ensure text wraps
+                        whiteSpace: "pre-wrap", // Preserve whitespace but wrap text
+                        maxWidth: "100%", // Restrict to container width
                       }}
                     >
-                      Comments
-                    </h4>
+                      {confession.confession}
+                    </p>
+                    
                     <div
                       style={{
                         display: "flex",
-                        flexDirection: "column",
-                        gap: 12,
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span style={{ color: "#666", fontSize: "12px" }}>
+                        Anonymous • {formatTime(confession.createdAt)}
+                      </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span style={{ color: "#666", fontSize: "12px" }}>
+                          {confession.comments.length} comments
+                        </span>
+                        <button
+                          style={{ background: "#ff9800", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", fontWeight: 600, cursor: "pointer", fontSize: 12 }}
+                          onClick={() => { setReportTarget(confession._id); setReportModalOpen(true); }}
+                        >
+                          Report
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Reactions Row */}
+                  <div style={{ 
+                    display: "flex", 
+                    gap: 10, 
+                    margin: "10px 0 16px 0", // Increased bottom margin
+                    flexWrap: "wrap", // Allow wrapping on smaller screens
+                    width: "100%"
+                  }}>
+                    {REACTIONS.map((emoji) => {
+                      const users = reactions[emoji] || [];
+                      const hasReacted = session?.user?.email && users.includes(session.user.email);
+                      return (
+                        <ReactionButton
+                          key={emoji}
+                          emoji={emoji}
+                          count={users.length}
+                          hasReacted={!!hasReacted}
+                          onClick={() => handleReaction(confession._id, emoji, hasReacted)}
+                          users={users}
+                          disabled={!session?.user?.email}
+                        />
+                      );
+                    })}
+                  </div>
+                  {/* Comments Section */}
+                  {confession.comments.length > 0 && (
+                    <div
+                      style={{
+                        borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                        paddingTop: 16,
+                        marginBottom: 16,
                         width: "100%",
                       }}
                     >
-                      {/* Show limited number of comments based on the current count */}
-                      {confession.comments
-                        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) // Sort by newest first
-                        .slice(0, commentCounts[confession._id] || 3) // Show only the tracked number (default 3)
-                        .map((comment: any) => (
-                          <div
-                            key={comment.id}
-                            className="comment-container"
-                            style={{
-                              background: "rgba(10, 10, 10, 0.6)",
-                              borderRadius: 12,
-                              padding: 12,
-                              border: "1px solid rgba(102, 126, 234, 0.2)",
-                              backdropFilter: "blur(5px)",
-                              width: "100%",
-                              boxSizing: "border-box", // Add this to include padding in width
-                            }}
-                          >
+                      <h4
+                        style={{
+                          color: "#fff",
+                          margin: "0 0 12px 0",
+                          fontSize: "14px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Comments
+                      </h4>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 12,
+                          width: "100%",
+                        }}
+                      >
+                        {/* Show limited number of comments based on the current count */}
+                        {confession.comments
+                          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) // Sort by newest first
+                          .slice(0, commentCounts[confession._id] || 3) // Show only the tracked number (default 3)
+                          .map((comment: any) => (
                             <div
+                              key={comment.id}
+                              className="comment-container"
                               style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                marginBottom: 4,
-                                flexWrap: "wrap", // Allow wrapping on small screens
+                                background: "rgba(10, 10, 10, 0.6)",
+                                borderRadius: 12,
+                                padding: 12,
+                                border: "1px solid rgba(102, 126, 234, 0.2)",
+                                backdropFilter: "blur(5px)",
+                                width: "100%",
+                                boxSizing: "border-box", // Add this to include padding in width
                               }}
                             >
-                              <span
-                                className="user-name"
+                              <div
                                 style={{
-                                  color: "#667eea",
-                                  fontSize: "12px",
-                                  fontWeight: "600",
-                                  maxWidth: "70%", // Prevent very long names from breaking layout
-                                  textOverflow: "ellipsis",
-                                  overflow: "hidden",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {comment.userName}
-                              </span>
-                              <span
-                                className="time-text"
-                                style={{
-                                  color: "rgba(255, 255, 255, 0.4)",
-                                  fontSize: "10px",
-                                }}
-                              >
-                                {formatTime(comment.createdAt)}
-                              </span>
-                            </div>
-                            <p
-                              className="comment-text"
-                              style={{
-                                color: "#fff",
-                                fontSize: "14px",
-                                margin: 0,
-                                lineHeight: 1.4,
-                                wordWrap: "break-word", // Add this to ensure text wraps properly
-                                overflowWrap: "break-word", // Add this for better word breaking
-                              }}
-                            >
-                              {comment.comment}
-                            </p>
-                            {/* Comment +1 Reaction */}
-                            <div style={{ 
-                              display: "flex", 
-                              justifyContent: "flex-end", 
-                              marginTop: 8,
-                              alignItems: "center",
-                              gap: 6
-                            }}>
-                              <button
-                                onClick={() => {
-                                  const hasReacted = comment.reactions?.includes(session?.user?.email || '');
-                                  handleCommentReaction(confession._id, comment.id, hasReacted || false);
-                                }}
-                                disabled={!session?.user?.email}
-                                style={{
-                                  background: comment.reactions?.includes(session?.user?.email || '') 
-                                    ? "rgba(102, 126, 234, 0.3)" 
-                                    : "rgba(255, 255, 255, 0.1)",
-                                  border: "1px solid rgba(102, 126, 234, 0.3)",
-                                  color: comment.reactions?.includes(session?.user?.email || '') 
-                                    ? "#667eea" 
-                                    : "#888",
-                                  borderRadius: "6px",
-                                  padding: "4px 8px",
-                                  fontSize: "11px",
-                                  cursor: session?.user?.email ? "pointer" : "not-allowed",
                                   display: "flex",
+                                  justifyContent: "space-between",
                                   alignItems: "center",
-                                  gap: 4,
-                                  transition: "all 0.2s",
-                                }}
-                                onMouseEnter={(e) => {
-                                  if (session?.user?.email) {
-                                    e.currentTarget.style.background = "rgba(102, 126, 234, 0.2)";
-                                  }
-                                }}
-                                onMouseLeave={(e) => {
-                                  if (session?.user?.email) {
-                                    e.currentTarget.style.background = comment.reactions?.includes(session?.user?.email || '') 
-                                      ? "rgba(102, 126, 234, 0.3)" 
-                                      : "rgba(255, 255, 255, 0.1)";
-                                  }
+                                  marginBottom: 4,
+                                  flexWrap: "wrap", // Allow wrapping on small screens
                                 }}
                               >
-                                <span style={{ fontSize: "12px" }}>➕</span>
-                                {(comment.reactions?.length || 0) > 0 && (
-                                  <span>{comment.reactions?.length}</span>
-                                )}
-                              </button>
+                                <span
+                                  className="user-name"
+                                  style={{
+                                    color: "#667eea",
+                                    fontSize: "12px",
+                                    fontWeight: "600",
+                                    maxWidth: "70%", // Prevent very long names from breaking layout
+                                    textOverflow: "ellipsis",
+                                    overflow: "hidden",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {comment.userName}
+                                </span>
+                                <span
+                                  className="time-text"
+                                  style={{
+                                    color: "rgba(255, 255, 255, 0.4)",
+                                    fontSize: "10px",
+                                  }}
+                                >
+                                  {formatTime(comment.createdAt)}
+                                </span>
+                              </div>
+                              <p
+                                className="comment-text"
+                                style={{
+                                  color: "#fff",
+                                  fontSize: "14px",
+                                  margin: 0,
+                                  lineHeight: 1.4,
+                                  wordWrap: "break-word", // Add this to ensure text wraps properly
+                                  overflowWrap: "break-word", // Add this for better word breaking
+                                }}
+                              >
+                                {comment.comment}
+                              </p>
+                              {/* Comment +1 Reaction */}
+                              <div style={{ 
+                                display: "flex", 
+                                justifyContent: "flex-end", 
+                                marginTop: 8,
+                                alignItems: "center",
+                                gap: 6
+                              }}>
+                                <button
+                                  onClick={() => {
+                                    const hasReacted = comment.reactions?.includes(session?.user?.email || '');
+                                    handleCommentReaction(confession._id, comment.id, hasReacted || false);
+                                  }}
+                                  disabled={!session?.user?.email}
+                                  style={{
+                                    background: comment.reactions?.includes(session?.user?.email || '') 
+                                      ? "rgba(102, 126, 234, 0.3)" 
+                                      : "rgba(255, 255, 255, 0.1)",
+                                    border: "1px solid rgba(102, 126, 234, 0.3)",
+                                    color: comment.reactions?.includes(session?.user?.email || '') 
+                                      ? "#667eea" 
+                                      : "#888",
+                                    borderRadius: "6px",
+                                    padding: "4px 8px",
+                                    fontSize: "11px",
+                                    cursor: session?.user?.email ? "pointer" : "not-allowed",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 4,
+                                    transition: "all 0.2s",
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (session?.user?.email) {
+                                      e.currentTarget.style.background = "rgba(102, 126, 234, 0.2)";
+                                    }
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (session?.user?.email) {
+                                      e.currentTarget.style.background = comment.reactions?.includes(session?.user?.email || '') 
+                                        ? "rgba(102, 126, 234, 0.3)" 
+                                        : "rgba(255, 255, 255, 0.1)";
+                                    }
+                                  }}
+                                >
+                                  <span style={{ fontSize: "12px" }}>➕</span>
+                                  {(comment.reactions?.length || 0) > 0 && (
+                                    <span>{comment.reactions?.length}</span>
+                                  )}
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
                       
-                      {/* Show "View more comments" button if there are more comments to show */}
-                      {confession.comments.length > (commentCounts[confession._id] || 3) ? (
-                        <button
-                          className="action-button"
-                          onClick={() => loadMoreComments(confession._id)}
-                          style={{
-                            background: "rgba(102, 126, 234, 0.1)",
-                            border: "1px solid rgba(102, 126, 234, 0.3)",
-                            color: "#667eea",
-                            borderRadius: "8px",
-                            padding: "6px 12px",
-                            fontSize: "12px",
-                            cursor: "pointer",
-                            alignSelf: "center",
-                            marginTop: "4px",
-                            fontWeight: "500",
-                            transition: "all 0.2s",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = "rgba(102, 126, 234, 0.2)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = "rgba(102, 126, 234, 0.1)";
-                          }}
-                        >
-                          View {Math.min(3, confession.comments.length - (commentCounts[confession._id] || 3))} more comments
-                        </button>
-                      ) : (
-                        // Show "Show less" button when all comments are displayed
-                        commentCounts[confession._id] && commentCounts[confession._id] > 3 && (
+                        {/* Show "View more comments" button if there are more comments to show */}
+                        {confession.comments.length > (commentCounts[confession._id] || 3) ? (
                           <button
                             className="action-button"
-                            onClick={() => showFewerComments(confession._id)}
+                            onClick={() => loadMoreComments(confession._id)}
                             style={{
                               background: "rgba(102, 126, 234, 0.1)",
                               border: "1px solid rgba(102, 126, 234, 0.3)",
@@ -923,13 +874,41 @@ export default function Feed() {
                               e.currentTarget.style.background = "rgba(102, 126, 234, 0.1)";
                             }}
                           >
-                            Show fewer comments
+                            View {Math.min(3, confession.comments.length - (commentCounts[confession._id] || 3))} more comments
                           </button>
-                        )
-                      )}
+                        ) : (
+                          // Show "Show less" button when all comments are displayed
+                          commentCounts[confession._id] && commentCounts[confession._id] > 3 && (
+                            <button
+                              className="action-button"
+                              onClick={() => showFewerComments(confession._id)}
+                              style={{
+                                background: "rgba(102, 126, 234, 0.1)",
+                                border: "1px solid rgba(102, 126, 234, 0.3)",
+                                color: "#667eea",
+                                borderRadius: "8px",
+                                padding: "6px 12px",
+                                fontSize: "12px",
+                                cursor: "pointer",
+                                alignSelf: "center",
+                                marginTop: "4px",
+                                fontWeight: "500",
+                                transition: "all 0.2s",
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = "rgba(102, 126, 234, 0.2)";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = "rgba(102, 126, 234, 0.1)";
+                              }}
+                            >
+                              Show fewer comments
+                            </button>
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Add Comment */}
                 {replyingTo === confession._id ? (
@@ -1039,7 +1018,7 @@ export default function Feed() {
         )}
         {!hasMore && confessions.length > 0 && (
           <div style={{ textAlign: "center", color: "#888", padding: 20 }}>
-            No tea? No vibes. Spill more... 👀
+            No more confessions.
           </div>
         )}
       </div>

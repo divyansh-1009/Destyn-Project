@@ -586,16 +586,21 @@ function LoginPageContent() {
 // Main component with Suspense boundary
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">Destyn</h1>
-            <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4">Loading...</p>
+    <>
+      <head>
+        <meta name="description" content="Event booking in Jodhpur made easy. Plan and book venues, vendors, and events online with Destyn. Your one-stop solution for seamless event planning. Explore now!" />
+      </head>
+      <Suspense fallback={
+        <div className="min-h-screen bg-black text-white flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">Destyn</h1>
+              <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="mt-4">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
-      <LoginPageContent />
-    </Suspense>
+      }>
+        <LoginPageContent />
+      </Suspense>
+    </>
   );
 }

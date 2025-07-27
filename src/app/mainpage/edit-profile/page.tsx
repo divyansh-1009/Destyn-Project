@@ -260,192 +260,197 @@ export default function EditProfile() {
   }
 
   return (
-    <div className="edit-profile-root" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', paddingBottom: 40 }}>
-      <style jsx>{`
-        .edit-profile-root > form {
-          width: 100%;
-          max-width: 540px;
-          margin: 0 auto;
-          padding: 0 12px;
-        }
-        @media (min-width: 900px) {
+    <>
+      <head>
+        <meta name="description" content="Update your profile to get personalized event recommendations. Destyn helps you plan and book events online in Jodhpur with ease." />
+      </head>
+      <div className="edit-profile-root" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', paddingBottom: 40 }}>
+        <style jsx>{`
           .edit-profile-root > form {
-            width: 80vw;
-            max-width: 1100px;
-            padding: 0 0;
+            width: 100%;
+            max-width: 540px;
+            margin: 0 auto;
+            padding: 0 12px;
           }
-        }
-      `}</style>
-      {/* Top Navigation Bar */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: 64,
-        background: '#000000',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 32px',
-        zIndex: 100,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-      }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', fontSize: 26, color: '#ffffff', cursor: 'pointer' }}><FaArrowLeft /></button>
-        <div style={{ fontWeight: 700, fontSize: 26, color: '#ffffff', textAlign: 'center', flex: 1 }}>Edit Profile</div>
-        <button
-          onClick={handleSubmit}
-          disabled={submitting || !fields.bio.trim() || fields.interests.length === 0 || photos.length === 0}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0 32px',
-            height: 44,
-            borderRadius: 22,
-            border: 'none',
-            background: (submitting || !fields.bio.trim() || fields.interests.length === 0 || photos.length === 0) 
-              ? 'linear-gradient(90deg, #666666 0%, #888888 100%)' 
-              : 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)',
-            color: (submitting || !fields.bio.trim() || fields.interests.length === 0 || photos.length === 0) 
-              ? '#999999' 
-              : '#000000',
-            fontWeight: 700,
-            fontSize: 18,
-            boxShadow: '0 2px 8px rgba(79,195,247,0.3)',
-            cursor: (submitting || !fields.bio.trim() || fields.interests.length === 0 || photos.length === 0) 
-              ? 'not-allowed' 
-              : 'pointer',
-            outline: 'none',
-            margin: 0,
-            width: 110,
-            transition: 'all 0.3s ease',
-          }}
-        >
-          {submitting ? 'Saving...' : 'Save'}
-        </button>
-      </div>
-      {/* Add a spacer div after the nav bar to push content down */}
-      <div style={{ height: 64 }} />
-      <form id="edit-profile-form" onSubmit={handleSubmit}>
-        {/* Photos Section */}
-        <div style={{ background: '#000000', borderRadius: 28, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', padding: 28, margin: '32px 0 24px 0', border: '2px solid #4FC3F7' }}>
-          <div style={{ display: 'flex', alignItems: 'center', fontWeight: 700, fontSize: 20, color: '#4FC3F7', marginBottom: 18, gap: 10 }}><FaCamera /> Photos <span style={{ color: '#ff4444', fontSize: '14px' }}>*</span></div>
-          {/* In the photo area, just display the photos in a grid with delete buttons. Remove all drag-and-drop logic and components. */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 90px)',
-            gridAutoRows: '110px',
-            gap: 18,
-            alignItems: 'center',
-            marginBottom: 10,
-            justifyContent: 'center',
-            width: '100%',
-            maxWidth: 350,
-            marginLeft: 'auto',
-            marginRight: 'auto',
-          }}>
-            {photos.map((photo, idx) => (
-              <div
-                key={photo.id}
-                style={{
-                  width: 90,
-                  height: 90,
-                  borderRadius: 20,
-                  background: '#333',
-                  position: 'relative',
-                  boxShadow: '0 2px 8px rgba(79,195,247,0.2)',
-                  marginRight: 0,
-                  marginBottom: 0,
-                  border: idx === 0 ? '2px solid #4FC3F7' : '2px solid #333',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <img src={photo.preview} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: 20, objectFit: 'cover', pointerEvents: 'none' }} />
-                <button
-                  type="button"
-                  onClick={e => { e.stopPropagation(); e.preventDefault(); handleDeletePhoto(photo.id); }}
+          @media (min-width: 900px) {
+            .edit-profile-root > form {
+              width: 80vw;
+              max-width: 1100px;
+              padding: 0 0;
+            }
+          }
+        `}</style>
+        {/* Top Navigation Bar */}
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: 64,
+          background: '#000000',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 32px',
+          zIndex: 100,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+        }}>
+          <button onClick={() => router.back()} style={{ background: 'none', border: 'none', fontSize: 26, color: '#ffffff', cursor: 'pointer' }}><FaArrowLeft /></button>
+          <div style={{ fontWeight: 700, fontSize: 26, color: '#ffffff', textAlign: 'center', flex: 1 }}>Edit Profile</div>
+          <button
+            onClick={handleSubmit}
+            disabled={submitting || !fields.bio.trim() || fields.interests.length === 0 || photos.length === 0}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0 32px',
+              height: 44,
+              borderRadius: 22,
+              border: 'none',
+              background: (submitting || !fields.bio.trim() || fields.interests.length === 0 || photos.length === 0) 
+                ? 'linear-gradient(90deg, #666666 0%, #888888 100%)' 
+                : 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)',
+              color: (submitting || !fields.bio.trim() || fields.interests.length === 0 || photos.length === 0) 
+                ? '#999999' 
+                : '#000000',
+              fontWeight: 700,
+              fontSize: 18,
+              boxShadow: '0 2px 8px rgba(79,195,247,0.3)',
+              cursor: (submitting || !fields.bio.trim() || fields.interests.length === 0 || photos.length === 0) 
+                ? 'not-allowed' 
+                : 'pointer',
+              outline: 'none',
+              margin: 0,
+              width: 110,
+              transition: 'all 0.3s ease',
+            }}
+          >
+            {submitting ? 'Saving...' : 'Save'}
+          </button>
+        </div>
+        {/* Add a spacer div after the nav bar to push content down */}
+        <div style={{ height: 64 }} />
+        <form id="edit-profile-form" onSubmit={handleSubmit}>
+          {/* Photos Section */}
+          <div style={{ background: '#000000', borderRadius: 28, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', padding: 28, margin: '32px 0 24px 0', border: '2px solid #4FC3F7' }}>
+            <div style={{ display: 'flex', alignItems: 'center', fontWeight: 700, fontSize: 20, color: '#4FC3F7', marginBottom: 18, gap: 10 }}><FaCamera /> Photos <span style={{ color: '#ff4444', fontSize: '14px' }}>*</span></div>
+            {/* In the photo area, just display the photos in a grid with delete buttons. Remove all drag-and-drop logic and components. */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 90px)',
+              gridAutoRows: '110px',
+              gap: 18,
+              alignItems: 'center',
+              marginBottom: 10,
+              justifyContent: 'center',
+              width: '100%',
+              maxWidth: 350,
+              marginLeft: 'auto',
+              marginRight: 'auto',
+            }}>
+              {photos.map((photo, idx) => (
+                <div
+                  key={photo.id}
                   style={{
-                    position: 'absolute',
-                    top: 2,
-                    right: 2,
-                    background: '#000000',
-                    color: '#4FC3F7',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: 28,
-                    height: 28,
-                    fontWeight: 700,
-                    fontSize: 20,
-                    cursor: 'pointer',
-                    boxShadow: '0 1px 4px rgba(79,195,247,0.3)',
+                    width: 90,
+                    height: 90,
+                    borderRadius: 20,
+                    background: '#333',
+                    position: 'relative',
+                    boxShadow: '0 2px 8px rgba(79,195,247,0.2)',
+                    marginRight: 0,
+                    marginBottom: 0,
+                    border: idx === 0 ? '2px solid #4FC3F7' : '2px solid #333',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    transition: 'background 0.18s, color 0.18s, box-shadow 0.18s',
                   }}
-                  aria-label="Delete photo"
                 >
-                  ×
-                </button>
-                {idx === 0 && (
-                  <div style={{ position: 'absolute', left: 0, bottom: 0, background: 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)', color: '#000000', fontSize: 11, fontWeight: 700, borderRadius: '0 12px 0 20px', padding: '2px 10px', letterSpacing: 0.5 }}>Profile</div>
-                )}
-              </div>
-            ))}
-            {photos.length < 6 && (
-              <label style={{ width: 90, height: 90, border: '2px dashed #4FC3F7', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 38, color: '#4FC3F7', cursor: 'pointer', background: '#1a1a1a' }}>
-                +
-                <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handlePhotoChange} />
-              </label>
+                  <img src={photo.preview} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: 20, objectFit: 'cover', pointerEvents: 'none' }} />
+                  <button
+                    type="button"
+                    onClick={e => { e.stopPropagation(); e.preventDefault(); handleDeletePhoto(photo.id); }}
+                    style={{
+                      position: 'absolute',
+                      top: 2,
+                      right: 2,
+                      background: '#000000',
+                      color: '#4FC3F7',
+                      border: 'none',
+                      borderRadius: '50%',
+                      width: 28,
+                      height: 28,
+                      fontWeight: 700,
+                      fontSize: 20,
+                      cursor: 'pointer',
+                      boxShadow: '0 1px 4px rgba(79,195,247,0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'background 0.18s, color 0.18s, box-shadow 0.18s',
+                    }}
+                    aria-label="Delete photo"
+                  >
+                    ×
+                  </button>
+                  {idx === 0 && (
+                    <div style={{ position: 'absolute', left: 0, bottom: 0, background: 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)', color: '#000000', fontSize: 11, fontWeight: 700, borderRadius: '0 12px 0 20px', padding: '2px 10px', letterSpacing: 0.5 }}>Profile</div>
+                  )}
+                </div>
+              ))}
+              {photos.length < 6 && (
+                <label style={{ width: 90, height: 90, border: '2px dashed #4FC3F7', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 38, color: '#4FC3F7', cursor: 'pointer', background: '#1a1a1a' }}>
+                  +
+                  <input type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={handlePhotoChange} />
+                </label>
+              )}
+            </div>
+            <div style={{ color: '#cccccc', fontSize: 15, marginTop: 6 }}>
+              Add up to 6 photos. First photo will be your main profile picture.
+              {photos.length === 0 && <span style={{ color: '#ff4444', display: 'block', marginTop: 4 }}>• At least one photo required</span>}
+            </div>
+          </div>
+          {/* About Me Section */}
+          <div style={{ background: '#000000', borderRadius: 28, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', padding: 28, marginBottom: 24, border: '2px solid #4FC3F7' }}>
+            <div style={{ display: 'flex', alignItems: 'center', fontWeight: 700, fontSize: 20, color: '#4FC3F7', marginBottom: 18, gap: 10 }}><FaHeart /> About Me</div>
+            <label style={{ fontWeight: 600, color: '#ffffff', marginBottom: 8, display: 'block' }}>
+              Bio <span style={{ color: '#ff4444', fontSize: '14px' }}>*</span>
+            </label>
+            <textarea name="bio" value={fields.bio} onChange={handleChange} maxLength={500} rows={3} style={{ width: '100%', padding: 16, borderRadius: 16, border: '1px solid #333', fontSize: 17, marginTop: 6, background: '#1a1a1a', color: '#ffffff', resize: 'vertical' }} />
+            <div style={{ textAlign: 'right', color: '#cccccc', fontSize: 14 }}>
+              {fields.bio.length}/500 {!fields.bio.trim() && <span style={{ color: '#ff4444' }}>• Minimum 1 character required</span>}
+            </div>
+          </div>
+          {/* Interests Section */}
+          <div style={{ background: '#000000', borderRadius: 28, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', padding: 28, marginBottom: 24, border: '2px solid #4FC3F7' }}>
+            <div style={{ fontWeight: 700, fontSize: 20, color: '#4FC3F7', marginBottom: 12 }}>Interests</div>
+            <div style={{ fontWeight: 600, color: '#ffffff', marginBottom: 8 }}>
+              Your Interests ({fields.interests.length} selected) <span style={{ color: '#ff4444', fontSize: '14px' }}>*</span>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
+              {fields.interests.map((interest, idx) => (
+                <span key={idx} style={{ background: 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)', color: '#000000', borderRadius: 16, padding: '8px 18px', fontSize: 16, fontWeight: 600, letterSpacing: 0.2, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  {interest}
+                  <button type="button" onClick={() => handleRemoveInterest(interest)} style={{ background: 'none', border: 'none', color: '#000000', fontSize: 18, marginLeft: 4, cursor: 'pointer' }}>&times;</button>
+                </span>
+              ))}
+            </div>
+            {fields.interests.length === 0 && (
+              <div style={{ color: '#ff4444', fontSize: 14, marginBottom: 8 }}>• At least one interest required</div>
             )}
+            <div style={{ fontWeight: 600, color: '#ffffff', marginBottom: 8 }}>All Interests</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {ALL_INTERESTS.map((interest, idx) => (
+                <button key={idx} type="button" onClick={() => handleInterestClick(interest)} style={{ background: fields.interests.includes(interest) ? 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)' : '#1a1a1a', color: fields.interests.includes(interest) ? '#000000' : '#4FC3F7', border: 'none', borderRadius: 16, padding: '8px 18px', fontSize: 16, fontWeight: 600, letterSpacing: 0.2, cursor: 'pointer' }}>+ {interest}</button>
+              ))}
+            </div>
           </div>
-          <div style={{ color: '#cccccc', fontSize: 15, marginTop: 6 }}>
-            Add up to 6 photos. First photo will be your main profile picture.
-            {photos.length === 0 && <span style={{ color: '#ff4444', display: 'block', marginTop: 4 }}>• At least one photo required</span>}
-          </div>
-        </div>
-        {/* About Me Section */}
-        <div style={{ background: '#000000', borderRadius: 28, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', padding: 28, marginBottom: 24, border: '2px solid #4FC3F7' }}>
-          <div style={{ display: 'flex', alignItems: 'center', fontWeight: 700, fontSize: 20, color: '#4FC3F7', marginBottom: 18, gap: 10 }}><FaHeart /> About Me</div>
-          <label style={{ fontWeight: 600, color: '#ffffff', marginBottom: 8, display: 'block' }}>
-            Bio <span style={{ color: '#ff4444', fontSize: '14px' }}>*</span>
-          </label>
-          <textarea name="bio" value={fields.bio} onChange={handleChange} maxLength={500} rows={3} style={{ width: '100%', padding: 16, borderRadius: 16, border: '1px solid #333', fontSize: 17, marginTop: 6, background: '#1a1a1a', color: '#ffffff', resize: 'vertical' }} />
-          <div style={{ textAlign: 'right', color: '#cccccc', fontSize: 14 }}>
-            {fields.bio.length}/500 {!fields.bio.trim() && <span style={{ color: '#ff4444' }}>• Minimum 1 character required</span>}
-          </div>
-        </div>
-        {/* Interests Section */}
-        <div style={{ background: '#000000', borderRadius: 28, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', padding: 28, marginBottom: 24, border: '2px solid #4FC3F7' }}>
-          <div style={{ fontWeight: 700, fontSize: 20, color: '#4FC3F7', marginBottom: 12 }}>Interests</div>
-          <div style={{ fontWeight: 600, color: '#ffffff', marginBottom: 8 }}>
-            Your Interests ({fields.interests.length} selected) <span style={{ color: '#ff4444', fontSize: '14px' }}>*</span>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
-            {fields.interests.map((interest, idx) => (
-              <span key={idx} style={{ background: 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)', color: '#000000', borderRadius: 16, padding: '8px 18px', fontSize: 16, fontWeight: 600, letterSpacing: 0.2, display: 'flex', alignItems: 'center', gap: 8 }}>
-                {interest}
-                <button type="button" onClick={() => handleRemoveInterest(interest)} style={{ background: 'none', border: 'none', color: '#000000', fontSize: 18, marginLeft: 4, cursor: 'pointer' }}>&times;</button>
-              </span>
-            ))}
-          </div>
-          {fields.interests.length === 0 && (
-            <div style={{ color: '#ff4444', fontSize: 14, marginBottom: 8 }}>• At least one interest required</div>
-          )}
-          <div style={{ fontWeight: 600, color: '#ffffff', marginBottom: 8 }}>All Interests</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-            {ALL_INTERESTS.map((interest, idx) => (
-              <button key={idx} type="button" onClick={() => handleInterestClick(interest)} style={{ background: fields.interests.includes(interest) ? 'linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)' : '#1a1a1a', color: fields.interests.includes(interest) ? '#000000' : '#4FC3F7', border: 'none', borderRadius: 16, padding: '8px 18px', fontSize: 16, fontWeight: 600, letterSpacing: 0.2, cursor: 'pointer' }}>+ {interest}</button>
-            ))}
-          </div>
-        </div>
-        {error && <div style={{ color: '#ff4444', marginTop: 12 }}>{error}</div>}
-        {success && <div style={{ color: '#4caf50', marginTop: 12 }}>{success}</div>}
-      </form>
-    </div>
+          {error && <div style={{ color: '#ff4444', marginTop: 12 }}>{error}</div>}
+          {success && <div style={{ color: '#4caf50', marginTop: 12 }}>{success}</div>}
+        </form>
+      </div>
+    </>
   );
 }
 

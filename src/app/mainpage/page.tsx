@@ -491,56 +491,61 @@ function MainPageContent() {
 // Main component with Suspense wrapper
 export default function MainPage() {
   return (
-    <Suspense fallback={
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          color: "#fff",
-        }}
-      >
+    <>
+      <head>
+        <meta name="description" content="Event booking in Jodhpur made easy. Plan and book venues, vendors, and events online with Destyn. Your one-stop solution for seamless event planning. Explore now!" />
+      </head>
+      <Suspense fallback={
         <div
           style={{
-            textAlign: "center",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            color: "#fff",
           }}
         >
           <div
             style={{
-              width: "60px",
-              height: "60px",
-              border: "4px solid rgba(255,255,255,0.3)",
-              borderTop: "4px solid #fff",
-              borderRadius: "50%",
-              margin: "0 auto 20px",
-              animation: "spin 1s linear infinite",
-            }}
-          ></div>
-          <p
-            style={{
-              fontSize: "16px",
-              fontWeight: "500",
+              textAlign: "center",
             }}
           >
-            Loading...
-          </p>
+            <div
+              style={{
+                width: "60px",
+                height: "60px",
+                border: "4px solid rgba(255,255,255,0.3)",
+                borderTop: "4px solid #fff",
+                borderRadius: "50%",
+                margin: "0 auto 20px",
+                animation: "spin 1s linear infinite",
+              }}
+            ></div>
+            <p
+              style={{
+                fontSize: "16px",
+                fontWeight: "500",
+              }}
+            >
+              Loading...
+            </p>
 
-          <style jsx>{`
-            @keyframes spin {
-              0% {
-                transform: rotate(0deg);
+            <style jsx>{`
+              @keyframes spin {
+                0% {
+                  transform: rotate(0deg);
+                }
+                100% {
+                  transform: rotate(360deg);
+                }
               }
-              100% {
-                transform: rotate(360deg);
-              }
-            }
-          `}</style>
+            `}</style>
+          </div>
         </div>
-      </div>
-    }>
-      <MainPageContent />
-    </Suspense>
+      }>
+        <MainPageContent />
+      </Suspense>
+    </>
   );
 }
