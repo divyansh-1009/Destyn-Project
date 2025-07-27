@@ -237,10 +237,10 @@ export default function People() {
         }}
       >
         <div style={{ fontSize: "48px", marginBottom: 16, opacity: 0.5 }}>
-          👥
+          🔍
         </div>
         <div style={{ fontSize: "20px", marginBottom: 8 }}>
-          No more people to show
+          You’ve swiped the town dry
         </div>
         <div style={{ fontSize: "14px", marginBottom: 20 }}>
           Check back later for new profiles

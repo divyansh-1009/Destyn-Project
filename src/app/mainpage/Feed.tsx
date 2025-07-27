@@ -126,11 +126,11 @@ export default function Feed() {
   const feedRef = useRef<HTMLDivElement>(null);
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
-  const [confessionPlaceholder, setConfessionPlaceholder] = useState("Tell us a gossip...");
+  const [confessionPlaceholder, setConfessionPlaceholder] = useState("Spill the tea...");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setConfessionPlaceholder(window.innerWidth < 600 ? "Share gossip..." : "Tell us a gossip...");
+      setConfessionPlaceholder(window.innerWidth < 600 ? "Spill the tea..." : "Spill the tea...");
     }
   }, []);
 

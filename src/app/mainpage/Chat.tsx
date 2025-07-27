@@ -345,8 +345,8 @@ export default function Chat() {
                 }}
               >
                 {activeTab === 'new' 
-                  ? "No new matches yet. Start liking people to see them here!"
-                  : "No active chats yet. Send a message to start chatting!"
+                  ? "Still a lil dry in here, go like some cuties..."
+                  : "Still waiting on that first “hey 👋” — go make a move!"
                 }
               </div>
             )}
@@ -796,7 +796,7 @@ export default function Chat() {
                   fontWeight: "600",
                 }}
               >
-                {isMobile ? "Select a match" : "Select a match to start chatting"}
+                {isMobile ? "Your next fav convo is one tap away—go for it " : "Your next fav convo is one tap away—go for it "}
               </div>
               <div
                 style={{
@@ -805,7 +805,7 @@ export default function Chat() {
                   maxWidth: 300,
                 }}
               >
-                Your conversations will appear here once you have mutual matches
+                Your chats will pop up once the vibes are mutual...
               </div>
             </div>
           )}
