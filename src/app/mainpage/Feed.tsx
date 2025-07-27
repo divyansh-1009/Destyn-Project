@@ -48,15 +48,16 @@ function ReactionButton({
           background: hasReacted ? "#0070f3" : "#222",
           color: hasReacted ? "#fff" : "#ccc",
           border: hasReacted ? "2px solid #0070f3" : "1px solid #333",
-          borderRadius: isMobile ? 16 : 20,
-          padding: isMobile ? "4px 10px" : "6px 14px",
-          fontSize: isMobile ? 14 : 18,
+          borderRadius: isMobile ? 12 : 15,
+          padding: isMobile ? "3px 7.5px" : "4.5px 10.5px",
+          fontSize: isMobile ? 10.5 : 13.5,
           fontWeight: 600,
           cursor: disabled ? "not-allowed" : "pointer",
           boxShadow: hasReacted ? "0 2px 8px #0070f355" : "none",
           display: "flex",
           alignItems: "center",
-          gap: isMobile ? 4 : 6,
+          justifyContent: "center",
+          gap: 3,
           transition: "all 0.2s",
           outline: hasReacted ? "2px solid #0070f3" : undefined,
           transform: anim ? "scale(1.2)" : "scale(1)",
@@ -68,7 +69,10 @@ function ReactionButton({
         onFocus={() => setShowTooltip(true)}
         onBlur={() => setShowTooltip(false)}
       >
-        {emoji} <span style={{ fontSize: isMobile ? 11 : 14, marginLeft: isMobile ? 2 : 4 }}>{count > 0 ? count : ""}</span>
+        <span style={{ fontSize: isMobile ? 10.5 : 13.5, display: 'flex', alignItems: 'center' }}>{emoji}</span>
+        {count > 0 && (
+          <span style={{ fontSize: isMobile ? 8.25 : 10.5, display: 'flex', alignItems: 'center' }}>{count}</span>
+        )}
       </button>
       {showTooltip && users.length > 0 && (
         <div
@@ -1035,7 +1039,7 @@ export default function Feed() {
         )}
         {!hasMore && confessions.length > 0 && (
           <div style={{ textAlign: "center", color: "#888", padding: 20 }}>
-            No more confessions.
+            No tea? No vibes. Spill more... 👀
           </div>
         )}
       </div>
