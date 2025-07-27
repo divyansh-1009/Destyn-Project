@@ -181,28 +181,28 @@ function UserProfileContent() {
         <div style={{ display: "flex", gap: 18, padding: "0 32px 0 32px", marginTop: 18 }}>
           <button
             onClick={handleMessage}
-            style={{ flex: 2, background: "linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)", color: "#000000", border: "none", borderRadius: 12, padding: "14px 0", fontWeight: 700, fontSize: 18, cursor: "pointer", boxShadow: '0 2px 8px rgba(79,195,247,0.3)', letterSpacing: 0.2 }}
+            style={{ flex: 2, background: "#002366", color: "#fff", border: "none", borderRadius: 12, padding: "14px 0", fontWeight: 700, fontSize: 18, cursor: "pointer", boxShadow: '0 2px 8px #00236644', letterSpacing: 0.2 }}
           >
             Message
           </button>
           {isBlocked ? (
             <button
               onClick={handleUnblock}
-              style={{ flex: 1, background: "#0070f3", color: "#fff", border: "none", borderRadius: 12, padding: "14px 0", fontWeight: 700, fontSize: 18, cursor: "pointer", boxShadow: '0 2px 8px rgba(0,112,243,0.3)', letterSpacing: 0.2 }}
+              style={{ flex: 1.5, background: "#0070f3", color: "#fff", border: "none", borderRadius: 12, padding: "14px 0", fontWeight: 700, fontSize: 18, cursor: "pointer", boxShadow: '0 2px 8px rgba(0,112,243,0.3)', letterSpacing: 0.2 }}
             >
-              Unblock
+              Un-ghost
             </button>
           ) : (
             <button
               onClick={() => setBlockModalOpen(true)}
-              style={{ flex: 1, background: "#ff4444", color: "#fff", border: "none", borderRadius: 12, padding: "14px 0", fontWeight: 700, fontSize: 18, cursor: "pointer", boxShadow: '0 2px 8px rgba(255,68,68,0.3)', letterSpacing: 0.2 }}
+              style={{ flex: 1.5, background: "#ff4444", color: "#fff", border: "none", borderRadius: 12, padding: "14px 0", fontWeight: 700, fontSize: 18, cursor: "pointer", boxShadow: '0 2px 8px rgba(255,68,68,0.3)', letterSpacing: 0.2 }}
             >
-              Block
+              Ghost
             </button>
           )}
           <button
             onClick={() => setReportModalOpen(true)}
-            style={{ flex: 1, background: "#ff9800", color: "#fff", border: "none", borderRadius: 12, padding: "14px 0", fontWeight: 700, fontSize: 18, cursor: "pointer", boxShadow: '0 2px 8px rgba(255,152,0,0.3)', letterSpacing: 0.2 }}
+            style={{ flex: 1.5, background: "#ff9800", color: "#fff", border: "none", borderRadius: 12, padding: "14px 0", fontWeight: 700, fontSize: 18, cursor: "pointer", boxShadow: '0 2px 8px rgba(255,152,0,0.3)', letterSpacing: 0.2 }}
           >
             Report
           </button>

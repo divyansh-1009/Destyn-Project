@@ -14,7 +14,7 @@ export default function BlockConfirmModal({ open, onClose, onConfirm, userEmail 
         <p>Are you sure you want to ghost <b>{userEmail}</b>? You will no longer see their profile and messages.</p>
         <div style={{ display: "flex", gap: 12, marginTop: 18 }}>
           <button onClick={onClose} style={{ padding: "10px 0", borderRadius: 8, background: "#333", color: "white", border: "none", fontWeight: 600, fontSize: 15, cursor: "pointer", flex: 1 }}>Cancel</button>
-          <button onClick={onConfirm} style={{ padding: "10px 0", borderRadius: 8, background: "#f44336", color: "white", border: "none", fontWeight: 600, fontSize: 15, cursor: "pointer", flex: 1 }}>Block</button>
+          <button onClick={onConfirm} style={{ padding: "10px 0", borderRadius: 8, background: "#f44336", color: "white", border: "none", fontWeight: 600, fontSize: 15, cursor: "pointer", flex: 1 }}>Ghost</button>
         </div>
       </div>
     </div>

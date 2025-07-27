@@ -485,6 +485,24 @@ export default function Feed() {
         boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
       }}
     >
+      {/* Gen Z Heading */}
+      <div
+        style={{
+          fontSize: 32,
+          fontWeight: 900,
+          color: '#fff',
+          textAlign: 'center',
+          marginBottom: 32,
+          letterSpacing: 1,
+          background: 'linear-gradient(90deg, #fc5c7d, #6a82fb, #fc5c7d)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          userSelect: 'none',
+          textShadow: '0 2px 12px #fc5c7d44',
+        }}
+      >
+         The Vibe Feed <span style={{fontWeight:700, fontSize:20}}></span>
+      </div>
       {/* Minimal Confession Input */}
       <div
         style={{

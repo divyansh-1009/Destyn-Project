@@ -7,6 +7,10 @@ import { FcGoogle } from "react-icons/fc";
 import { ParallaxProvider, Parallax } from "react-scroll-parallax";
 import { motion } from "framer-motion";
 import { useRef } from "react";
+import FAQs from "./mainpage/FAQs";
+import Privacy from "./mainpage/Privacy";
+import Guidelines from "./mainpage/Guidelines";
+import AboutUs from "./mainpage/AboutUs";
 
 // Function to clear all authentication-related cookies
 const clearAuthCookies = async () => {
@@ -99,6 +103,8 @@ function LoginPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [isClearingSession, setIsClearingSession] = useState(false);
   const [hasProcessedError, setHasProcessedError] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [modal, setModal] = useState<null | "faq" | "privacy" | "guidelines" | "aboutus">(null);
   const sectionIds = ["about", "services", "faq"];
   const activeSection = useScrollSpy(sectionIds);
 
@@ -322,31 +328,57 @@ function LoginPageContent() {
               <div className="text-2xl font-bold text-white flex items-center">
                 <img src="/Typography_white.png" alt="Destyn Logo" className="h-10 w-auto object-contain" style={{filter: 'drop-shadow(0 1px 4px #34398c)'}} />
               </div>
-              <div className="hidden md:flex space-x-8">
-                {sectionIds.map((id) => (
-                  <a
-                    key={id}
-                    href={`#${id}`}
-                    className={`relative text-white transition-colors duration-200 px-2 py-1 ${
-                      activeSection === id ? "font-bold text-blue-400" : "hover:text-blue-300"
-                    }`}
+              <div className="flex items-center space-x-4">
+                <div className="hidden md:flex space-x-8">
+                  {sectionIds.map((id) => (
+                    <a
+                      key={id}
+                      href={`#${id}`}
+                      className={`relative text-white transition-colors duration-200 px-2 py-1 ${
+                        activeSection === id ? "font-bold text-blue-400" : "hover:text-blue-300"
+                      }`}
+                    >
+                      <span>{id.charAt(0).toUpperCase() + id.slice(1)}</span>
+                      {/* Animated underline */}
+                      <motion.span
+                        layoutId="nav-underline"
+                        className="absolute left-0 right-0 -bottom-1 h-0.5 bg-blue-400 rounded"
+                        style={{
+                          opacity: activeSection === id ? 1 : 0,
+                          transition: "opacity 0.2s"
+                        }}
+                      />
+                    </a>
+                  ))}
+                </div>
+                {/* Hamburger/More menu */}
+                <div className="ml-4 relative">
+                  <button
+                    aria-label="More options"
+                    className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-800 focus:outline-none"
+                    onClick={() => setMoreOpen((v) => !v)}
                   >
-                    <span>{id.charAt(0).toUpperCase() + id.slice(1)}</span>
-                    {/* Animated underline */}
-                    <motion.span
-                      layoutId="nav-underline"
-                      className="absolute left-0 right-0 -bottom-1 h-0.5 bg-blue-400 rounded"
-                      style={{
-                        opacity: activeSection === id ? 1 : 0,
-                        transition: "opacity 0.2s"
-                      }}
-                    />
-                  </a>
-                ))}
+                    {/* Hamburger icon */}
+                    <span style={{ display: 'inline-block', fontSize: 28, lineHeight: 1 }}>&#9776;</span>
+                  </button>
+                  {moreOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-black border border-gray-700 rounded-lg shadow-lg z-50">
+                      <button className="block w-full text-left px-4 py-3 text-white hover:bg-gray-800" onClick={() => { setModal("faq"); setMoreOpen(false); }}>FAQ</button>
+                      <button className="block w-full text-left px-4 py-3 text-white hover:bg-gray-800" onClick={() => { setModal("privacy"); setMoreOpen(false); }}>Privacy Policy</button>
+                      <button className="block w-full text-left px-4 py-3 text-white hover:bg-gray-800" onClick={() => { setModal("guidelines"); setMoreOpen(false); }}>Guidelines</button>
+                      <button className="block w-full text-left px-4 py-3 text-white hover:bg-gray-800" onClick={() => { setModal("aboutus"); setMoreOpen(false); }}>About Us</button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </nav>
+        {/* Modals for More menu */}
+        {modal === "faq" && <FAQs onClose={() => setModal(null)} onShowPrivacy={() => { setModal("privacy"); }} />}
+        {modal === "privacy" && <Privacy onClose={() => setModal(null)} />}
+        {modal === "guidelines" && <Guidelines onClose={() => setModal(null)} />}
+        {modal === "aboutus" && <AboutUs onClose={() => setModal(null)} />}
 
         {/* Hero Section with Parallax */}
         <section className="relative h-screen flex items-center justify-center overflow-hidden">
@@ -409,17 +441,34 @@ function LoginPageContent() {
 
         {/* Discover Connections Section */}
         <motion.section
-          className="flex flex-col md:flex-row items-center justify-center py-16 px-4 md:px-0"
+          className="relative flex flex-col md:flex-row items-center justify-center py-16 px-4 md:px-0 min-h-[60vh]"
           style={{
-            background: 'linear-gradient(90deg, #fff 0%, #f5f6fa 40%, #34398c 100%)',
+            background: `linear-gradient(120deg, #fbb040 0%, #6a1b9a 100%), radial-gradient(circle at 60% 40%, #fbb04033 0%, #6a1b9a22 80%)`,
+            overflow: 'hidden',
           }}
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.8 }}
         >
+          {/* Blurred background image layer */}
+          <img
+            src="/discover-connection.png"
+            alt="Blurred background"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              filter: 'blur(32px) brightness(0.7)',
+              zIndex: 0,
+              pointerEvents: 'none',
+            }}
+          />
           {/* Left: Text */}
-          <div className="md:w-1/2 w-full flex flex-col items-start justify-center px-4 md:px-16 mb-10 md:mb-0">
+          <div className="md:w-1/2 w-full flex flex-col items-start justify-center px-4 md:px-16 mb-10 md:mb-0 relative z-10">
             <h2 className="font-serif text-5xl md:text-6xl font-bold mb-6 leading-tight text-[#34398c]">Discover<br/>Connections</h2>
             <div className="w-24 h-1 bg-[#34398c] mb-8"></div>
             <p className="font-serif text-xl md:text-2xl leading-relaxed text-[#34398c]">
@@ -427,14 +476,31 @@ function LoginPageContent() {
             </p>
           </div>
           {/* Right: Image with overlay */}
-          <div className="md:w-1/2 w-full flex items-center justify-center relative">
+          <div className="md:w-1/2 w-full flex items-center justify-center relative z-10">
             <div className="absolute rounded-xl shadow-2xl w-[90%] h-[90%] bg-[#34398c] opacity-20 z-0" style={{filter:'blur(12px)'}}></div>
-            <img
-              src="/discover-connection.png"
-              alt="Discover Connections"
-              className="rounded-xl shadow-2xl max-w-full h-auto object-contain relative z-10"
-              style={{ minWidth: '250px', maxWidth: '400px', background: 'transparent' }}
-            />
+            <div
+              style={{
+                position: 'relative',
+                zIndex: 1,
+                borderRadius: '24px',
+                overflow: 'hidden',
+                boxShadow: '0 8px 40px 0 #fbb04055, 0 2px 24px 0 #6a1b9a44',
+                background: 'rgba(255,255,255,0.05)',
+                maxWidth: 400,
+                margin: '0 auto',
+              }}
+            >
+              <img
+                src="/discover-connection.png"
+                alt="Discover Connections"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  display: 'block',
+                  borderRadius: '24px',
+                }}
+              />
+            </div>
           </div>
         </motion.section>
 
@@ -497,8 +563,16 @@ function LoginPageContent() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5 }}
                 >
-                  <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center text-5xl bg-white bg-opacity-10 group-hover:bg-opacity-30 transition-all duration-300">
-                    {service.icon}
+                  <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center bg-white bg-opacity-10 group-hover:bg-opacity-30 transition-all duration-300 overflow-hidden">
+                    {service.title === "Verified Community" && (
+                      <img src="/verified.avif" alt="Verified Community" className="w-full h-full object-cover" />
+                    )}
+                    {service.title === "Safe Environment" && (
+                      <img src="/security.jpg" alt="Safe Environment" className="w-full h-full object-cover" />
+                    )}
+                    {service.title === "Emotional Support" && (
+                      <img src="/connection.jpg" alt="Emotional Support" className="w-full h-full object-cover" />
+                    )}
                   </div>
                   <h3 className="text-2xl font-bold mb-4 group-hover:text-white transition-colors duration-200">{service.title}</h3>
                   <p className="text-gray-300 group-hover:text-white transition-colors duration-200">{service.desc}</p>
@@ -586,21 +660,16 @@ function LoginPageContent() {
 // Main component with Suspense boundary
 export default function LoginPage() {
   return (
-    <>
-      <head>
-        <meta name="description" content="Event booking in Jodhpur made easy. Plan and book venues, vendors, and events online with Destyn. Your one-stop solution for seamless event planning. Explore now!" />
-      </head>
-      <Suspense fallback={
-        <div className="min-h-screen bg-black text-white flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold mb-4">Destyn</h1>
-              <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="mt-4">Loading...</p>
-          </div>
+    <Suspense fallback={
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4">Destyn</h1>
+            <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4">Loading...</p>
         </div>
-      }>
-        <LoginPageContent />
-      </Suspense>
-    </>
+      </div>
+    }>
+      <LoginPageContent />
+    </Suspense>
   );
 }

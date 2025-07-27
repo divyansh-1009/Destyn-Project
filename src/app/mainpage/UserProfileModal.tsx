@@ -98,7 +98,7 @@ export default function UserProfileModal({
             onClick={onBlock}
             style={{ flex: 1, background: isBlocked ? "#0070f3" : "#f44336", color: "#fff", border: "none", borderRadius: 12, padding: "12px 0", fontWeight: 700, fontSize: 16, cursor: "pointer" }}
           >
-            {isBlocked ? "Unblock" : "Block"}
+            {isBlocked ? "Un-ghost" : "Ghost"}
           </button>
           <button
             onClick={onReport}

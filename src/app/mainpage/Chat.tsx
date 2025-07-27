@@ -815,7 +815,7 @@ export default function Chat() {
                     onBlur={(e) =>
                       ((e.target as HTMLInputElement).style.borderColor = "#333")
                     }
-                    placeholder={isBlocked ? "You have blocked this user. You cannot send messages." : "Type a message..."}
+                    placeholder={isBlocked ? "You have ghosted this user. You cannot send messages." : "Type a message..."}
                     disabled={isBlocked}
                   />
                   <button
