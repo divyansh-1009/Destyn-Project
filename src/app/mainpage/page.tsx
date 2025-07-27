@@ -244,7 +244,7 @@ function MainPageContent() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "8px 16px",
+          padding: "3px 16px",
           borderBottom: "1px solid #333",
           background: "#111",
           boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
@@ -266,7 +266,7 @@ function MainPageContent() {
             src={TypographyWhiteImage.src}
             alt="Destyn Logo"
             style={{
-              height: "32px",
+              height: "21px",
               width: "auto",
               objectFit: "contain"
             }}
@@ -283,9 +283,9 @@ function MainPageContent() {
                 background: "none",
                 border: "none",
                 color: "#fff",
-                fontSize: "24px",
+                fontSize: "16px",
                 cursor: "pointer",
-                padding: "8px",
+                padding: "3px",
               }}
             >
               ☰
