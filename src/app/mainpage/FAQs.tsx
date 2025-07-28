@@ -75,9 +75,6 @@ export default function FAQs({
 
   return (
     <>
-      <head>
-        <meta name="description" content="Find answers to frequently asked questions about Destyn, the leading event booking platform in Jodhpur. Learn how to plan and book events online, and get support for your event planning journey." />
-      </head>
       <div
         style={{
           position: "fixed",

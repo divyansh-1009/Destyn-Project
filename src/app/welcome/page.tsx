@@ -4,6 +4,8 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from 'uuid';
+import { useImageCompression } from "@/lib/useImageCompression";
+import CompressionProgress from "@/components/CompressionProgress";
 
 const INTEREST_OPTIONS = [
 	"Music", "Movies", "Sports", "Travel", "Reading", "Cooking", "Dancing", "Gaming", "Art", "Photography", "Fitness", "Yoga", "Meditation", "Technology", "Science", "Nature", "Animals", "Fashion", "Shopping", "Writing", "Blogging", "Volunteering", "Gardening", "Hiking", "Cycling", "Swimming", "Board Games", "Podcasts", "DIY", "Cars"
@@ -193,6 +195,25 @@ export default function WelcomePage() {
 	const [isCheckingCompletion, setIsCheckingCompletion] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+	
+	// Image compression hook
+	const {
+		compressMultipleImages,
+		state: compressionState,
+		compressionInfo,
+		isCompressing
+	} = useImageCompression({
+		compressionOptions: {
+			maxWidth: 1000,
+			maxHeight: 1000,
+			quality: 0.8,
+			format: 'jpeg'
+		},
+		onError: (error) => {
+			console.error('Compression error:', error);
+			alert('Failed to compress image. Please try again.');
+		}
+	});
 
 	// Add effect to fetch the user's profile photo when the component mounts
 	useEffect(() => {
@@ -329,14 +350,10 @@ export default function WelcomePage() {
 		const files = Array.from(event.target.files || []);
 		if (!files.length || !session?.user?.email) return;
 
-		// Validate file types and sizes
+		// Validate file types
 		for (const file of files) {
 			if (!file.type.startsWith("image/")) {
 				alert("Please select only image files");
-				return;
-			}
-			if (file.size > 10 * 1024 * 1024) {
-				alert("File size must be less than 10MB");
 				return;
 			}
 		}
@@ -348,6 +365,22 @@ export default function WelcomePage() {
 		}
 
 		setUploading(true);
+		
+		try {
+			// Compress images before processing
+			const compressedImages = await compressMultipleImages(files);
+			const newPhotoObjs = compressedImages.map((compressed) => ({ 
+				id: uuidv4(), 
+				preview: compressed.dataUrl, 
+				fileOrUrl: compressed.file 
+			}));
+			setPhotos(prev => [...prev, ...newPhotoObjs].slice(0, 6));
+		} catch (error) {
+			console.error('Error compressing images:', error);
+			alert('Failed to process images. Please try again.');
+		} finally {
+			setUploading(false);
+		}
 
 		try {
 			// Upload each file and add to photos array
@@ -609,9 +642,6 @@ export default function WelcomePage() {
 
 	return (
 		<>
-			<head>
-				<meta name="description" content="Welcome to Destyn – your trusted partner for event booking in Jodhpur. Start planning your perfect event online today!" />
-			</head>
 			<div
 				style={{
 					minHeight: "100vh",
@@ -622,6 +652,12 @@ export default function WelcomePage() {
 					padding: "10px",
 				}}
 			>
+				{/* Compression Progress Overlay */}
+				<CompressionProgress 
+					state={compressionState}
+					compressionInfo={compressionInfo}
+					showCompressionInfo={false}
+				/>
 				<div
 					style={{
 						background: "#111", // Changed from "#fff" to dark

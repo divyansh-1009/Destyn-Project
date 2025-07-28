@@ -233,9 +233,6 @@ function UserProfileContent() {
 export default function UserProfilePage() {
   return (
     <>
-      <head>
-        <meta name="description" content="Manage your event bookings and personal details. View your event history and preferences on Destyn, the leading platform for event planning in Jodhpur." />
-      </head>
       <Suspense fallback={
         <div style={{ 
           minHeight: "100vh", 

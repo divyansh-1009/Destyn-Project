@@ -70,6 +70,7 @@ function useScrollSpy(sectionIds: string[]) {
   return activeId;
 }
 
+
 // Service card data
 const SERVICES = [
   {

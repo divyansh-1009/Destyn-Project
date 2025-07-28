@@ -9,6 +9,8 @@ import { restrictToParentElement } from '@dnd-kit/modifiers';
 import { arrayMove, SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { v4 as uuidv4 } from 'uuid';
+import { useImageCompression } from "@/lib/useImageCompression";
+import CompressionProgress from "@/components/CompressionProgress";
 
 export default function EditProfile() {
   const { data: session } = useSession();
@@ -37,6 +39,25 @@ export default function EditProfile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const activePhoto = photos.find(p => p.id === activeId) || null;
+  
+  // Image compression hook
+  const {
+    compressMultipleImages,
+    state: compressionState,
+    compressionInfo,
+    isCompressing
+  } = useImageCompression({
+    compressionOptions: {
+      maxWidth: 1000,
+      maxHeight: 1000,
+      quality: 0.8,
+      format: 'jpeg'
+    },
+    onError: (error) => {
+      console.error('Compression error:', error);
+      alert('Failed to compress image. Please try again.');
+    }
+  });
 
   // All 30 interests from the welcome page
   const ALL_INTERESTS = [
@@ -83,17 +104,13 @@ export default function EditProfile() {
   };
 
   // Add photo
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const allowed = Math.max(0, 6 - photos.length);
     const newFiles = files.slice(0, allowed);
     
-    // Validate file sizes
+    // Validate file types
     for (const file of newFiles) {
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
-        alert('File size must be less than 10MB');
-        return;
-      }
       if (!file.type.startsWith('image/')) {
         alert('Please select only image files');
         return;
@@ -102,9 +119,22 @@ export default function EditProfile() {
     
     if (photos.length + newFiles.length > 6) {
       alert('You can upload up to 6 photos.');
+      return;
     }
-    const newPhotoObjs = newFiles.map((file) => ({ id: uuidv4(), preview: URL.createObjectURL(file), fileOrUrl: file }));
-    setPhotos(prev => [...prev, ...newPhotoObjs].slice(0, 6));
+    
+    try {
+      // Compress images before adding to state
+      const compressedImages = await compressMultipleImages(newFiles);
+      const newPhotoObjs = compressedImages.map((compressed) => ({ 
+        id: uuidv4(), 
+        preview: compressed.dataUrl, 
+        fileOrUrl: compressed.file 
+      }));
+      setPhotos(prev => [...prev, ...newPhotoObjs].slice(0, 6));
+    } catch (error) {
+      console.error('Error compressing images:', error);
+      alert('Failed to process images. Please try again.');
+    }
   };
 
   // Delete photo
@@ -261,10 +291,13 @@ export default function EditProfile() {
 
   return (
     <>
-      <head>
-        <meta name="description" content="Update your profile to get personalized event recommendations. Destyn helps you plan and book events online in Jodhpur with ease." />
-      </head>
       <div className="edit-profile-root" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', paddingBottom: 40 }}>
+        {/* Compression Progress Overlay */}
+        <CompressionProgress 
+          state={compressionState}
+          compressionInfo={compressionInfo}
+          showCompressionInfo={false}
+        />
         <style jsx>{`
           .edit-profile-root > form {
             width: 100%;

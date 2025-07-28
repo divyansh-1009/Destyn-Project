@@ -1,62 +1,55 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Handle file upload size limits for API routes
-  if (request.nextUrl.pathname.startsWith('/api/upload-photo')) {
-    const response = NextResponse.next()
-    
-    // Set headers for larger file uploads (10MB)
-    response.headers.set('max-http-buffer-size', '10mb')
-    response.headers.set('Content-Type', 'multipart/form-data')
-    
-    // Increase timeout for large file uploads
-    response.headers.set('Connection', 'keep-alive')
-    response.headers.set('Transfer-Encoding', 'chunked')
-    
-    // Set additional headers for better upload handling
-    response.headers.set('X-Accel-Buffering', 'no')
-    response.headers.set('Cache-Control', 'no-cache')
-    
-    return response
-  }
+  // Get the hostname and protocol
+  const hostname = request.headers.get('host') || '';
+  const protocol = request.headers.get('x-forwarded-proto') || 'http';
+  const url = request.nextUrl.clone();
 
-  // Handle access denied redirects and clear cookies
-  if (request.nextUrl.pathname === '/' && request.nextUrl.searchParams.get('error') === 'AccessDenied') {
-    const response = NextResponse.next()
-    
-    // Clear authentication cookies when access is denied
-    const cookiesToClear = [
-      'next-auth.session-token',
-      'next-auth.csrf-token', 
-      'next-auth.callback-url',
-      '__Secure-next-auth.session-token',
-      '__Secure-next-auth.csrf-token',
-      '__Secure-next-auth.callback-url',
-      'auth-token',
-      'user-session'
-    ]
-
-    cookiesToClear.forEach(cookieName => {
-      response.cookies.set(cookieName, '', {
-        expires: new Date(0),
-        path: '/',
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax'
-      })
-    })
-
-    console.log('Middleware: Cleared cookies due to access denial')
-    return response
-  }
+  // Only redirect to HTTPS in production (not on localhost)
+  const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1') || hostname.includes('0.0.0.0');
+  const isProduction = process.env.NODE_ENV === 'production';
+  const isVercel = hostname.includes('vercel.app') || hostname.includes('.vercel.app');
   
-  return NextResponse.next()
+  // Check if we need to redirect to HTTPS
+  const needsHttpsRedirect = isProduction && 
+    !isLocalhost && 
+    protocol !== 'https' && 
+    (isVercel || hostname.includes('.com') || hostname.includes('.org') || hostname.includes('.net'));
+
+  if (needsHttpsRedirect) {
+    // Create HTTPS URL
+    const httpsUrl = new URL(request.url);
+    httpsUrl.protocol = 'https:';
+    
+    // Preserve the original path and query parameters
+    httpsUrl.pathname = url.pathname;
+    httpsUrl.search = url.search;
+    
+    // Redirect to HTTPS
+    return NextResponse.redirect(httpsUrl, {
+      status: 301, // Permanent redirect
+      headers: {
+        'Cache-Control': 'public, max-age=31536000, immutable', // Cache for 1 year
+      },
+    });
+  }
+
+  // Continue with the request if no redirect is needed
+  return NextResponse.next();
 }
 
+// Configure which paths the middleware should run on
 export const config = {
   matcher: [
-    '/api/upload-photo',
-    '/api/:path*',
-    '/'
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public files (images, etc.)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf|eot)).*)',
   ],
-} 
+}; 

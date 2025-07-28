@@ -492,9 +492,6 @@ function MainPageContent() {
 export default function MainPage() {
   return (
     <>
-      <head>
-        <meta name="description" content="Event booking in Jodhpur made easy. Plan and book venues, vendors, and events online with Destyn. Your one-stop solution for seamless event planning. Explore now!" />
-      </head>
       <Suspense fallback={
         <div
           style={{

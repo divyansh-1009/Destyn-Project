@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { FaCamera } from 'react-icons/fa';
 import { FiLogOut } from 'react-icons/fi';
+import { useImageCompression } from "@/lib/useImageCompression";
+import CompressionProgress from "@/components/CompressionProgress";
 
 export default function Profile() {
   const { data: session } = useSession();
@@ -14,6 +16,25 @@ export default function Profile() {
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Image compression hook
+  const {
+    compressSingleImage,
+    state: compressionState,
+    compressionInfo,
+    isCompressing
+  } = useImageCompression({
+    compressionOptions: {
+      maxWidth: 1000,
+      maxHeight: 1000,
+      quality: 0.8,
+      format: 'jpeg'
+    },
+    onError: (error) => {
+      console.error('Compression error:', error);
+      alert('Failed to compress image. Please try again.');
+    }
+  });
 
 
 
@@ -116,21 +137,19 @@ export default function Profile() {
     const file = event.target.files?.[0];
     if (!file || !session?.user?.email) return;
     
-    // Validate file type and size
+    // Validate file type
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file');
       return;
     }
     
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      alert('File size must be less than 10MB');
-      return;
-    }
-    
     setUploading(true);
     try {
+      // Compress image before upload
+      const compressedImage = await compressSingleImage(file);
+      
       const formData = new FormData();
-      formData.append("photo", file);
+      formData.append("photo", compressedImage.file);
       formData.append("userEmail", session.user.email);
       const response = await fetch("/api/upload-photo", {
         method: "POST",
@@ -224,6 +243,12 @@ export default function Profile() {
       padding: '20px',
       color: '#ffffff'
     }}>
+      {/* Compression Progress Overlay */}
+      <CompressionProgress 
+        state={compressionState}
+        compressionInfo={compressionInfo}
+        showCompressionInfo={false}
+      />
       <div style={{ maxWidth: 480, margin: '0 auto' }}>
         
         {/* Black Card Container */}
