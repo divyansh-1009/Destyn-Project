@@ -33,16 +33,20 @@ export default function Privacy({ onClose }: { onClose: () => void }) {
         <button
           onClick={onClose}
           style={{
-            position: "absolute",
+            position: "sticky",
             top: "20px",
             right: "20px",
-            background: "none",
+            background: "transparent",
             border: "none",
+            borderRadius: "8px",
             color: "#888",
             fontSize: "24px",
             cursor: "pointer",
-            padding: "8px",
-            transition: "color 0.2s",
+            padding: "8px 12px",
+            transition: "all 0.2s",
+            zIndex: 10,
+            float: "right",
+            marginBottom: "20px",
           }}
           onMouseEnter={(e) => {
             (e.target as HTMLElement).style.color = "#fff";
