@@ -107,12 +107,30 @@ function LoginPageContent() {
   const [modal, setModal] = useState<null | "faq" | "privacy" | "guidelines" | "aboutus">(null);
   const sectionIds = ["about", "services", "faq"];
   const activeSection = useScrollSpy(sectionIds);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (status !== "loading") {
       setHasInitialized(true);
     }
   }, [status]);
+
+  // Handle clicks outside dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setMoreOpen(false);
+      }
+    };
+
+    if (moreOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [moreOpen]);
 
   useEffect(() => {
     // Check for authentication error in URL parameters
@@ -338,7 +356,7 @@ function LoginPageContent() {
                         activeSection === id ? "font-bold text-blue-400" : "hover:text-blue-300"
                       }`}
                     >
-                      <span>{id.charAt(0).toUpperCase() + id.slice(1)}</span>
+                      <span>{id === "faq" ? "FAQ" : id.charAt(0).toUpperCase() + id.slice(1)}</span>
                       {/* Animated underline */}
                       <motion.span
                         layoutId="nav-underline"
@@ -352,7 +370,7 @@ function LoginPageContent() {
                   ))}
                 </div>
                 {/* Hamburger/More menu */}
-                <div className="ml-4 relative">
+                <div className="ml-4 relative" ref={dropdownRef}>
                   <button
                     aria-label="More options"
                     className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-800 focus:outline-none"
@@ -469,9 +487,9 @@ function LoginPageContent() {
           />
           {/* Left: Text */}
           <div className="md:w-1/2 w-full flex flex-col items-start justify-center px-4 md:px-16 mb-10 md:mb-0 relative z-10">
-            <h2 className="font-serif text-5xl md:text-6xl font-bold mb-6 leading-tight text-[#34398c]">Discover<br/>Connections</h2>
-            <div className="w-24 h-1 bg-[#34398c] mb-8"></div>
-            <p className="font-serif text-xl md:text-2xl leading-relaxed text-[#34398c]">
+            <h2 className="font-serif text-5xl md:text-6xl font-bold mb-6 leading-tight text-white" style={{textShadow: '0 2px 8px rgba(0,0,0,0.3)'}}>Discover<br/>Connections</h2>
+            <div className="w-24 h-1 bg-white mb-8" style={{boxShadow: '0 2px 4px rgba(0,0,0,0.2)'}}></div>
+            <p className="font-serif text-xl md:text-2xl leading-relaxed text-gray-100" style={{textShadow: '0 1px 4px rgba(0,0,0,0.2)'}}>
               We believe every student deserves emotional support and someone to love. Build memories in your college because grades won't be remembered. Stay connected to your college community and make connections.
             </p>
           </div>
@@ -636,20 +654,10 @@ function LoginPageContent() {
                 <div className="text-xl font-bold mb-2 flex items-center">
                   <img src="/Typography_white.png" alt="Destyn Logo" className="h-8 w-auto object-contain" style={{filter: 'drop-shadow(0 1px 4px #34398c)'}} />
                 </div>
-                <div className="text-gray-400">Copyright © 2025 All rights reserved</div>
+                <div className="text-gray-400 mb-2">Connecting hearts, building memories</div>
+                <div className="text-gray-400">Copyright © 2025 Destyn. All rights reserved</div>
               </div>
               <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
-                <div className="flex space-x-6">
-                  {sectionIds.map((id) => (
-                    <a
-                      key={id}
-                      href={`#${id}`}
-                      className={`text-white hover:text-gray-300 transition-colors scroll-smooth ${activeSection === id ? "font-bold text-blue-400" : ""}`}
-                    >
-                      {id.charAt(0).toUpperCase() + id.slice(1)}
-                    </a>
-                  ))}
-                </div>
                 <div className="flex space-x-4 mt-4 md:mt-0">
                   {/* Instagram */}
                   <a
