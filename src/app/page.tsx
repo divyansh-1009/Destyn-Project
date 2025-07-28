@@ -692,7 +692,9 @@ function LoginPageContent() {
                   
                   {/* Gmail */}
                   <a
-                    href="mailto:destyn4sup@gmail.com"
+                    href="https://mail.google.com/mail/?view=cm&fs=1&to=destyn4sup@gmail.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-white hover:text-red-400 transition-colors duration-300 transform hover:scale-110"
                     aria-label="Email us"
                   >
