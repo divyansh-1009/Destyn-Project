@@ -268,7 +268,16 @@ function MainPageContent() {
             style={{
               height: "23px",
               width: "auto",
-              objectFit: "contain"
+              objectFit: "contain",
+              cursor: "pointer",
+              transition: "opacity 0.2s ease",
+            }}
+            onClick={() => setActive("feed")}
+            onMouseEnter={(e) => {
+              (e.target as HTMLElement).style.opacity = "0.8";
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLElement).style.opacity = "1";
             }}
           />
         </div>

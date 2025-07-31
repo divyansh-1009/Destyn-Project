@@ -378,7 +378,7 @@ export default function Feed() {
       .char-count {
         position: absolute;
         bottom: 8px;
-        right: 52px;
+        right: 12px;
         font-size: 11px;
         color: rgba(255, 255, 255, 0.5);
       }
@@ -446,7 +446,7 @@ export default function Feed() {
         
         .char-count {
           bottom: 6px;
-          right: 46px;
+          right: 10px;
           font-size: 10px;
         }
         
@@ -513,83 +513,84 @@ export default function Feed() {
           // Remove maxWidth and margin for full width
         }}
       >
-        <textarea
-          className="gossip-textarea"
-          value={newConfession}
-          onChange={(e) => setNewConfession(e.target.value)}
-          placeholder={confessionPlaceholder}
-          maxLength={800}
-          style={{
-            width: "100%",
-            boxSizing: "border-box",
-            paddingRight: 48, // space for button
-            minWidth: 0,
-          }}
-          onKeyDown={e => {
-            if (e.key === "Enter" && !e.shiftKey && newConfession.trim()) {
-              e.preventDefault();
-              handleSubmitConfession();
-            }
-          }}
-        />
-        {newConfession.length > 0 && (
-          <div 
-            className={`char-count ${
-              newConfession.length > 700 ? "near-limit" : ""
-            } ${newConfession.length > 750 ? "at-limit" : ""}`}
-          >
-            {newConfession.length}/800
-          </div>
-        )}
-        <button
-          style={{
-            position: "absolute",
-            top: "50%",
-            right: "12px",
-            transform: "translateY(-50%)",
-            width: "38px",
-            height: "38px",
-            borderRadius: "50%",
-            background: newConfession.trim() ? "linear-gradient(135deg, #25D366, #128C7E)" : "#666", // WhatsApp gradient when active
-            color: "white",
-            border: "none",
-            cursor: newConfession.trim() ? "pointer" : "not-allowed",
-            opacity: loading ? 0.7 : 1,
-            transition: "all 0.2s ease",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 0,
-            boxShadow: newConfession.trim() ? "0 2px 8px rgba(0, 0, 0, 0.2)" : "none",
-          }}
-          onClick={handleSubmitConfession}
-          disabled={loading || !newConfession.trim()}
-        >
-          {loading ? (
-            // Loading spinner
-            <div
+        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ position: "relative", flex: 1 }}>
+            <textarea
+              className="gossip-textarea"
+              value={newConfession}
+              onChange={(e) => setNewConfession(e.target.value)}
+              placeholder={confessionPlaceholder}
+              maxLength={800}
               style={{
-                width: "18px",
-                height: "18px",
-                border: "2px solid rgba(255,255,255,0.3)",
-                borderTop: "2px solid white",
-                borderRadius: "50%",
-                animation: "spin 1s linear infinite",
+                width: "100%",
+                boxSizing: "border-box",
+                paddingRight: newConfession.length > 0 ? "50px" : "16px", // Space for char count when text exists
+                minWidth: 0,
+              }}
+              onKeyDown={e => {
+                if (e.key === "Enter" && !e.shiftKey && newConfession.trim()) {
+                  e.preventDefault();
+                  handleSubmitConfession();
+                }
               }}
             />
-          ) : (
-            // Fixed WhatsApp-style send icon (microphone/paper plane)
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="white"
-            >
-              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-            </svg>
-          )}
-        </button>
+            {newConfession.length > 0 && (
+              <div 
+                className={`char-count ${
+                  newConfession.length > 700 ? "near-limit" : ""
+                } ${newConfession.length > 750 ? "at-limit" : ""}`}
+              >
+                {newConfession.length}/800
+              </div>
+            )}
+          </div>
+          <button
+            style={{
+              width: "38px",
+              height: "38px",
+              borderRadius: "50%",
+              background: newConfession.trim() ? "linear-gradient(135deg, #25D366, #128C7E)" : "#666", // WhatsApp gradient when active
+              color: "white",
+              border: "none",
+              cursor: newConfession.trim() ? "pointer" : "not-allowed",
+              opacity: loading ? 0.7 : 1,
+              transition: "all 0.2s ease",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 0,
+              boxShadow: newConfession.trim() ? "0 2px 8px rgba(0, 0, 0, 0.2)" : "none",
+              flexShrink: 0, // Prevent button from shrinking
+            }}
+                        onClick={handleSubmitConfession}
+            disabled={loading || !newConfession.trim()}
+          >
+            {loading ? (
+              // Loading spinner
+              <div
+                style={{
+                  width: "18px",
+                  height: "18px",
+                  border: "2px solid rgba(255,255,255,0.3)",
+                  borderTop: "2px solid white",
+                  borderRadius: "50%",
+                  animation: "spin 1s linear infinite",
+                }}
+              />
+            ) : (
+              // Fixed WhatsApp-style send icon (microphone/paper plane)
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="white"
+              >
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Confessions Feed */}
