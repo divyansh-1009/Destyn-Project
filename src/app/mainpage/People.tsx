@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import React from "react";
+import ZodiacTag from "@/components/ZodiacTag";
 
 // First, update the User type to ensure bio and interests are properly typed
 type User = {
@@ -74,6 +75,8 @@ export default function People() {
   // Add state to track previous matches
   const [matches, setMatches] = useState<any[]>([]);
   const [matchNotification, setMatchNotification] = useState("");
+
+
 
   // Function to fetch fresh data
   const fetchUsers = async () => {
@@ -186,7 +189,9 @@ export default function People() {
 
   // Fetch users on mount and when session changes
   useEffect(() => {
-    fetchUsers();
+    if (session?.user?.email) {
+      fetchUsers();
+    }
   }, [session?.user?.email]);
 
   // Add visibility change listener to refresh when user comes back to tab
@@ -453,6 +458,7 @@ export default function People() {
           ) : (
             <div style={{ width: "100%", height: 400, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 120, color: "#bbb", background: "#eee" }}>👤</div>
           )}
+
           {/* Overlay name and info (bottom left, always visible) */}
           <div style={{
             position: "absolute",
@@ -513,7 +519,15 @@ export default function People() {
         {/* Card Details */}
         <div style={{ padding: "28px 24px 18px 24px", color: "#222" }}>
           {/* About/Bio section always visible */}
-          <div style={{ fontWeight: 700, fontSize: 18, marginBottom: 4 }}>About</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+            <div style={{ fontWeight: 700, fontSize: 18 }}>About</div>
+            {user.answers?.q3?.dob && (
+              <ZodiacTag 
+                birthdate={user.answers.q3.dob} 
+                size="small"
+              />
+            )}
+          </div>
           <div style={{ fontSize: 15, marginBottom: 18, color: "#444" }}>
             {getAbout(user) || <span style={{ color: "#bbb" }}>No bio provided.</span>}
           </div>
@@ -542,6 +556,7 @@ export default function People() {
               <span style={{ color: "#bbb", fontSize: 15 }}>No interests listed</span>
             )}
           </div>
+
           {/* School */}
           {getSchool(user) && (
             <>

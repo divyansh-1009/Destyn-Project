@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import ZodiacTag from "@/components/ZodiacTag";
 
 export default function UserProfileModal({
   open,
@@ -89,6 +90,17 @@ export default function UserProfileModal({
                   <span key={idx} style={{ background: "#f3e8ff", color: "#a259f7", borderRadius: 16, padding: "6px 16px", fontSize: 15, fontWeight: 600 }}>{interest}</span>
                 ))}
               </div>
+            </div>
+          )}
+          {/* Zodiac Sign */}
+          {profile.birthdate && (
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ fontWeight: 700, color: "#a259f7", fontSize: 16, marginBottom: 6 }}>Zodiac</div>
+              <ZodiacTag 
+                birthdate={profile.birthdate} 
+                size="medium" 
+                showElement={true}
+              />
             </div>
           )}
         </div>

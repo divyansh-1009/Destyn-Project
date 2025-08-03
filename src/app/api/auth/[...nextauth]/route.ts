@@ -29,7 +29,8 @@ const ALLOWED_DOMAINS = [
   'mbm.ac.in',
   'nift.ac.in',
   'jietjodhpur.ac.in',
-  'aiimsjodhpur.edu.in'
+  'aiimsjodhpur.edu.in',
+  'divyakumar16072006@gmail.com'
 ];
 
 const handler = NextAuth({

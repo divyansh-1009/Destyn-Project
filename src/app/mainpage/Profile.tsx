@@ -8,6 +8,7 @@ import { FaCamera } from 'react-icons/fa';
 import { FiLogOut } from 'react-icons/fi';
 import { useImageCompression } from "@/lib/useImageCompression";
 import CompressionProgress from "@/components/CompressionProgress";
+import ZodiacTag from "@/components/ZodiacTag";
 
 export default function Profile() {
   const { data: session } = useSession();
@@ -361,11 +362,24 @@ export default function Profile() {
               {profile?.birthdate ? `${getAge(profile.birthdate)} years old` : 'Age not set'}
             </div>
             <div style={{ 
-              fontSize: '19px', 
-              color: '#999999',
-              fontWeight: '600'
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap'
             }}>
-              {profile?.gender ? profile.gender : 'Gender not set'}
+              <div style={{ 
+                fontSize: '19px', 
+                color: '#999999',
+                fontWeight: '600'
+              }}>
+                {profile?.gender ? profile.gender : 'Gender not set'}
+              </div>
+              {profile?.birthdate && (
+                <ZodiacTag 
+                  birthdate={profile.birthdate} 
+                  size="medium"
+                />
+              )}
             </div>
           </div>
         </div>

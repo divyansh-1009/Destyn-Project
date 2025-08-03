@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import BlockConfirmModal from "../BlockConfirmModal";
 import ReportModal from "../ReportModal";
 import { useSession } from "next-auth/react";
+import ZodiacTag from "@/components/ZodiacTag";
 
 // Component that uses useSearchParams
 function UserProfileContent() {
@@ -19,6 +20,8 @@ function UserProfileContent() {
   const [blockModalOpen, setBlockModalOpen] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+
+
 
   useEffect(() => {
     if (!email) return;
@@ -135,6 +138,7 @@ function UserProfileContent() {
           ) : (
             <div style={{ width: "100%", height: 220, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 80, color: "#666" }}>👤</div>
           )}
+
         </div>
         {/* More Photos */}
         {morePhotos.length > 0 && (
@@ -163,7 +167,21 @@ function UserProfileContent() {
             )}
           </div>
           {profile.bio && (
-            <div style={{ color: "#cccccc", fontSize: 18, margin: "14px 0 24px 0", lineHeight: 1.5 }}>{profile.bio}</div>
+            <div style={{ 
+              display: "flex", 
+              alignItems: "flex-start", 
+              justifyContent: "space-between", 
+              margin: "14px 0 24px 0",
+              gap: "12px"
+            }}>
+              <div style={{ color: "#cccccc", fontSize: 18, lineHeight: 1.5, flex: 1 }}>{profile.bio}</div>
+              {profile.birthdate && (
+                <ZodiacTag 
+                  birthdate={profile.birthdate} 
+                  size="small"
+                />
+              )}
+            </div>
           )}
           {/* Interests */}
           {Array.isArray(profile.interests) && profile.interests.length > 0 && (
@@ -176,6 +194,7 @@ function UserProfileContent() {
               </div>
             </div>
           )}
+
         </div>
         {/* Message, Block, Report Buttons */}
         <div style={{ display: "flex", gap: 18, padding: "0 32px 0 32px", marginTop: 18 }}>
