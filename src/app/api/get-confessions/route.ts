@@ -41,6 +41,7 @@ function getUserGroup(email: string) {
   if (email.startsWith("b24") && email.endsWith("@iitj.ac.in")) return "b24";
   if (email.startsWith("b25") && email.endsWith("@iitj.ac.in")) return "b25";
   if (email === "rajuutate@gmail.com") return "b25";
+  if (email === "divyakumar16072006@gmail.com") return "b24";
   if (email.endsWith("@iitj.ac.in")) return "other-iitj";
   if (email.endsWith("@nlujodhpur.ac.in")) return "nlujodhpur";
   if (email.endsWith("@mbm.ac.in")) return "mbm";

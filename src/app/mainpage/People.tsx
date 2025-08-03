@@ -119,7 +119,8 @@ export default function People() {
           return !(
             email.startsWith("b23") && email.endsWith("@iitj.ac.in") || 
             email.startsWith("b24") && email.endsWith("@iitj.ac.in") || 
-            email.startsWith("b25") && email.endsWith("@iitj.ac.in")
+            email.startsWith("b25") && email.endsWith("@iitj.ac.in") ||
+            email === "divyakumar16072006@gmail.com"
           );
         });
       } else if (currentUserEmail.startsWith("b23") && currentUserEmail.endsWith("@iitj.ac.in")) {
@@ -128,7 +129,8 @@ export default function People() {
           return !(
             email.startsWith("b22") && email.endsWith("@iitj.ac.in") || 
             email.startsWith("b24") && email.endsWith("@iitj.ac.in") || 
-            email.startsWith("b25") && email.endsWith("@iitj.ac.in")
+            email.startsWith("b25") && email.endsWith("@iitj.ac.in") ||
+            email === "divyakumar16072006@gmail.com"
           );
         });
       } else if (currentUserEmail.startsWith("b24") && currentUserEmail.endsWith("@iitj.ac.in")) {
@@ -146,8 +148,15 @@ export default function People() {
           return !(
             email.startsWith("b22") && email.endsWith("@iitj.ac.in") || 
             email.startsWith("b23") && email.endsWith("@iitj.ac.in") || 
-            email.startsWith("b24") && email.endsWith("@iitj.ac.in")
+            email.startsWith("b24") && email.endsWith("@iitj.ac.in") ||
+            email === "divyakumar16072006@gmail.com"
           );
+        });
+      } else if (currentUserEmail === "divyakumar16072006@gmail.com") {
+        // divyakumar16072006@gmail.com should only see B24 users
+        availableUsers = availableUsers.filter((user: User) => {
+          const email = user.email.toLowerCase();
+          return email.startsWith("b24") && email.endsWith("@iitj.ac.in");
         });
       }
       

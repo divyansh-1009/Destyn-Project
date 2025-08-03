@@ -148,7 +148,7 @@ export default function Feed() {
     }
   }, []);
 
-  // Initial fetch
+  // Initial fetch okay sir
   useEffect(() => {
     if (!session?.user?.email) return;
     setLoading(true);
