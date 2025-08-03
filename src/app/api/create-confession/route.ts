@@ -20,11 +20,26 @@ function getUserGroup(email: string) {
 }
 
 export async function POST(req: NextRequest) {
-  const { confession, userEmail } = await req.json();
+  const { confession, userEmail, imageUrl, caption, postType = "text" } = await req.json();
 
-  if (!confession || !userEmail) {
+  if (!userEmail) {
     return NextResponse.json(
-      { error: "Missing confession or user email" },
+      { error: "Missing user email" },
+      { status: 400 }
+    );
+  }
+
+  // Validate based on post type
+  if (postType === "text" && !confession) {
+    return NextResponse.json(
+      { error: "Missing confession text" },
+      { status: 400 }
+    );
+  }
+
+  if (postType === "image" && !imageUrl) {
+    return NextResponse.json(
+      { error: "Missing image URL" },
       { status: 400 }
     );
   }
@@ -35,7 +50,10 @@ export async function POST(req: NextRequest) {
   try {
     const group = getUserGroup(userEmail);
     const confessionDoc = {
-      confession,
+      confession: confession || "", // Text content (can be empty for image-only posts)
+      imageUrl: imageUrl || null, // Image URL (can be null for text-only posts)
+      caption: caption || "", // Caption for image posts
+      postType: postType, // "text" or "image"
       userEmail, // Stored but not exposed in responses
       group, // Store group for efficient querying
       createdAt: new Date().toISOString(),

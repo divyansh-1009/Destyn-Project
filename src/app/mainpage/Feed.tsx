@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import ReportModal from "./ReportModal";
+import { useImageCompression } from "@/lib/useImageCompression";
+import CompressionProgress from "@/components/CompressionProgress";
 
 const REACTIONS = ["❤️", "😂", "😮", "😢", "👍"];
 const PAGE_SIZE = 10;
@@ -103,6 +105,9 @@ function ReactionButton({
 interface Confession {
   _id: string;
   confession: string;
+  imageUrl?: string;
+  caption?: string;
+  postType?: "text" | "image";
   createdAt: string;
   likes: number;
   comments: Array<{
@@ -132,6 +137,33 @@ export default function Feed() {
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
   const [confessionPlaceholder, setConfessionPlaceholder] = useState("Spill the tea...");
   const [isMobile, setIsMobile] = useState(false);
+  
+  // New state for image uploads
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageCaption, setImageCaption] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [postType, setPostType] = useState<"text" | "image">("text");
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  
+  // Image compression hook
+  const {
+    compressSingleImage,
+    state: compressionState,
+    compressionInfo,
+    isCompressing
+  } = useImageCompression({
+    compressionOptions: {
+      maxWidth: 800,
+      maxHeight: 800,
+      quality: 0.8,
+      format: 'jpeg'
+    },
+    onError: (error) => {
+      console.error('Compression error:', error);
+      alert('Failed to compress image. Please try again.');
+    }
+  });
 
   useEffect(() => {
     const checkIfMobile = () => {
@@ -246,23 +278,108 @@ export default function Feed() {
     ));
   };
 
+  const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Image size must be less than 10MB');
+        return;
+      }
+      
+      try {
+        // Compress the image client-side
+        const compressedImage = await compressSingleImage(file);
+        setSelectedImage(compressedImage.file);
+        setPostType("image");
+        
+        // Create preview from compressed image
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setImagePreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(compressedImage.file);
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        alert('Failed to process image. Please try again.');
+      }
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    setImageCaption("");
+    setPostType("text");
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
+    }
+  };
+
   const handleSubmitConfession = async () => {
-    if (!newConfession.trim() || !session?.user?.email) return;
+    if (!session?.user?.email) return;
+    
+    // Validate based on post type
+    if (postType === "text" && !newConfession.trim()) return;
+    if (postType === "image" && !selectedImage) return;
 
     setLoading(true);
     try {
+      let imageUrl = null;
+      
+      // Upload image first if it's an image post
+      if (postType === "image" && selectedImage) {
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append("image", selectedImage);
+        formData.append("userEmail", session.user.email);
+        
+        const uploadResponse = await fetch("/api/upload-feed-image", {
+          method: "POST",
+          body: formData,
+        });
+        
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload image");
+        }
+        
+        const uploadData = await uploadResponse.json();
+        imageUrl = uploadData.imageUrl;
+        setUploadingImage(false);
+      }
+
+      // Create the confession/post
       const response = await fetch("/api/create-confession", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           confession: newConfession.trim(),
           userEmail: session.user.email,
+          imageUrl: imageUrl,
+          caption: imageCaption.trim(),
+          postType: postType,
         }),
       });
 
       if (response.ok) {
+        // Reset form
         setNewConfession("");
-        fetch(`/api/get-confessions?skip=0&limit=${PAGE_SIZE}`) // Refresh the feed
+        setSelectedImage(null);
+        setImagePreview(null);
+        setImageCaption("");
+        setPostType("text");
+        if (imageInputRef.current) {
+          imageInputRef.current.value = "";
+        }
+        
+        // Refresh the feed
+        fetch(`/api/get-confessions?skip=0&limit=${PAGE_SIZE}`)
           .then((res) => res.json())
           .then((data) => {
             setConfessions(data.confessions || []);
@@ -272,6 +389,7 @@ export default function Feed() {
       }
     } catch (error) {
       console.error("Error creating confession:", error);
+      setUploadingImage(false);
     } finally {
       setLoading(false);
     }
@@ -467,19 +585,26 @@ export default function Feed() {
   }, []);
 
   return (
-    <div
-      ref={feedRef}
-      style={{
-        maxWidth: 800,
-        margin: "0 auto",
-        padding: "20px",
-        background: "#000",
-        height: "calc(100vh - 60px)",
-        overflowY: "auto",
-        borderRadius: 0, // Changed from 16 to 0 to remove rounded corners
-        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-      }}
-    >
+    <>
+      {/* Compression Progress Overlay */}
+      <CompressionProgress 
+        state={compressionState}
+        compressionInfo={compressionInfo}
+        showCompressionInfo={false}
+      />
+      <div
+        ref={feedRef}
+        style={{
+          maxWidth: 800,
+          margin: "0 auto",
+          padding: "20px",
+          background: "#000",
+          height: "calc(100vh - 60px)",
+          overflowY: "auto",
+          borderRadius: 0, // Changed from 16 to 0 to remove rounded corners
+          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+        }}
+      >
       {/* Gen Z Heading */}
       <div
         style={{
@@ -498,7 +623,7 @@ export default function Feed() {
       >
          The Vibe Feed <span style={{fontWeight:700, fontSize:20}}></span>
       </div>
-      {/* Minimal Confession Input */}
+      {/* Enhanced Confession Input with Image Support */}
       <div
         style={{
           position: "fixed",
@@ -510,63 +635,86 @@ export default function Feed() {
           padding: "16px 20px 12px 20px",
           borderTop: "1px solid #333",
           boxShadow: "0 -4px 20px rgba(0,0,0,0.15)",
-          // Remove maxWidth and margin for full width
         }}
       >
-        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ position: "relative", flex: 1 }}>
-            <textarea
-              className="gossip-textarea"
-              value={newConfession}
-              onChange={(e) => setNewConfession(e.target.value)}
-              placeholder={confessionPlaceholder}
-              maxLength={800}
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                paddingRight: newConfession.length > 0 ? "50px" : "16px", // Space for char count when text exists
-                minWidth: 0,
-              }}
-              onKeyDown={e => {
-                if (e.key === "Enter" && !e.shiftKey && newConfession.trim()) {
-                  e.preventDefault();
-                  handleSubmitConfession();
-                }
-              }}
+        {/* Image Preview */}
+        {imagePreview && (
+          <div style={{ 
+            marginBottom: "12px", 
+            position: "relative",
+            borderRadius: "12px",
+            overflow: "hidden",
+            background: "#111",
+            border: "1px solid #333",
+            maxHeight: "300px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <img 
+              src={imagePreview} 
+              alt="Preview" 
+              style={{ 
+                width: "100%", 
+                height: "auto",
+                maxHeight: "300px",
+                objectFit: "contain",
+                display: "block"
+              }} 
             />
-            {newConfession.length > 0 && (
-              <div 
-                className={`char-count ${
-                  newConfession.length > 700 ? "near-limit" : ""
-                } ${newConfession.length > 750 ? "at-limit" : ""}`}
-              >
-                {newConfession.length}/800
-              </div>
-            )}
+            <button
+              onClick={handleRemoveImage}
+              style={{
+                position: "absolute",
+                top: "8px",
+                right: "8px",
+                background: "rgba(0,0,0,0.8)",
+                color: "#fff",
+                border: "none",
+                borderRadius: "50%",
+                width: "32px",
+                height: "32px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "18px",
+                fontWeight: "bold"
+              }}
+            >
+              ×
+            </button>
           </div>
+        )}
+
+        {/* Input Area */}
+        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "12px" }}>
+          {/* Image Upload Button */}
           <button
+            onClick={() => imageInputRef.current?.click()}
             style={{
               width: "38px",
               height: "38px",
               borderRadius: "50%",
-              background: newConfession.trim() ? "linear-gradient(135deg, #25D366, #128C7E)" : "#666", // WhatsApp gradient when active
-              color: "white",
-              border: "none",
-              cursor: newConfession.trim() ? "pointer" : "not-allowed",
-              opacity: loading ? 0.7 : 1,
-              transition: "all 0.2s ease",
+              background: "#333",
+              color: "#fff",
+              border: "1px solid #555",
+              cursor: "pointer",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              padding: 0,
-              boxShadow: newConfession.trim() ? "0 2px 8px rgba(0, 0, 0, 0.2)" : "none",
-              flexShrink: 0, // Prevent button from shrinking
+              transition: "all 0.2s ease",
+              flexShrink: 0,
             }}
-                        onClick={handleSubmitConfession}
-            disabled={loading || !newConfession.trim()}
+            onMouseEnter={(e) => {
+              (e.target as HTMLButtonElement).style.background = "#444";
+            }}
+            onMouseLeave={(e) => {
+              (e.target as HTMLButtonElement).style.background = "#333";
+            }}
+            disabled={uploadingImage}
           >
-            {loading ? (
-              // Loading spinner
+            {uploadingImage ? (
               <div
                 style={{
                   width: "18px",
@@ -578,7 +726,94 @@ export default function Feed() {
                 }}
               />
             ) : (
-              // Fixed WhatsApp-style send icon (microphone/paper plane)
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+              </svg>
+            )}
+          </button>
+
+          {/* Text Input */}
+          <div style={{ position: "relative", flex: 1 }}>
+            <textarea
+              className="gossip-textarea"
+              value={postType === "image" ? imageCaption : newConfession}
+              onChange={(e) => {
+                if (postType === "image") {
+                  setImageCaption(e.target.value);
+                } else {
+                  setNewConfession(e.target.value);
+                }
+              }}
+              placeholder={postType === "image" ? "Write a caption..." : confessionPlaceholder}
+              maxLength={800}
+              style={{
+                width: "100%",
+                boxSizing: "border-box",
+                paddingRight: (postType === "image" ? imageCaption.length : newConfession.length) > 0 ? "50px" : "16px",
+                minWidth: 0,
+              }}
+              onKeyDown={e => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (postType === "text" && newConfession.trim()) {
+                    handleSubmitConfession();
+                  } else if (postType === "image" && selectedImage) {
+                    handleSubmitConfession();
+                  }
+                }
+              }}
+            />
+            {(postType === "image" ? imageCaption.length : newConfession.length) > 0 && (
+              <div 
+                className={`char-count ${
+                  (postType === "image" ? imageCaption.length : newConfession.length) > 700 ? "near-limit" : ""
+                } ${(postType === "image" ? imageCaption.length : newConfession.length) > 750 ? "at-limit" : ""}`}
+              >
+                {(postType === "image" ? imageCaption.length : newConfession.length)}/800
+              </div>
+            )}
+          </div>
+
+          {/* Send Button */}
+          <button
+            style={{
+              width: "38px",
+              height: "38px",
+              borderRadius: "50%",
+              background: (postType === "text" && newConfession.trim()) || (postType === "image" && selectedImage) 
+                ? "linear-gradient(135deg, #25D366, #128C7E)" 
+                : "#666",
+              color: "white",
+              border: "none",
+              cursor: ((postType === "text" && newConfession.trim()) || (postType === "image" && selectedImage)) 
+                ? "pointer" 
+                : "not-allowed",
+              opacity: loading || uploadingImage ? 0.7 : 1,
+              transition: "all 0.2s ease",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 0,
+              boxShadow: ((postType === "text" && newConfession.trim()) || (postType === "image" && selectedImage)) 
+                ? "0 2px 8px rgba(0, 0, 0, 0.2)" 
+                : "none",
+              flexShrink: 0,
+            }}
+            onClick={handleSubmitConfession}
+            disabled={loading || uploadingImage || ((postType === "text" && !newConfession.trim()) || (postType === "image" && !selectedImage))}
+          >
+            {loading || uploadingImage ? (
+              <div
+                style={{
+                  width: "18px",
+                  height: "18px",
+                  border: "2px solid rgba(255,255,255,0.3)",
+                  borderTop: "2px solid white",
+                  borderRadius: "50%",
+                  animation: "spin 1s linear infinite",
+                }}
+              />
+            ) : (
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
                 width="20" 
@@ -591,6 +826,15 @@ export default function Feed() {
             )}
           </button>
         </div>
+
+        {/* Hidden file input */}
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageSelect}
+          style={{ display: "none" }}
+        />
       </div>
 
       {/* Confessions Feed */}
@@ -655,21 +899,54 @@ export default function Feed() {
 
                   {/* Confession Content */}
                   <div style={{ marginBottom: 16, width: "100%" }}>
-                    <p
-                      className="gossip-text"
-                      style={{
-                        color: "#fff",
-                        fontSize: "16px",
-                        lineHeight: 1.6,
-                        margin: "0 0 12px 0",
-                        wordWrap: "break-word", // Allow breaking long words
-                        overflowWrap: "break-word", // Ensure text wraps
-                        whiteSpace: "pre-wrap", // Preserve whitespace but wrap text
-                        maxWidth: "100%", // Restrict to container width
-                      }}
-                    >
-                      {confession.confession}
-                    </p>
+                    {/* Image Display */}
+                    {confession.imageUrl && (
+                      <div style={{ 
+                        marginBottom: "16px", 
+                        borderRadius: "12px", 
+                        overflow: "hidden",
+                        background: "#111",
+                        border: "1px solid #333"
+                      }}>
+                        <img 
+                          src={confession.imageUrl} 
+                          alt="Post image" 
+                          style={{ 
+                            width: "100%", 
+                            maxHeight: "400px", 
+                            objectFit: "contain",
+                            display: "block"
+                          }} 
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const parent = target.parentElement;
+                            if (parent) {
+                              parent.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 200px; color: #666; font-size: 14px;">Image failed to load</div>';
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Text Content */}
+                    {(confession.confession || confession.caption) && (
+                      <p
+                        className="gossip-text"
+                        style={{
+                          color: "#fff",
+                          fontSize: "16px",
+                          lineHeight: 1.6,
+                          margin: "0 0 12px 0",
+                          wordWrap: "break-word", // Allow breaking long words
+                          overflowWrap: "break-word", // Ensure text wraps
+                          whiteSpace: "pre-wrap", // Preserve whitespace but wrap text
+                          maxWidth: "100%", // Restrict to container width
+                        }}
+                      >
+                        {confession.confession || confession.caption}
+                      </p>
+                    )}
                     
                     <div
                       style={{
@@ -1053,5 +1330,6 @@ export default function Feed() {
         targetId={reportTarget || ""}
       />
     </div>
+    </>
   );
 }
