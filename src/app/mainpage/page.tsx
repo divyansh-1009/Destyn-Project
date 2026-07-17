@@ -12,9 +12,9 @@ import Guidelines from "./Guidelines";
 import Privacy from "./Privacy";
 import FAQs from "./FAQs";
 import Feedback from "./Feedback";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import TypographyWhiteImage from "../../assets/Typography_white.png";
+import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_OPTIONS = [
   { key: "feed", label: "Feed" },
@@ -31,7 +31,6 @@ const TOP_NAV_OPTIONS = [
   { key: "Feedback", label: "Feedback" },
 ];
 
-// Component that uses useSearchParams
 function MainPageContent() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -54,24 +53,19 @@ function MainPageContent() {
   }, [tabParam]);
 
   useEffect(() => {
-    // Handle unauthenticated users
     if (status === "unauthenticated") {
       router.push("/");
       return;
     }
 
-    // Check if profile is complete when session is available
     if (session?.user?.email) {
       checkProfileCompletion();
     }
   }, [session, status, router]);
 
   useEffect(() => {
-    // Function to check screen width
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize(); // Initial check
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -88,33 +82,23 @@ function MainPageContent() {
       const data = await response.json();
 
       if (!response.ok || !data.isComplete) {
-        // Profile is incomplete, redirect to welcome page
         router.push("/welcome");
         return;
       }
 
-      // Profile is complete, allow access to main page
       setIsLoading(false);
     } catch (error) {
       console.error("Error checking profile completion:", error);
-      // On error, redirect to welcome page to be safe
       router.push("/welcome");
     }
   };
 
   const handleTopNavClick = (key: string) => {
-    console.log(`Clicked ${key}`);
-    if (key === "About Us") {
-      setShowAboutUs(true);
-    } else if (key === "Guidelines") {
-      setShowGuidelines(true);
-    } else if (key === "Privacy") {
-      setShowPrivacy(true);
-    } else if (key === "FAQs") {
-      setShowFAQs(true);
-    } else if (key === "Feedback") {
-      setShowFeedback(true);
-    }
+    if (key === "About Us") setShowAboutUs(true);
+    else if (key === "Guidelines") setShowGuidelines(true);
+    else if (key === "Privacy") setShowPrivacy(true);
+    else if (key === "FAQs") setShowFAQs(true);
+    else if (key === "Feedback") setShowFeedback(true);
     setMenuOpen(false);
   };
 
@@ -136,324 +120,114 @@ function MainPageContent() {
       Component = <Feed />;
   }
 
-  // Render navigation items
   const renderNavItems = () => {
     return NAV_OPTIONS.map((opt) => (
       <button
         key={opt.key}
         onClick={() => setActive(opt.key)}
-        style={{
-          background: "none",
-          border: "none",
-          fontWeight: active === opt.key ? "600" : "400",
-          color: active === opt.key ? "#0070f3" : "#888",
-          fontSize: "14px",
-          cursor: "pointer",
-          padding: "8px 16px",
-          borderRadius: "8px",
-          transition: "all 0.2s",
-          textAlign: "left",
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: 0,
-        }}
-        onMouseEnter={(e) => {
-          if (active !== opt.key) {
-            (e.target as HTMLElement).style.color = "#fff";
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (active !== opt.key) {
-            (e.target as HTMLElement).style.color = "#888";
-          }
-        }}
+        className={`relative flex items-center justify-center w-full px-4 py-3 md:py-4 transition-all duration-200 group md:rounded-xl md:mb-3 ${
+          active === opt.key ? "text-primary font-bold md:bg-primary/10" : "text-muted-foreground hover:text-foreground font-medium md:hover:bg-muted"
+        }`}
       >
-        {opt.label}
+        <span className="text-sm md:text-base z-10">{opt.label}</span>
+        {active === opt.key && isMobile && (
+          <motion.div
+            layoutId="mobile-nav-indicator"
+            className="absolute top-0 left-0 right-0 h-0.5 bg-primary rounded-b-full"
+          />
+        )}
       </button>
     ));
   };
 
   if (isLoading || status === "loading") {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", // Changed to match other screens
-          color: "#fff", // Changed to white for contrast
-        }}
-      >
-        <div
-          style={{
-            textAlign: "center",
-          }}
-        >
-          <div
-            style={{
-              width: "60px",
-              height: "60px",
-              border: "4px solid rgba(255,255,255,0.3)",
-              borderTop: "4px solid #fff",
-              borderRadius: "50%",
-              margin: "0 auto 20px",
-              animation: "spin 1s linear infinite",
-            }}
-          ></div>
-          <p
-            style={{
-              fontSize: "16px",
-              fontWeight: "500",
-            }}
-          >
-            Loading your profile...
-          </p>
-
-          <style jsx>{`
-            @keyframes spin {
-              0% {
-                transform: rotate(0deg);
-              }
-              100% {
-                transform: rotate(360deg);
-              }
-            }
-          `}</style>
-        </div>
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-background text-foreground">
+        <div className="w-12 h-12 border-4 border-muted border-t-primary rounded-full animate-spin mb-4"></div>
+        <p className="text-lg font-medium text-muted-foreground">Loading your profile...</p>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        color: "#fff",
-        overflow: "hidden",
-      }}
-    >
+    <div className="h-screen flex flex-col bg-background text-foreground overflow-hidden font-sans selection:bg-primary selection:text-primary-foreground">
       {/* Top Navbar */}
-      <header
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "6px 16px",
-          borderBottom: "1px solid #333",
-          background: "#111",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-          position: "sticky",
-          top: 0,
-          zIndex: 1000,
-        }}
-      >
-        {/* Logo and name */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-          }}
-        >
-          {/* Logo */}
+      <header className="flex justify-between items-center px-4 md:px-8 py-3 md:py-4 bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
+        <div className="flex items-center gap-3">
           <img
             src={TypographyWhiteImage.src}
             alt="Destyn Logo"
-            style={{
-              height: "23px",
-              width: "auto",
-              objectFit: "contain",
-              cursor: "pointer",
-              transition: "opacity 0.2s ease",
-            }}
+            className="h-6 md:h-7 w-auto object-contain cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => setActive("feed")}
-            onMouseEnter={(e) => {
-              (e.target as HTMLElement).style.opacity = "0.8";
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLElement).style.opacity = "1";
-            }}
           />
         </div>
 
-        {/* Different navigation options for top navbar */}
-        {true ? (
-          <div style={{ position: "relative" }}>
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#fff",
-                fontSize: "18px",
-                cursor: "pointer",
-                padding: "6px",
-              }}
-            >
-              ☰
-            </button>
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="p-2 -mr-2 text-foreground hover:bg-muted rounded-full transition-colors md:hidden"
+          >
+            <span className="text-xl leading-none">&#9776;</span>
+          </button>
 
-            {/* Dropdown menu and overlay */}
+          <div className="hidden md:flex gap-2">
+            {TOP_NAV_OPTIONS.map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => handleTopNavClick(opt.key)}
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-full transition-colors"
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
+          <AnimatePresence>
             {menuOpen && (
               <>
-                {/* Overlay to close menu when clicking outside */}
                 <div
+                  className="fixed inset-0 z-40 md:hidden"
                   onClick={() => setMenuOpen(false)}
-                  style={{
-                    position: "fixed",
-                    top: 0,
-                    left: 0,
-                    width: "100vw",
-                    height: "100vh",
-                    zIndex: 999, // less than dropdown
-                  }}
                 />
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "100%",
-                    right: 0,
-                    background: "#222",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
-                    overflow: "hidden",
-                    marginTop: "8px",
-                    width: "150px",
-                    zIndex: 1000,
-                  }}
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-2xl py-2 z-50 md:hidden"
                 >
                   {TOP_NAV_OPTIONS.map((opt) => (
                     <button
                       key={opt.key}
                       onClick={() => handleTopNavClick(opt.key)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "#fff",
-                        fontSize: "14px",
-                        cursor: "pointer",
-                        padding: "12px 16px",
-                        width: "100%",
-                        textAlign: "left",
-                        transition: "all 0.2s",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.target as HTMLElement).style.background = "#333";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.target as HTMLElement).style.background = "none";
-                      }}
+                      className="w-full text-left px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                     >
                       {opt.label}
                     </button>
                   ))}
-                </div>
+                </motion.div>
               </>
             )}
-          </div>
-        ) : (
-          <div style={{ display: "flex", gap: "12px" }}>
-            {TOP_NAV_OPTIONS.map((opt) => (
-              <button
-                key={opt.key}
-                onClick={() => handleTopNavClick(opt.key)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#ccc",
-                  fontSize: "14px",
-                  cursor: "pointer",
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  (e.target as HTMLElement).style.color = "#fff";
-                }}
-                onMouseLeave={(e) => {
-                  (e.target as HTMLElement).style.color = "#ccc";
-                }}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        )}
+          </AnimatePresence>
+        </div>
       </header>
 
-      {/* Main content area with flexible layout based on screen size */}
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          overflow: "hidden",
-        }}
-      >
-        {/* Side navigation for desktop */}
+      {/* Main Layout Area */}
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Desktop Sidebar */}
         {!isMobile && (
-          <div
-            style={{
-              width: "90px", // Reduced from 120px to 90px (75% of current width)
-              borderRight: "1px solid #333",
-              background: "#111",
-              padding: "32px 8px",
-              display: "flex",
-              flexDirection: "column",
-              minHeight: 0,
-              alignItems: "center",
-            }}
-          >
-            {NAV_OPTIONS.map((opt) => (
-              <button
-                key={opt.key}
-                onClick={() => setActive(opt.key)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  fontWeight: active === opt.key ? "700" : "500",
-                  color: active === opt.key ? "#0070f3" : "#bbb",
-                  fontSize: "16px", // Reduced from 20px to 16px
-                  fontFamily: "'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, 'Liberation Sans', sans-serif",
-                  letterSpacing: "0.5px",
-                  cursor: "pointer",
-                  padding: "14px 0",
-                  borderRadius: "10px",
-                  transition: "all 0.2s",
-                  textAlign: "center",
-                  width: "100%",
-                  marginBottom: "14px", // 60% of previous 24px
-                }}
-                onMouseEnter={(e) => {
-                  if (active !== opt.key) {
-                    (e.target as HTMLElement).style.color = "#fff";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (active !== opt.key) {
-                    (e.target as HTMLElement).style.color = "#bbb";
-                  }
-                }}
-              >
-                {opt.label}
-              </button>
-            ))}
+          <div className="w-[200px] border-r border-border bg-card/30 flex flex-col pt-6 px-4 shrink-0 overflow-y-auto">
+            <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4 px-4">Menu</div>
+            {renderNavItems()}
           </div>
         )}
 
-        {/* Main content */}
-        <div style={{ 
-          flex: 1, 
-          overflow: "auto",
-          paddingBottom: isMobile ? "calc(80px + env(safe-area-inset-bottom))" : "0"
-        }}>{Component}</div>
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto bg-background scroll-smooth">
+          <div className="pb-24 md:pb-8 h-full max-w-5xl mx-auto w-full">
+            {Component}
+          </div>
+        </div>
       </div>
 
       {/* Modals */}
@@ -471,25 +245,9 @@ function MainPageContent() {
       )}
       {showFeedback && <Feedback onClose={() => setShowFeedback(false)} />}
 
-      {/* Bottom navigation for mobile */}
+      {/* Mobile Bottom Navbar */}
       {isMobile && (
-        <nav
-          style={{
-            display: "flex",
-            justifyContent: "space-around",
-            borderTop: "1px solid #333",
-            padding: "12px 0",
-            paddingBottom: "calc(12px + env(safe-area-inset-bottom))",
-            background: "#111",
-            backdropFilter: "blur(10px)",
-            boxShadow: "0 -4px 20px rgba(0,0,0,0.3)",
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 1000,
-          }}
-        >
+        <nav className="flex justify-around border-t border-border bg-background/90 backdrop-blur-xl pb-safe pt-1 fixed bottom-0 left-0 right-0 z-50">
           {renderNavItems()}
         </nav>
       )}
@@ -497,61 +255,15 @@ function MainPageContent() {
   );
 }
 
-// Main component with Suspense wrapper
 export default function MainPage() {
   return (
-    <>
-      <Suspense fallback={
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "#fff",
-          }}
-        >
-          <div
-            style={{
-              textAlign: "center",
-            }}
-          >
-            <div
-              style={{
-                width: "60px",
-                height: "60px",
-                border: "4px solid rgba(255,255,255,0.3)",
-                borderTop: "4px solid #fff",
-                borderRadius: "50%",
-                margin: "0 auto 20px",
-                animation: "spin 1s linear infinite",
-              }}
-            ></div>
-            <p
-              style={{
-                fontSize: "16px",
-                fontWeight: "500",
-              }}
-            >
-              Loading...
-            </p>
-
-            <style jsx>{`
-              @keyframes spin {
-                0% {
-                  transform: rotate(0deg);
-                }
-                100% {
-                  transform: rotate(360deg);
-                }
-              }
-            `}</style>
-          </div>
-        </div>
-      }>
-        <MainPageContent />
-      </Suspense>
-    </>
+    <Suspense fallback={
+      <div className="h-screen flex flex-col items-center justify-center bg-background text-foreground">
+        <div className="w-12 h-12 border-4 border-muted border-t-primary rounded-full animate-spin mb-4"></div>
+        <p className="text-lg font-medium text-muted-foreground">Loading...</p>
+      </div>
+    }>
+      <MainPageContent />
+    </Suspense>
   );
 }

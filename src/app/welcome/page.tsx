@@ -26,7 +26,6 @@ const QUESTIONS = [
 		id: "q2",
 		question: "What are your interests? (Select as many as you like)",
 		isInterests: true,
-		//options: INTEREST_OPTIONS,
 	},
 	{
 		id: "q3",
@@ -190,18 +189,14 @@ export default function WelcomePage() {
 	const [gender, setGender] = useState("");
 	const [preference, setPreference] = useState("");
 	const [dob, setDob] = useState("");
-	const [bio, setBio] = useState("");
-	const [profileCompleted, setProfileCompleted] = useState(false); // New state to track completion
+	const [profileCompleted, setProfileCompleted] = useState(false);
 	const [isCheckingCompletion, setIsCheckingCompletion] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
 	
-	// Image compression hook
 	const {
 		compressMultipleImages,
 		state: compressionState,
 		compressionInfo,
-		isCompressing
 	} = useImageCompression({
 		compressionOptions: {
 			maxWidth: 1000,
@@ -215,14 +210,12 @@ export default function WelcomePage() {
 		}
 	});
 
-	// Add effect to fetch the user's profile photo when the component mounts
 	useEffect(() => {
 		if (session?.user?.email) {
 			fetchUserProfile();
 		}
 	}, [session?.user?.email]);
 
-	// Function to fetch user profile including photo
 	const fetchUserProfile = async () => {
 		try {
 			const response = await fetch("/api/get-user-profile", {
@@ -233,7 +226,6 @@ export default function WelcomePage() {
 
 			if (response.ok) {
 				const data = await response.json();
-				// Handle both single profilePhoto and array of profilePhotos
 				const photoUrls = data.profilePhotos || (data.profilePhoto ? [data.profilePhoto] : []);
 				const loadedPhotos = photoUrls.map((url: string) => ({ 
 					id: uuidv4(), 
@@ -241,11 +233,10 @@ export default function WelcomePage() {
 					fileOrUrl: url 
 				}));
 				setPhotos(loadedPhotos);
-				// Update the answers state with the first photo as profile photo
 				if (loadedPhotos.length > 0) {
 					setAnswers((prev) => ({ ...prev, q0: loadedPhotos[0].preview }));
 				}
-				if (data.bio) setBio(data.bio);
+				if (data.bio) setAnswers((prev) => ({ ...prev, q1: data.bio }));
 				if (data.interests) setSelectedInterests(data.interests);
 				if (data.gender) setGender(data.gender);
 				if (data.preference) setPreference(data.preference);
@@ -256,14 +247,12 @@ export default function WelcomePage() {
 		}
 	};
 
-	// Check profile completion when component mounts
 	useEffect(() => {
 		if (session?.user?.email) {
 			checkProfileCompletion();
 		}
 	}, [session?.user?.email]);
 
-	// Function to check profile completion
 	const checkProfileCompletion = async () => {
 		if (!session?.user?.email) return;
 		
@@ -278,10 +267,8 @@ export default function WelcomePage() {
 			const data = await response.json();
 
 			if (response.ok && data.isComplete) {
-				// If profile is complete, redirect to main page
 				router.push("/mainpage");
 			} else {
-				// If profile is incomplete, allow access to welcome page
 				setIsCheckingCompletion(false);
 			}
 		} catch (error) {
@@ -296,43 +283,10 @@ export default function WelcomePage() {
 		}
 	}, [status, router]);
 
-	// Add this in the head section of your component
-	useEffect(() => {
-		// Add viewport meta tag to ensure proper scaling on mobile devices
-		const meta = document.createElement('meta');
-		meta.name = 'viewport';
-		meta.content = 'width=device-width, initial-scale=1, maximum-scale=1';
-		document.getElementsByTagName('head')[0].appendChild(meta);
-		
-		return () => {
-			document.getElementsByTagName('head')[0].removeChild(meta);
-		};
-	}, []);
-
-	useEffect(() => {
-		const handleResize = () => {
-			setWindowWidth(window.innerWidth);
-		};
-		
-		if (typeof window !== 'undefined') {
-			window.addEventListener('resize', handleResize);
-			return () => window.removeEventListener('resize', handleResize);
-		}
-	}, []);
-
 	if (status === "loading")
 		return (
-			<div
-				style={{
-					display: "flex",
-					justifyContent: "center",
-					alignItems: "center",
-					height: "100vh",
-					background: "#000",
-					color: "#fff",
-				}}
-			>
-				<p>Loading...</p>
+			<div className="min-h-screen bg-background flex justify-center items-center">
+				<div className="w-12 h-12 border-4 border-muted border-t-primary rounded-full animate-spin"></div>
 			</div>
 		);
 
@@ -342,15 +296,10 @@ export default function WelcomePage() {
 		setAnswers((prev) => ({ ...prev, [qid]: value }));
 	};
 
-	const triggerFileInput = () => {
-		fileInputRef.current?.click();
-	};
-
 	const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		const files = Array.from(event.target.files || []);
 		if (!files.length || !session?.user?.email) return;
 
-		// Validate file types
 		for (const file of files) {
 			if (!file.type.startsWith("image/")) {
 				alert("Please select only image files");
@@ -358,7 +307,6 @@ export default function WelcomePage() {
 			}
 		}
 
-		// Check if adding these files would exceed the limit
 		if (photos.length + files.length > 6) {
 			alert('You can upload up to 6 photos.');
 			return;
@@ -366,27 +314,19 @@ export default function WelcomePage() {
 
 		setUploading(true);
 		
+		let compressedImages;
 		try {
-			// Compress images before processing
-			const compressedImages = await compressMultipleImages(files);
-			const newPhotoObjs = compressedImages.map((compressed) => ({ 
-				id: uuidv4(), 
-				preview: compressed.dataUrl, 
-				fileOrUrl: compressed.file 
-			}));
-			setPhotos(prev => [...prev, ...newPhotoObjs].slice(0, 6));
+			compressedImages = await compressMultipleImages(files);
 		} catch (error) {
-			console.error('Error compressing images:', error);
 			alert('Failed to process images. Please try again.');
-		} finally {
 			setUploading(false);
+			return;
 		}
 
 		try {
-			// Upload each file and add to photos array
-			for (const file of files) {
+			for (const compressed of compressedImages) {
 				const formData = new FormData();
-				formData.append("photo", file);
+				formData.append("photo", compressed.file);
 				formData.append("userEmail", session.user.email);
 
 				const response = await fetch("/api/upload-photo", {
@@ -401,18 +341,19 @@ export default function WelcomePage() {
 						preview: data.photoUrl, 
 						fileOrUrl: data.photoUrl 
 					};
-					setPhotos(prev => [...prev, newPhoto]);
-					// Update answers with the first photo as profile photo
-					if (photos.length === 0) {
-						setAnswers((prev) => ({ ...prev, q0: data.photoUrl }));
-					}
+					setPhotos(prev => {
+						const updated = [...prev, newPhoto].slice(0, 6);
+						if (prev.length === 0) {
+							setAnswers(a => ({ ...a, q0: data.photoUrl }));
+						}
+						return updated;
+					});
 				} else {
 					const error = await response.json();
 					alert(`Upload failed: ${error.error}`);
 				}
 			}
 		} catch (error) {
-			console.error("Error uploading photo:", error);
 			alert("Failed to upload photo. Please try again.");
 		} finally {
 			setUploading(false);
@@ -423,10 +364,9 @@ export default function WelcomePage() {
 		const photoToDelete = photos.find(photo => photo.id === id);
 		if (!photoToDelete || !session?.user?.email) return;
 
-		// If it's an existing photo URL (not a new file), delete from Cloudinary
 		if (typeof photoToDelete.fileOrUrl === 'string' && photoToDelete.fileOrUrl.startsWith('http')) {
 			try {
-				const response = await fetch("/api/delete-photo", {
+				await fetch("/api/delete-photo", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
@@ -434,19 +374,13 @@ export default function WelcomePage() {
 						photoUrl: photoToDelete.fileOrUrl
 					}),
 				});
-
-				if (!response.ok) {
-					console.error("Failed to delete photo from Cloudinary");
-				}
 			} catch (error) {
 				console.error("Error deleting photo:", error);
 			}
 		}
 
-		// Remove from local state
 		setPhotos(prev => prev.filter((photo) => photo.id !== id));
 		
-		// Update answers - if this was the first photo, update q0 to the new first photo
 		if (photos.length > 0 && photos[0].id === id) {
 			const remainingPhotos = photos.filter(photo => photo.id !== id);
 			if (remainingPhotos.length > 0) {
@@ -472,24 +406,12 @@ export default function WelcomePage() {
 	const handleSubmit = async () => {
 		setIsSubmitting(true);
 		try {
-			// Get all photo URLs in order
 			const photoUrls = photos.map(photo => photo.preview);
-			
-			// Store all data in the answers object
 			const updatedAnswers = {
 				...answers,
-				// Make sure q0 has the first photo as profile photo
 				q0: photos.length > 0 ? photos[0].preview : null,
-				// Make sure q1 has the bio
-				q1: bio,
-				// Make sure q2 has the interests
 				q2: selectedInterests,
-				// Make sure q3 has gender, preference, and birthdate
-				q3: {
-					gender,
-					preference,
-					dob
-				}
+				q3: { gender, preference, dob }
 			};
 
 			await fetch("/api/update-profile", {
@@ -497,9 +419,9 @@ export default function WelcomePage() {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					email: session.user.email,
-					name: session.user.name, // The name will be cleaned in the API route
+					name: session.user.name,
 					answers: updatedAnswers,
-					profilePhotos: photoUrls, // Send all photos
+					profilePhotos: photoUrls,
 				}),
 			});
 			
@@ -511,125 +433,37 @@ export default function WelcomePage() {
 		}
 	};
 
-	const goToMainPage = () => {
-		router.push("/mainpage");
-	};
-
 	const currentQ = QUESTIONS[currentQuestion];
 	const isLastQuestion = currentQuestion === QUESTIONS.length - 1;
 	const isPhotoQuestion = currentQ.isPhotoUpload;
-	const canProceed = isPhotoQuestion ? photos.length > 0 : answers[currentQ.id];
+	const canProceed = isPhotoQuestion ? photos.length > 0 : (
+		currentQ.isBio ? !!answers[currentQ.id]?.trim() :
+		currentQ.isInterests ? selectedInterests.length > 0 :
+		currentQ.isGenderPrefDob ? (gender && preference && dob && answers[currentQ.id]?.isValidDob !== false) :
+		!!answers[currentQ.id]
+	);
 
-	// Return loading state while checking completion
 	if (isCheckingCompletion) {
 		return (
-			<div
-				style={{
-					display: "flex",
-					justifyContent: "center",
-					alignItems: "center",
-					height: "100vh",
-					background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-					color: "#fff",
-				}}
-			>
-				<div style={{ textAlign: "center" }}>
-					<div
-						style={{
-							width: "60px",
-							height: "60px",
-							border: "4px solid rgba(255,255,255,0.3)",
-							borderTop: "4px solid white",
-							borderRadius: "50%",
-							animation: "spin 1s linear infinite",
-							margin: "0 auto 20px auto",
-						}}
-					></div>
-					<p style={{ fontSize: "18px", fontWeight: "500" }}>Checking your profile...</p>
-					<style jsx>{`
-						@keyframes spin {
-							0% { transform: rotate(0deg); }
-							100% { transform: rotate(360deg); }
-						}
-					`}</style>
-				</div>
+			<div className="min-h-screen bg-background flex justify-center items-center flex-col text-foreground">
+				<div className="w-12 h-12 border-4 border-muted border-t-primary rounded-full animate-spin mb-4"></div>
+				<p className="text-lg font-medium">Checking your profile...</p>
 			</div>
 		);
 	}
 
-	// Render the congratulations screen if profile is completed
 	if (profileCompleted) {
 		return (
-			<div
-				style={{
-					minHeight: "100vh",
-					background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					padding: "10px",
-				}}
-			>
-				<div
-					style={{
-						background: "#111", // Changed from "#fff" to black
-						borderRadius: "20px",
-						padding: "40px 30px",
-						maxWidth: "600px",
-						width: "100%",
-						boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
-						margin: "20px 20px",
-						textAlign: "center",
-					}}
-				>
-					<div
-						style={{
-							fontSize: "64px",
-							marginBottom: "20px",
-						}}
-					>
-						🎉
-					</div>
-					<h1
-						style={{
-							fontSize: "28px",
-							fontWeight: "700",
-							color: "#fff", // Changed from "#333" to white
-							marginBottom: "16px",
-						}}
-					>
-						Congratulations!
-					</h1>
-					<p
-						style={{
-							fontSize: "16px",
-							color: "#999", // Changed from "#666" to lighter grey
-							lineHeight: "1.6",
-							marginBottom: "30px",
-						}}
-					>
+			<div className="min-h-screen bg-background flex items-center justify-center p-4">
+				<div className="bg-card border border-border rounded-3xl p-10 max-w-lg w-full text-center shadow-2xl">
+					<div className="text-6xl mb-6">🎉</div>
+					<h1 className="text-3xl font-bold text-foreground mb-4">Congratulations!</h1>
+					<p className="text-muted-foreground text-lg mb-8 leading-relaxed">
 						Your profile has been successfully created. You're all set to connect with amazing people!
 					</p>
 					<button
-						onClick={goToMainPage}
-						style={{
-							padding: "16px 40px",
-							background: "#667eea", // Changed to solid color to match other buttons
-							color: "#fff",
-							border: "none",
-							borderRadius: "10px",
-							cursor: "pointer",
-							fontSize: "18px",
-							fontWeight: "600",
-							boxShadow: "0 4px 14px rgba(102, 126, 234, 0.4)",
-							transition: "transform 0.2s ease",
-						}}
-						onMouseEnter={(e) => {
-							(e.target as HTMLButtonElement).style.transform = "translateY(-2px)";
-						}}
-						onMouseLeave={(e) => {
-							(e.target as HTMLButtonElement).style.transform = "translateY(0)";
-						}}
+						onClick={() => router.push("/mainpage")}
+						className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-3 rounded-full font-semibold transition-all transform hover:-translate-y-1 w-full shadow-lg"
 					>
 						Start Exploring Destyn
 					</button>
@@ -638,548 +472,232 @@ export default function WelcomePage() {
 		);
 	}
 
-	const isMobile = windowWidth < 768;
-
 	return (
-		<>
-			<div
-				style={{
-					minHeight: "100vh",
-					background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					padding: "10px",
-				}}
-			>
-				{/* Compression Progress Overlay */}
-				<CompressionProgress 
-					state={compressionState}
-					compressionInfo={compressionInfo}
-					showCompressionInfo={false}
-				/>
-				<div
-					style={{
-						background: "#111", // Changed from "#fff" to dark
-						borderRadius: "20px",
-						padding: "20px",
-						maxWidth: "600px",
-						width: "calc(100% - 20px)",
-						boxShadow: "0 20px 60px rgba(0,0,0,0.1)",
-						margin: "20px auto",
-						overflow: "hidden",
-					}}
-				>
-					{/* Progress Bar */}
+		<div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 font-sans text-foreground selection:bg-primary selection:text-primary-foreground">
+			<CompressionProgress 
+				state={compressionState}
+				compressionInfo={compressionInfo}
+				showCompressionInfo={false}
+			/>
+			
+			<div className="bg-card border border-border rounded-3xl p-6 md:p-10 max-w-xl w-full shadow-2xl relative overflow-hidden">
+				
+				{/* Progress Bar */}
+				<div className="w-full bg-secondary h-2 rounded-full mb-8 overflow-hidden">
 					<div
-						style={{
-							background: "#222", // Changed from "#f0f0f0" to darker
-							height: "12px",
-							borderRadius: "10px",
-							marginTop: "5px",
-							marginLeft: "5px",
-							marginRight: "5px",
-							marginBottom: "30px",
-							overflow: "hidden",
-						}}
-					>
-						<div
-							style={{
-								background: "#667eea",
-								height: "100%",
-								width: `${((currentQuestion + 1) / QUESTIONS.length) * 100}%`,
-								transition: "width 0.3s ease",
-							}}
-						/>
-					</div>
+						className="bg-primary h-full transition-all duration-500 ease-out rounded-full"
+						style={{ width: `${((currentQuestion + 1) / QUESTIONS.length) * 100}%` }}
+					/>
+				</div>
 
-					{/* Question Counter */}
-					<div
-						style={{
-							textAlign: "center",
-							color: "#999", // Changed from "#666" to lighter
-							fontSize: "12px",
-							marginBottom: "20px",
-						}}
-					>
-						Question {currentQuestion + 1} of {QUESTIONS.length}
-					</div>
+				<div className="text-center text-muted-foreground text-sm font-medium mb-6 uppercase tracking-wider">
+					Step {currentQuestion + 1} of {QUESTIONS.length}
+				</div>
 
-					{/* Question */}
-					<h2
-						style={{
-							fontSize: isMobile ? "18px" : "20px",
-							fontWeight: "600",
-							color: "#fff", // Changed from "#333" to white
-							marginBottom: "30px",
-							textAlign: "center",
-							lineHeight: "1.4",
-							padding: "0 10px",
-						}}
-					>
-						{currentQ.question}
-					</h2>
+				<h2 className="text-2xl md:text-3xl font-bold text-center mb-8 leading-tight tracking-tight">
+					{currentQ.question}
+				</h2>
 
-					{/* Options or Photo Upload UI */}
+				<div className="min-h-[250px] flex flex-col justify-center">
 					{isPhotoQuestion ? (
-						<div
-							style={{
-								display: "flex",
-								flexDirection: "column",
-								alignItems: "center",
-								gap: "20px",
-								marginBottom: "40px",
-							}}
-						>
-							{/* Photos Grid */}
-							<div
-								style={{
-									display: "grid",
-									gridTemplateColumns: "repeat(3, 90px)",
-									gridAutoRows: "110px",
-									gap: 18,
-									alignItems: "center",
-									marginBottom: 10,
-									justifyContent: "center",
-									width: "100%",
-									maxWidth: 350,
-									marginLeft: "auto",
-									marginRight: "auto",
-								}}
-							>
+						<div className="flex flex-col items-center gap-6">
+							<div className="grid grid-cols-3 gap-4 mx-auto">
 								{photos.map((photo, idx) => (
 									<div
 										key={photo.id}
-										style={{
-											width: 90,
-											height: 90,
-											borderRadius: 20,
-											background: "#333",
-											position: "relative",
-											boxShadow: "0 2px 8px rgba(79,195,247,0.2)",
-											marginRight: 0,
-											marginBottom: 0,
-											border: idx === 0 ? "2px solid #4FC3F7" : "2px solid #333",
-											display: "flex",
-											alignItems: "center",
-											justifyContent: "center",
-										}}
+										className={`w-24 h-24 md:w-28 md:h-28 rounded-2xl relative overflow-hidden bg-secondary border-2 transition-all ${idx === 0 ? 'border-primary ring-4 ring-primary/20' : 'border-border'}`}
 									>
 										<img 
 											src={photo.preview} 
-											alt="Profile" 
-											style={{ 
-												width: "100%", 
-												height: "100%", 
-												borderRadius: 20, 
-												objectFit: "cover", 
-												pointerEvents: "none" 
-											}} 
+											alt="Upload" 
+											className="w-full h-full object-cover" 
 										/>
 										<button
 											type="button"
 											onClick={() => handleDeletePhoto(photo.id)}
-											style={{
-												position: "absolute",
-												top: 2,
-												right: 2,
-												background: "#000000",
-												color: "#4FC3F7",
-												border: "none",
-												borderRadius: "50%",
-												width: 28,
-												height: 28,
-												fontWeight: 700,
-												fontSize: 20,
-												cursor: "pointer",
-												boxShadow: "0 1px 4px rgba(79,195,247,0.3)",
-												display: "flex",
-												alignItems: "center",
-												justifyContent: "center",
-												transition: "background 0.18s, color 0.18s, box-shadow 0.18s",
-											}}
-											aria-label="Delete photo"
+											className="absolute top-1 right-1 bg-black/60 hover:bg-destructive text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors"
 										>
-											×
+											<span className="text-sm font-bold leading-none">&times;</span>
 										</button>
 										{idx === 0 && (
-											<div style={{ 
-												position: "absolute", 
-												left: 0, 
-												bottom: 0, 
-												background: "linear-gradient(90deg, #4FC3F7 0%, #29B6F6 100%)", 
-												color: "#000000", 
-												fontSize: 11, 
-												fontWeight: 700, 
-												borderRadius: "0 12px 0 20px", 
-												padding: "2px 10px", 
-												letterSpacing: 0.5 
-											}}>
-												Profile
+											<div className="absolute bottom-0 left-0 right-0 bg-primary/90 text-primary-foreground text-[10px] font-bold uppercase text-center py-1 tracking-wider">
+												Main
 											</div>
 										)}
 									</div>
 								))}
 								{photos.length < 6 && (
-									<label style={{ 
-										width: 90, 
-										height: 90, 
-										border: "2px dashed #4FC3F7", 
-										borderRadius: 20, 
-										display: "flex", 
-										alignItems: "center", 
-										justifyContent: "center", 
-										fontSize: 38, 
-										color: "#4FC3F7", 
-										cursor: "pointer", 
-										background: "#1a1a1a" 
-									}}>
-										+
+									<label className="w-24 h-24 md:w-28 md:h-28 border-2 border-dashed border-primary/50 hover:border-primary hover:bg-primary/5 rounded-2xl flex flex-col items-center justify-center text-primary cursor-pointer transition-all bg-secondary/50">
+										<span className="text-3xl font-light mb-1">+</span>
+										<span className="text-[10px] uppercase tracking-wider font-semibold">Upload</span>
 										<input 
 											type="file" 
 											accept="image/*" 
 											multiple 
-											style={{ display: "none" }} 
+											className="hidden" 
 											onChange={handlePhotoUpload} 
+											disabled={uploading}
 										/>
 									</label>
 								)}
 							</div>
-
-							{/* Helper Text */}
-							<p
-								style={{
-									fontSize: "12px",
-									color: "#666",
-									textAlign: "center",
-								}}
-							>
-								Add up to 6 photos. First photo will be your main profile picture.
-								{photos.length === 0 && (
-									<span style={{ color: "#ff4444", display: "block", marginTop: 4 }}>
-										• At least one photo required
-									</span>
-								)}
+							<p className="text-sm text-muted-foreground text-center">
+								Add up to 6 photos. The first will be your main photo.
+								{photos.length === 0 && <span className="block text-destructive mt-2 font-medium">At least one photo is required</span>}
 							</p>
 						</div>
 					) : (
-						<div
-							style={{
-								display: "flex",
-								flexDirection: "column",
-								gap: "15px",
-								marginBottom: "40px",
-							}}
-						>
+						<div className="flex flex-col gap-4">
 							{currentQ.isBio && (
 								<textarea
-									value={bio}
-									onChange={e => { setBio(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: e.target.value })); }}
-									placeholder="Tell us about yourself..."
-									style={{ 
-										width: '100%', 
-										minHeight: 80, 
-										borderRadius: 8, 
-										border: '1px solid #333', // Darker border
-										padding: 10, 
-										fontSize: 14, 
-										color: '#fff', // White text
-										background: '#1a1a1a', // Dark background
-									}}
+									value={answers[currentQ.id] || ""}
+									onChange={e => handleChange(currentQ.id, e.target.value)}
+									placeholder="Share a little bit about what makes you, you..."
+									className="w-full h-40 bg-input border border-border rounded-2xl p-5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none transition-all text-lg"
 								/>
 							)}
+							
 							{currentQ.isInterests && (
-								<div style={{ 
-									display: 'flex', 
-									flexWrap: 'wrap', 
-									gap: 8, 
-									marginBottom: 16,
-									justifyContent: 'center'
-								}}>
+								<div className="flex flex-wrap gap-3 justify-center mt-2">
 									{INTEREST_OPTIONS.map(opt => (
 										<button
 											key={opt}
 											type="button"
 											onClick={() => {
 												setSelectedInterests(prev => prev.includes(opt) ? prev.filter(i => i !== opt) : [...prev, opt]);
-												setAnswers(prev => ({ ...prev, [currentQ.id]: prev[currentQ.id]?.includes(opt) ? prev[currentQ.id].filter((i: string) => i !== opt) : [...(prev[currentQ.id] || []), opt] }));
 											}}
-											style={{
-												background: selectedInterests.includes(opt) ? '#667eea' : '#f0f0f0',
-												color: selectedInterests.includes(opt) ? '#fff' : '#333',
-												border: 'none',
-												borderRadius: '16px',
-												padding: '8px 16px',
-												cursor: 'pointer',
-												fontWeight: 500,
-												margin: '4px',
-												fontSize: window.innerWidth < 768 ? '12px' : '14px',
-											}}
+											className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+												selectedInterests.includes(opt) 
+												? 'bg-primary text-primary-foreground shadow-md shadow-primary/20 scale-105' 
+												: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border'
+											}`}
 										>
 											{opt}
 										</button>
 									))}
 								</div>
 							)}
+							
 							{currentQ.isGenderPrefDob && (
-								<div style={{ 
-									display: 'flex', 
-									flexDirection: 'column', 
-									gap: window.innerWidth < 768 ? 16 : 24, 
-									alignItems: 'center', 
-									marginBottom: 32,
-									width: '100%'
-								}}>
-									<div style={{ width: '100%', maxWidth: 340 }}>
-										<label style={{ 
-											fontWeight: 600, 
-											display: 'block', 
-											marginBottom: 6, 
-											color: '#fff'  // Changed from '#222' to white
-										}}>
-											Gender
-										</label>
+								<div className="flex flex-col gap-6 max-w-xs mx-auto w-full">
+									<div className="space-y-2">
+										<label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">I am a</label>
 										<select 
 											value={gender} 
-											onChange={e => { setGender(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], gender: e.target.value } })); }} 
-											style={{ 
-												width: '100%', 
-												padding: '10px', 
-												borderRadius: '8px', 
-												border: '1px solid #333', // Darker border
-												fontSize: window.innerWidth < 768 ? '14px' : '15px', 
-												color: '#fff', // White text
-												background: '#1a1a1a', // Dark background
-												appearance: 'auto' // Ensures proper display on mobile
-											}}
+											onChange={e => setGender(e.target.value)} 
+											className="w-full bg-input border border-border rounded-xl p-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none"
 										>
 											<option value="">Select your gender</option>
 											<option value="male">Male</option>
 											<option value="female">Female</option>
 										</select>
 									</div>
-									<div style={{ width: '100%', maxWidth: 340 }}>
-										<label style={{ 
-											fontWeight: 600, 
-											display: 'block', 
-											marginBottom: 6, 
-											color: '#fff'  // Changed from '#222' to white
-										}}>
-											Interested in dating
-										</label>
+									<div className="space-y-2">
+										<label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Interested in</label>
 										<select 
 											value={preference} 
-											onChange={e => { setPreference(e.target.value); setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], preference: e.target.value } })); }} 
-											style={{ 
-												width: '100%', 
-												padding: '10px', 
-												borderRadius: '8px', 
-												border: '1px solid #333', // Darker border
-												fontSize: window.innerWidth < 768 ? '14px' : '15px', 
-												color: '#fff', // White text
-												background: '#1a1a1a', // Dark background
-												appearance: 'auto' // Ensures proper display on mobile
-											}}
+											onChange={e => setPreference(e.target.value)} 
+											className="w-full bg-input border border-border rounded-xl p-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent appearance-none"
 										>
 											<option value="">Select preference</option>
-											<option value="male">Male</option>
-											<option value="female">Female</option>
+											<option value="male">Men</option>
+											<option value="female">Women</option>
+											<option value="everyone">Everyone</option>
 										</select>
 									</div>
-									<div style={{ width: '100%', maxWidth: 340 }}>
-										<label style={{ 
-											fontWeight: 600, 
-											display: 'block', 
-											marginBottom: 6, 
-											color: '#fff'  // Changed from '#222' to white
-										}}>
-											Date of Birth
-										</label>
+									<div className="space-y-2">
+										<label className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Date of Birth</label>
 										<input 
 											type="date" 
 											value={dob} 
 											onChange={e => { 
 												const inputDate = e.target.value;
-                                                const selectedDate = new Date(inputDate);
-                                                const today = new Date();
-                                                
-                                                // First validate that the date actually exists (handles cases like Feb 31)
-                                                if (isNaN(selectedDate.getTime())) {
-                                                    // Invalid date format - don't update state
-                                                    setAnswers(prev => ({ 
-                                                        ...prev, 
-                                                        [currentQ.id]: { 
-                                                            ...prev[currentQ.id], 
-                                                            dob: inputDate,
-                                                            isValidDob: false,
-                                                            errorMessage: "Invalid date selected" 
-                                                        } 
-                                                    }));
-                                                    setDob(inputDate);
-                                                    return;
-                                                }
-                                                
-                                                // Calculate age
-                                                let age = today.getFullYear() - selectedDate.getFullYear();
-                                                const monthDiff = today.getMonth() - selectedDate.getMonth();
-                                                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
-                                                    age--;
-                                                }
-                                                
-                                                setDob(inputDate);
-                                                
-                                                // Validate age range
-                                                if (age >= 18 && age <= 100) {
-                                                    setAnswers(prev => ({ 
-                                                        ...prev, 
-                                                        [currentQ.id]: { 
-                                                            ...prev[currentQ.id], 
-                                                            dob: inputDate,
-                                                            isValidDob: true,
-                                                            errorMessage: null
-                                                        } 
-                                                    }));
-                                                } else {
-                                                    setAnswers(prev => ({ 
-                                                        ...prev, 
-                                                        [currentQ.id]: { 
-                                                            ...prev[currentQ.id], 
-                                                            dob: inputDate,
-                                                            isValidDob: false,
-                                                            errorMessage: age < 18 ? "You must be at least 18 years old" : "Age cannot exceed 100 years" 
-                                                        } 
-                                                    }));
-                                                }
+												const selectedDate = new Date(inputDate);
+												const today = new Date();
+												
+												if (isNaN(selectedDate.getTime())) {
+													setAnswers(prev => ({ ...prev, [currentQ.id]: { ...prev[currentQ.id], dob: inputDate, isValidDob: false }}));
+													setDob(inputDate);
+													return;
+												}
+												
+												let age = today.getFullYear() - selectedDate.getFullYear();
+												const monthDiff = today.getMonth() - selectedDate.getMonth();
+												if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) age--;
+												
+												setDob(inputDate);
+												setAnswers(prev => ({ 
+													...prev, 
+													[currentQ.id]: { dob: inputDate, isValidDob: (age >= 18 && age <= 100) } 
+												}));
 											}} 
-											style={{ 
-												width: '100%', 
-												padding: 10, 
-												borderRadius: 8, 
-												border: `1px solid ${answers[currentQ.id]?.isValidDob === false ? '#ff4d4d' : '#333'}`, // Darker border with error color
-												fontSize: 15, 
-												color: '#fff', // White text
-												background: '#1a1a1a' // Dark background
-											}} 
+											className={`w-full bg-input border ${answers[currentQ.id]?.isValidDob === false ? 'border-destructive focus:ring-destructive' : 'border-border focus:ring-primary'} rounded-xl p-4 text-foreground focus:outline-none focus:ring-2 focus:border-transparent block`}
 											max={new Date(new Date().setFullYear(new Date().getFullYear() - 18)).toISOString().split('T')[0]}
-											min={new Date(new Date().setFullYear(new Date().getFullYear() - 100)).toISOString().split('T')[0]}
 										/>
 										{answers[currentQ.id]?.isValidDob === false && (
-											<p style={{ color: '#ff4d4d', fontSize: 12, marginTop: 4 }}>
-												Incorrect Age
-											</p>
+											<p className="text-destructive text-sm font-medium mt-1">You must be at least 18 years old.</p>
 										)}
 									</div>
 								</div>
 							)}
+							
 							{currentQ.options?.map((opt) => (
 								<label
 									key={opt}
-									style={{
-										display: "flex",
-										alignItems: "center",
-										padding: "10px 15px",
-										border: answers[currentQ.id] === opt
-											? "2px solid #667eea"
-											: "2px solid #333", // Changed from "#e0e0e0" to darker
-										borderRadius: "10px",
-										cursor: "pointer",
-										transition: "all 0.2s ease",
-										background: answers[currentQ.id] === opt 
-											? "rgba(102, 126, 234, 0.2)" // Semi-transparent highlight
-											: "#1a1a1a", // Dark background for options
-									}}
+									className={`flex items-center p-4 md:p-5 rounded-2xl cursor-pointer transition-all duration-200 border-2 ${
+										answers[currentQ.id] === opt
+											? 'border-primary bg-primary/10 scale-[1.02]'
+											: 'border-border bg-input hover:border-primary/50'
+									}`}
 								>
+									<div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-4 flex-shrink-0 transition-colors ${answers[currentQ.id] === opt ? 'border-primary' : 'border-muted-foreground'}`}>
+										{answers[currentQ.id] === opt && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+									</div>
 									<input
 										type="radio"
 										name={currentQ.id}
 										value={opt}
 										checked={answers[currentQ.id] === opt}
 										onChange={() => handleChange(currentQ.id, opt)}
-										style={{
-											marginRight: "10px",
-											transform: "scale(1.1)",
-										}}
+										className="hidden"
 									/>
-									<span
-										style={{
-											fontSize: "13px",
-											color: "#fff", // Changed from "#333" to white
-											lineHeight: "1.4",
-										}}
-									>
+									<span className={`text-base md:text-lg font-medium ${answers[currentQ.id] === opt ? 'text-foreground' : 'text-muted-foreground'}`}>
 										{opt}
 									</span>
 								</label>
 							))}
 						</div>
 					)}
+				</div>
 
-					{/* Navigation Buttons */}
-					<div
-						style={{
-							display: "flex",
-							justifyContent: "space-between",
-							alignItems: "center",
-						}}
+				<div className="flex justify-between items-center mt-12 pt-6 border-t border-border">
+					<button
+						onClick={handlePrev}
+						disabled={currentQuestion === 0}
+						className={`px-6 py-3 rounded-full font-medium transition-all ${currentQuestion === 0 ? 'opacity-0 cursor-default' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}
 					>
-						<button
-							onClick={handlePrev}
-							disabled={currentQuestion === 0}
-							style={{
-								padding: "12px 24px",
-								background: "#667eea", // Changed to match Choose Photo button
-								color: "#fff",
-								border: "none",
-								borderRadius: "8px",
-								cursor: currentQuestion === 0 ? "not-allowed" : "pointer",
-								fontSize: "14px",
-								fontWeight: "500",
-								opacity: currentQuestion === 0 ? "0.5" : "1", // Use opacity for disabled state
-							}}
-						>
-							Previous
-						</button>
+						Previous
+					</button>
 
-						{isLastQuestion ? (
-							<button
-								onClick={handleSubmit}
-								disabled={!canProceed || isSubmitting}
-								style={{
-									padding: "12px 32px",
-									background: "#667eea", // Changed to match Choose Photo button
-									color: "#fff",
-									border: "none",
-									borderRadius: "8px",
-									cursor: canProceed && !isSubmitting ? "pointer" : "not-allowed",
-									fontSize: "14px",
-									fontWeight: "600",
-									opacity: (!canProceed || isSubmitting) ? "0.5" : "1", // Use opacity for disabled state
-								}}
-							>
-								{isSubmitting ? "Submitting..." : "Complete Profile"}
-							</button>
-						) : (
-							<button
-								onClick={handleNext}
-								disabled={!canProceed}
-								style={{
-									padding: "12px 24px",
-									background: "#667eea", // Changed to match Choose Photo button
-									color: "#fff",
-									border: "none",
-									borderRadius: "8px",
-									cursor: canProceed ? "pointer" : "not-allowed",
-									fontSize: "14px", // Changed to match other buttons
-									fontWeight: "500",
-									opacity: !canProceed ? "0.5" : "1", // Use opacity for disabled state
-								}}
-							>
-								Next
-							</button>
-						)}
-					</div>
+					{isLastQuestion ? (
+						<button
+							onClick={handleSubmit}
+							disabled={!canProceed || isSubmitting}
+							className={`px-8 py-3 rounded-full font-semibold transition-all shadow-lg ${canProceed && !isSubmitting ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5' : 'bg-primary/50 text-primary-foreground/50 cursor-not-allowed'}`}
+						>
+							{isSubmitting ? "Submitting..." : "Complete Profile"}
+						</button>
+					) : (
+						<button
+							onClick={handleNext}
+							disabled={!canProceed}
+							className={`px-8 py-3 rounded-full font-semibold transition-all ${canProceed ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 shadow-lg shadow-primary/20' : 'bg-primary/50 text-primary-foreground/50 cursor-not-allowed'}`}
+						>
+							Continue
+						</button>
+					)}
 				</div>
 			</div>
-		</>
+		</div>
 	);
 }

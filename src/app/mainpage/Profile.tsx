@@ -18,12 +18,10 @@ export default function Profile() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Image compression hook
   const {
     compressSingleImage,
     state: compressionState,
     compressionInfo,
-    isCompressing
   } = useImageCompression({
     compressionOptions: {
       maxWidth: 1000,
@@ -37,8 +35,6 @@ export default function Profile() {
     }
   });
 
-
-
   useEffect(() => {
     if (!session?.user?.email) return;
     const fetchProfile = async () => {
@@ -50,9 +46,7 @@ export default function Profile() {
         });
         if (response.ok) {
           const data = await response.json();
-          console.log('Profile data received:', data); // Debug log
           setProfile(data);
-          // Set the first photo as profile photo, or use the single profilePhoto if no array
           if (Array.isArray(data.profilePhotos) && data.profilePhotos.length > 0) {
             setProfilePhoto(data.profilePhotos[0]);
           } else {
@@ -60,18 +54,15 @@ export default function Profile() {
           }
         }
       } catch (error) {
-        console.error("Error fetching profile:", error);
         setProfile(null);
       }
     };
     fetchProfile();
   }, [session?.user?.email]);
 
-  // Add effect to refresh data when component becomes visible (e.g., after returning from edit profile)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden && session?.user?.email) {
-        // Refresh profile data when page becomes visible
         const fetchProfile = async () => {
           try {
             const response = await fetch("/api/get-user-profile", {
@@ -88,9 +79,7 @@ export default function Profile() {
                 setProfilePhoto(data.profilePhoto || null);
               }
             }
-          } catch (error) {
-            console.error("Error refreshing profile:", error);
-          }
+          } catch (error) {}
         };
         fetchProfile();
       }
@@ -98,7 +87,6 @@ export default function Profile() {
 
     const handleFocus = () => {
       if (session?.user?.email) {
-        // Refresh profile data when window gains focus
         const fetchProfile = async () => {
           try {
             const response = await fetch("/api/get-user-profile", {
@@ -115,9 +103,7 @@ export default function Profile() {
                 setProfilePhoto(data.profilePhoto || null);
               }
             }
-          } catch (error) {
-            console.error("Error refreshing profile:", error);
-          }
+          } catch (error) {}
         };
         fetchProfile();
       }
@@ -138,7 +124,6 @@ export default function Profile() {
     const file = event.target.files?.[0];
     if (!file || !session?.user?.email) return;
     
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file');
       return;
@@ -146,7 +131,6 @@ export default function Profile() {
     
     setUploading(true);
     try {
-      // Compress image before upload
       const compressedImage = await compressSingleImage(file);
       
       const formData = new FormData();
@@ -157,8 +141,6 @@ export default function Profile() {
         body: formData,
       });
       if (response.ok) {
-        const data = await response.json();
-        // Refresh the profile data to get updated photos
         const profileResponse = await fetch("/api/get-user-profile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -177,7 +159,6 @@ export default function Profile() {
         alert('Failed to upload photo. Please try again.');
       }
     } catch (error) {
-      console.error("Error uploading photo:", error);
       alert('Error uploading photo. Please try again.');
     } finally {
       setUploading(false);
@@ -189,12 +170,10 @@ export default function Profile() {
       await signOut({ redirect: false });
       router.push('/');
     } catch (error) {
-      console.error("Error during logout:", error);
       router.push('/');
     }
   };
 
-  // Helper: get age from birthdate string (YYYY-MM-DD)
   function getAge(birthdate?: string) {
     if (!birthdate) return undefined;
     try {
@@ -207,7 +186,6 @@ export default function Profile() {
     }
   }
 
-  // Get all user photos (profilePhotos array or fallback to single profilePhoto)
   const getUserPhotos = () => {
     if (Array.isArray(profile?.profilePhotos) && profile.profilePhotos.length > 0) {
       return profile.profilePhotos;
@@ -220,413 +198,189 @@ export default function Profile() {
 
   const userPhotos = getUserPhotos();
 
-  // Show loading state while session is loading
   if (!session) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#ffffff',
-        fontSize: '20px'
-      }}>
-        Loading...
+      <div className="min-h-screen bg-background flex items-center justify-center text-foreground text-xl">
+        <div className="w-12 h-12 border-4 border-muted border-t-primary rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
-      padding: '20px',
-      color: '#ffffff'
-    }}>
-      {/* Compression Progress Overlay */}
+    <div className="min-h-screen bg-background p-4 md:p-8 text-foreground pb-24 md:pb-8">
       <CompressionProgress 
         state={compressionState}
         compressionInfo={compressionInfo}
         showCompressionInfo={false}
       />
-      <div style={{ maxWidth: 480, margin: '0 auto' }}>
+      
+      <div className="max-w-xl mx-auto space-y-6">
         
-        {/* Black Card Container */}
-        <div style={{
-          background: '#000000',
-          borderRadius: '20px',
-          padding: '24px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-          marginBottom: '20px'
-        }}>
+        {/* Profile Card Container */}
+        <div className="bg-card rounded-3xl p-6 md:p-8 shadow-2xl border border-border">
           
           {/* Profile Header */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            marginBottom: '32px',
-            gap: '16px'
-          }}>
-          {/* Circular Profile Picture */}
-          <div style={{
-            position: 'relative',
-            width: '120px',
-            height: '120px',
-            borderRadius: '50%',
-            border: '2px solid #4FC3F7',
-            overflow: 'hidden',
-            flexShrink: 0
-          }}>
-            {profilePhoto ? (
-              <img 
-                src={profilePhoto} 
-                alt="Profile" 
-                style={{ 
-                  width: '100%', 
-                  height: '100%', 
-                  objectFit: 'cover' 
-                }} 
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const parent = target.parentElement;
-                  if (parent) {
-                    parent.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #333; color: white; font-size: 32px;">👤</div>';
-                  }
-                }}
-              />
-            ) : (
-              <div style={{ 
-                width: '100%', 
-                height: '100%', 
-                background: '#333',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '32px'
-              }}>
-                👤
+          <div className="flex items-center mb-8 gap-6">
+            {/* Circular Profile Picture */}
+            <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-primary bg-secondary shrink-0 overflow-hidden shadow-lg shadow-primary/20">
+              {profilePhoto ? (
+                <img 
+                  src={profilePhoto} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = '<div class="flex items-center justify-center w-full h-full bg-secondary text-foreground text-4xl">👤</div>';
+                    }
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full bg-secondary flex items-center justify-center text-4xl">
+                  👤
+                </div>
+              )}
+              {/* Camera icon overlay */}
+              <div 
+                onClick={triggerFileInput}
+                className="absolute bottom-0 right-0 md:bottom-2 md:right-2 bg-primary w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center cursor-pointer text-primary-foreground transition-transform hover:scale-110 shadow-lg border-2 border-card"
+              >
+                <FaCamera size={14} />
               </div>
-            )}
-            {/* Camera icon overlay */}
-            <div 
-              onClick={triggerFileInput}
-              style={{
-                position: 'absolute',
-                bottom: '0',
-                right: '0',
-                background: '#4FC3F7',
-                borderRadius: '50%',
-                width: '24px',
-                height: '24px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                fontSize: '12px',
-                color: '#000',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = 'scale(1.1)';
-                e.currentTarget.style.background = '#29B6F6';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.background = '#4FC3F7';
-              }}
-            >
-              <FaCamera />
+            </div>
+
+            {/* User Info */}
+            <div className="flex-1">
+              <h1 className="text-2xl md:text-3xl font-bold mb-1 text-foreground break-words leading-tight">
+                {profile?.name || 'User Name'}
+              </h1>
+              <div className="text-lg md:text-xl text-muted-foreground mb-2">
+                {profile?.birthdate ? `${getAge(profile.birthdate)} years old` : 'Age not set'}
+              </div>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <span className="text-base md:text-lg text-muted-foreground font-semibold capitalize">
+                  {profile?.gender ? profile.gender : 'Gender not set'}
+                </span>
+                {profile?.birthdate && (
+                  <ZodiacTag 
+                    birthdate={profile.birthdate} 
+                    size="medium"
+                  />
+                )}
+              </div>
             </div>
           </div>
 
-          {/* User Info */}
-          <div style={{ flex: 1 }}>
-            <div style={{ 
-              fontSize: '30px', 
-              fontWeight: 'bold', 
-              marginBottom: '4px',
-              color: '#ffffff',
-              wordWrap: 'break-word',
-              overflowWrap: 'break-word',
-              lineHeight: '1.2'
-            }}>
-              {profile?.name || 'User Name'}
-            </div>
-            <div style={{ 
-              fontSize: '20px', 
-              color: '#cccccc',
-              marginBottom: '2px'
-            }}>
-              {profile?.birthdate ? `${getAge(profile.birthdate)} years old` : 'Age not set'}
-            </div>
-            <div style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap'
-            }}>
-              <div style={{ 
-                fontSize: '19px', 
-                color: '#999999',
-                fontWeight: '600'
-              }}>
-                {profile?.gender ? profile.gender : 'Gender not set'}
-              </div>
-              {profile?.birthdate && (
-                <ZodiacTag 
-                  birthdate={profile.birthdate} 
-                  size="medium"
-                />
+          {/* Bio Section */}
+          <div className="mb-8">
+            <h2 className="bg-muted rounded-xl px-4 py-2.5 mb-3 text-xl font-bold text-foreground inline-block">
+              Bio
+            </h2>
+            <div className={`bg-secondary rounded-2xl p-5 text-secondary-foreground text-base md:text-lg leading-relaxed ${profile?.bio && profile.bio.length > 100 ? 'min-h-[120px]' : ''}`}>
+              {profile?.bio ? profile.bio : (
+                <span className="text-muted-foreground italic">
+                  No bio added yet. Click "Edit Profile" to add your bio!
+                </span>
               )}
             </div>
           </div>
-        </div>
 
-        {/* Bio Section */}
-        <div style={{ marginBottom: '24px' }}>
-          <div style={{
-            background: '#1a1a1a',
-            borderRadius: '8px',
-            padding: '12px 16px',
-            marginBottom: '12px',
-            fontSize: '25px',
-            fontWeight: 'bold',
-            color: '#ffffff'
-          }}>
-            Bio
+          {/* Interests Section */}
+          <div className="mb-8">
+            <h2 className="bg-muted rounded-xl px-4 py-2.5 mb-3 text-xl font-bold text-foreground inline-block">
+              Interests
+            </h2>
+            <div className="bg-secondary rounded-2xl p-5 min-h-[120px]">
+              {Array.isArray(profile?.interests) && profile.interests.length > 0 ? (
+                <div className="flex flex-wrap gap-2 md:gap-3">
+                  {profile.interests.map((interest: string, index: number) => (
+                    <span key={index} className="bg-primary/10 text-primary border border-primary/20 rounded-full px-4 py-1.5 text-sm md:text-base font-semibold">
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {Array.from({ length: 8 }, (_, i) => (
+                    <div key={i} className="bg-muted/50 rounded-full h-8 animate-pulse"></div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          <div style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: '12px',
-            padding: '20px',
-            color: '#ffffff',
-            fontSize: '18px',
-            lineHeight: '1.5',
-            minHeight: profile?.bio && profile.bio.length > 100 ? '120px' : 'auto'
-          }}>
-            {profile?.bio ? profile.bio : (
-              <span style={{ color: '#cccccc', fontStyle: 'italic' }}>
-                No bio added yet. Click "Edit Profile" to add your bio!
-              </span>
-            )}
-          </div>
-        </div>
 
-        {/* Interests Section */}
-        <div style={{ marginBottom: '24px' }}>
-          <div style={{
-            background: '#1a1a1a',
-            borderRadius: '8px',
-            padding: '12px 16px',
-            marginBottom: '12px',
-            fontSize: '25px',
-            fontWeight: 'bold',
-            color: '#ffffff'
-          }}>
-            Interests
-          </div>
-          <div style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: '12px',
-            padding: '20px',
-            minHeight: '120px'
-          }}>
-            {Array.isArray(profile?.interests) && profile.interests.length > 0 ? (
-              <div style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '8px'
-              }}>
-                {profile.interests.map((interest: string, index: number) => (
-                  <div key={index} style={{
-                    background: '#cccccc',
-                    color: '#333',
-                    borderRadius: '8px',
-                    padding: '8px 12px',
-                    fontSize: '16px',
-                    fontWeight: '500'
-                  }}>
-                    {interest}
+          {/* Photos Section */}
+          <div className="mb-8">
+            <h2 className="bg-muted rounded-xl px-4 py-2.5 mb-3 text-xl font-bold text-foreground inline-block">
+              Photos <span className="text-muted-foreground font-medium text-lg ml-1">({userPhotos.length})</span>
+            </h2>
+            <div className="grid grid-cols-3 gap-3 md:gap-4 auto-rows-fr aspect-[3/2]">
+              {userPhotos.length > 0 ? (
+                userPhotos.slice(0, 6).map((photo: string, index: number) => (
+                  <div key={index} className="rounded-xl md:rounded-2xl border-2 border-primary/20 overflow-hidden relative bg-secondary aspect-square">
+                    <img 
+                      src={photo} 
+                      alt={`Post ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.className = "flex flex-col items-center justify-center w-full h-full bg-secondary text-muted-foreground text-xs text-center p-2 rounded-xl border border-border";
+                          parent.innerHTML = '<span>Photo Error</span>';
+                        }
+                      }}
+                    />
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(5, 1fr)',
-                gap: '8px',
-                gridTemplateRows: 'repeat(2, 1fr)',
-                height: '80px'
-              }}>
-                {Array.from({ length: 10 }, (_, i) => (
-                  <div key={i} style={{
-                    background: '#cccccc',
-                    borderRadius: '8px',
-                    height: '32px'
-                  }}></div>
-                ))}
-              </div>
-            )}
+                ))
+              ) : (
+                Array.from({ length: 6 }, (_, i) => (
+                  <div key={i} className="bg-secondary rounded-xl md:rounded-2xl border-2 border-dashed border-border flex items-center justify-center text-muted-foreground text-xs md:text-sm aspect-square">
+                    Empty
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-        </div>
-
-        {/* Posts Section */}
-        <div style={{ marginBottom: '32px' }}>
-          <div style={{
-            background: '#1a1a1a',
-            borderRadius: '8px',
-            padding: '12px 16px',
-            marginBottom: '12px',
-            fontSize: '25px',
-            fontWeight: 'bold',
-            color: '#ffffff'
-          }}>
-            Posts ({userPhotos.length} photos)
-          </div>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '12px',
-            gridTemplateRows: 'repeat(2, 1fr)',
-            height: '300px'
-          }}>
-            {userPhotos.length > 0 ? (
-              userPhotos.slice(0, 6).map((photo: string, index: number) => (
-                <div key={index} style={{
-                  borderRadius: '12px',
-                  border: '2px solid #4FC3F7',
-                  overflow: 'hidden',
-                  position: 'relative',
-                  background: '#333'
-                }}>
-                  <img 
-                    src={photo} 
-                    alt={`Post ${index + 1}`}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover'
-                    }}
-                    onError={(e) => {
-                      // Handle image load errors
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent) {
-                        parent.style.background = '#ff4444';
-                        parent.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: white; font-size: 12px;">Photo Error</div>';
-                      }
-                    }}
-                  />
-                </div>
-              ))
-            ) : (
-              Array.from({ length: 6 }, (_, i) => (
-                <div key={i} style={{
-                  background: '#333',
-                  borderRadius: '12px',
-                  border: '2px solid #4FC3F7',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#666',
-                  fontSize: '14px'
-                }}>
-                  No Photo
-                </div>
-              ))
-            )}
-          </div>
-        </div>
 
         </div>
 
-        {/* Buttons */}
-        <div style={{ textAlign: 'center' }}>
+        {/* Action Buttons */}
+        <div className="space-y-4">
           <button
             onClick={() => router.push('/mainpage/edit-profile')}
-            style={{
-              width: '100%',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: '#ffffff',
-              border: '2px solid #4FC3F7',
-              borderRadius: '12px',
-              padding: '16px 0',
-              fontSize: '18px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              marginBottom: '16px',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.3)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl py-4 font-semibold text-lg transition-all shadow-lg hover:shadow-primary/25 hover:-translate-y-1"
           >
-            Edit profile
+            Edit Profile
           </button>
 
           <button
             onClick={handleLogout}
-            style={{
-              width: '100%',
-              background: 'linear-gradient(135deg, #ff4444 0%, #ff6b6b 100%)',
-              color: '#ffffff',
-              border: '2px solid #ff6b6b',
-              borderRadius: '12px',
-              padding: '16px 0',
-              fontSize: '18px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 8px 25px rgba(255, 68, 68, 0.3)';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
+            className="w-full bg-destructive/10 hover:bg-destructive text-destructive hover:text-destructive-foreground border border-destructive/20 rounded-2xl py-4 font-semibold text-lg transition-all flex items-center justify-center gap-2"
           >
             <FiLogOut size={20} />
             Log Out
           </button>
         </div>
 
-        {/* Hidden file input for photo upload */}
+        {/* Hidden inputs & modals */}
         <input
           ref={fileInputRef}
           type="file"
           accept="image/*"
           onChange={handlePhotoUpload}
-          style={{ display: 'none' }}
+          className="hidden"
         />
 
-        {/* Uploading indicator */}
         {uploading && (
-          <div style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: 'rgba(0,0,0,0.8)',
-            color: 'white',
-            padding: '20px',
-            borderRadius: '10px',
-            zIndex: 1000
-          }}>
-            Uploading photo...
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-card p-6 rounded-2xl shadow-xl flex flex-col items-center gap-4">
+              <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin"></div>
+              <span className="text-foreground font-medium">Uploading photo...</span>
+            </div>
           </div>
         )}
       </div>

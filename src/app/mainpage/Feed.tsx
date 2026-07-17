@@ -26,19 +26,9 @@ function ReactionButton({
 }) {
   const [anim, setAnim] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-    return () => window.removeEventListener('resize', checkIfMobile);
-  }, []);
 
   return (
-    <div style={{ position: "relative", display: "inline-block" }}>
+    <div className="relative inline-block">
       <button
         onClick={() => {
           setAnim(true);
@@ -46,56 +36,27 @@ function ReactionButton({
           setTimeout(() => setAnim(false), 250);
         }}
         disabled={disabled}
-        style={{
-          background: hasReacted ? "#0070f3" : "#222",
-          color: hasReacted ? "#fff" : "#ccc",
-          border: hasReacted ? "2px solid #0070f3" : "1px solid #333",
-          borderRadius: isMobile ? 16 : 15,
-          padding: isMobile ? "4px 10px" : "4.5px 10.5px",
-          fontSize: isMobile ? 14 : 13.5,
-          fontWeight: 600,
-          cursor: disabled ? "not-allowed" : "pointer",
-          boxShadow: hasReacted ? "0 2px 8px #0070f355" : "none",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 3,
-          transition: "all 0.2s",
-          outline: hasReacted ? "2px solid #0070f3" : undefined,
-          transform: anim ? "scale(1.2)" : "scale(1)",
-          zIndex: 1,
-        }}
+        className={`flex items-center justify-center gap-1.5 px-3 py-1.5 md:px-3.5 md:py-2 rounded-2xl md:rounded-full font-semibold transition-all duration-200 ${
+          hasReacted
+            ? "bg-primary text-primary-foreground border-2 border-primary shadow-md shadow-primary/20 outline outline-2 outline-primary"
+            : "bg-muted text-muted-foreground border border-border hover:bg-muted/80"
+        } ${disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"} ${
+          anim ? "scale-125" : "scale-100"
+        } z-10`}
         aria-label={`React with ${emoji}`}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
         onFocus={() => setShowTooltip(true)}
         onBlur={() => setShowTooltip(false)}
       >
-        <span style={{ fontSize: isMobile ? 14 : 13.5, display: 'flex', alignItems: 'center' }}>{emoji}</span>
+        <span className="text-sm md:text-base flex items-center">{emoji}</span>
         {count > 0 && (
-          <span style={{ fontSize: isMobile ? 11 : 10.5, display: 'flex', alignItems: 'center' }}>{count}</span>
+          <span className="text-xs md:text-sm flex items-center">{count}</span>
         )}
       </button>
       {showTooltip && users.length > 0 && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "110%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "#222",
-            color: "#fff",
-            padding: "6px 12px",
-            borderRadius: 8,
-            fontSize: 13,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-            whiteSpace: "nowrap",
-            zIndex: 10,
-          }}
-        >
-          {users.length === 1
-            ? `1 person`
-            : `${users.length} people`}
+        <div className="absolute bottom-[110%] left-1/2 -translate-x-1/2 bg-card text-card-foreground border border-border px-3 py-1.5 rounded-lg text-xs shadow-xl whitespace-nowrap z-50">
+          {users.length === 1 ? `1 person` : `${users.length} people`}
         </div>
       )}
     </div>
@@ -116,7 +77,7 @@ interface Confession {
     userEmail: string;
     userName: string;
     createdAt: string;
-    reactions?: string[]; // Array of user emails who reacted
+    reactions?: string[];
   }>;
 }
 
@@ -133,12 +94,8 @@ export default function Feed() {
   const [fetchingMore, setFetchingMore] = useState(false);
   const [total, setTotal] = useState(0);
   const feedRef = useRef<HTMLDivElement>(null);
-  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
-  const [confessionPlaceholder, setConfessionPlaceholder] = useState("Spill the tea...");
-  const [isMobile, setIsMobile] = useState(false);
   
-  // New state for image uploads
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageCaption, setImageCaption] = useState("");
@@ -146,12 +103,10 @@ export default function Feed() {
   const [postType, setPostType] = useState<"text" | "image">("text");
   const imageInputRef = useRef<HTMLInputElement>(null);
   
-  // Image compression hook
   const {
     compressSingleImage,
     state: compressionState,
     compressionInfo,
-    isCompressing
   } = useImageCompression({
     compressionOptions: {
       maxWidth: 800,
@@ -165,22 +120,6 @@ export default function Feed() {
     }
   });
 
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-    return () => window.removeEventListener('resize', checkIfMobile);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setConfessionPlaceholder(window.innerWidth < 600 ? "Spill the tea..." : "Spill the tea...");
-    }
-  }, []);
-
-  // Initial fetch okay sir
   useEffect(() => {
     if (!session?.user?.email) return;
     setLoading(true);
@@ -202,7 +141,6 @@ export default function Feed() {
       });
   }, [session?.user?.email]);
 
-  // Infinite scroll
   useEffect(() => {
     const handleScroll = () => {
       if (!feedRef.current || loading || fetchingMore || !hasMore) return;
@@ -281,32 +219,22 @@ export default function Feed() {
   const handleImageSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         alert('Please select an image file');
         return;
       }
-      
-      // Validate file size (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
         alert('Image size must be less than 10MB');
         return;
       }
-      
       try {
-        // Compress the image client-side
         const compressedImage = await compressSingleImage(file);
         setSelectedImage(compressedImage.file);
         setPostType("image");
-        
-        // Create preview from compressed image
         const reader = new FileReader();
-        reader.onload = (e) => {
-          setImagePreview(e.target?.result as string);
-        };
+        reader.onload = (e) => setImagePreview(e.target?.result as string);
         reader.readAsDataURL(compressedImage.file);
       } catch (error) {
-        console.error('Error compressing image:', error);
         alert('Failed to process image. Please try again.');
       }
     }
@@ -317,44 +245,29 @@ export default function Feed() {
     setImagePreview(null);
     setImageCaption("");
     setPostType("text");
-    if (imageInputRef.current) {
-      imageInputRef.current.value = "";
-    }
+    if (imageInputRef.current) imageInputRef.current.value = "";
   };
 
   const handleSubmitConfession = async () => {
     if (!session?.user?.email) return;
-    
-    // Validate based on post type
     if (postType === "text" && !newConfession.trim()) return;
     if (postType === "image" && !selectedImage) return;
 
     setLoading(true);
     try {
       let imageUrl = null;
-      
-      // Upload image first if it's an image post
       if (postType === "image" && selectedImage) {
         setUploadingImage(true);
         const formData = new FormData();
         formData.append("image", selectedImage);
         formData.append("userEmail", session.user.email);
-        
-        const uploadResponse = await fetch("/api/upload-feed-image", {
-          method: "POST",
-          body: formData,
-        });
-        
-        if (!uploadResponse.ok) {
-          throw new Error("Failed to upload image");
-        }
-        
+        const uploadResponse = await fetch("/api/upload-feed-image", { method: "POST", body: formData });
+        if (!uploadResponse.ok) throw new Error("Failed to upload image");
         const uploadData = await uploadResponse.json();
         imageUrl = uploadData.imageUrl;
         setUploadingImage(false);
       }
 
-      // Create the confession/post
       const response = await fetch("/api/create-confession", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -368,17 +281,13 @@ export default function Feed() {
       });
 
       if (response.ok) {
-        // Reset form
         setNewConfession("");
         setSelectedImage(null);
         setImagePreview(null);
         setImageCaption("");
         setPostType("text");
-        if (imageInputRef.current) {
-          imageInputRef.current.value = "";
-        }
+        if (imageInputRef.current) imageInputRef.current.value = "";
         
-        // Refresh the feed
         fetch(`/api/get-confessions?skip=0&limit=${PAGE_SIZE}`)
           .then((res) => res.json())
           .then((data) => {
@@ -388,7 +297,6 @@ export default function Feed() {
           });
       }
     } catch (error) {
-      console.error("Error creating confession:", error);
       setUploadingImage(false);
     } finally {
       setLoading(false);
@@ -397,7 +305,6 @@ export default function Feed() {
 
   const handleAddComment = async (confessionId: string) => {
     if (!commentText.trim() || !session?.user?.email) return;
-
     try {
       const response = await fetch("/api/add-comment", {
         method: "POST",
@@ -408,24 +315,18 @@ export default function Feed() {
           userEmail: session.user.email,
         }),
       });
-
       if (response.ok) {
         setCommentText("");
         setReplyingTo(null);
-        fetch(`/api/get-confessions?skip=0&limit=${PAGE_SIZE}`) // Refresh the feed
+        fetch(`/api/get-confessions?skip=0&limit=${PAGE_SIZE}`)
           .then((res) => res.json())
           .then((data) => {
             setConfessions(data.confessions || []);
             setTotal(data.total || 0);
             setHasMore((data.confessions?.length || 0) < (data.total || 0));
           });
-      } else {
-        const errorData = await response.json();
-        console.error("Error response:", errorData);
       }
-    } catch (error) {
-      console.error("Error adding comment:", error);
-    }
+    } catch (error) {}
   };
 
   const formatTime = (timestamp: string) => {
@@ -433,537 +334,173 @@ export default function Feed() {
     const now = new Date();
     const diffInMinutes = (now.getTime() - date.getTime()) / (1000 * 60);
     const diffInHours = diffInMinutes / 60;
-
-    if (diffInHours < 1) {
-      return `${Math.floor(diffInMinutes)}m ago`;
-    } else if (diffInHours < 24) {
-      return `${Math.floor(diffInHours)}h ago`;
-    } else {
-      return date.toLocaleDateString();
-    }
+    if (diffInHours < 1) return `${Math.floor(diffInMinutes)}m ago`;
+    else if (diffInHours < 24) return `${Math.floor(diffInHours)}h ago`;
+    else return date.toLocaleDateString();
   };
 
   const loadMoreComments = (confessionId: string) => {
-    setCommentCounts(prev => {
-      const currentCount = prev[confessionId] || 3; // Default is 3
-      const newCount = currentCount + 3; // Add 3 more
-      return { ...prev, [confessionId]: newCount };
-    });
+    setCommentCounts(prev => ({ ...prev, [confessionId]: (prev[confessionId] || 3) + 3 }));
   };
 
-  // Function to show fewer comments
   const showFewerComments = (confessionId: string) => {
     setCommentCounts(prev => {
       const updated = { ...prev };
-      delete updated[confessionId]; // Reset to default (3)
+      delete updated[confessionId];
       return updated;
     });
   };
 
-  // Add a new useEffect to handle auto-resize of textarea
   useEffect(() => {
     const adjustTextareaHeight = () => {
-      const textarea = document.querySelector('textarea');
+      const textarea = document.querySelector('textarea.gossip-textarea') as HTMLTextAreaElement;
       if (textarea) {
-        // Reset height to auto first to shrink if text is removed
         textarea.style.height = 'auto';
-        // Set height based on scrollHeight (with a maximum height)
         textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
       }
     };
-
-    // Adjust on input changes
     document.addEventListener('input', adjustTextareaHeight);
-    
-    // Initial adjustment
     setTimeout(adjustTextareaHeight, 100);
-    
-    return () => {
-      document.removeEventListener('input', adjustTextareaHeight);
-    };
-  }, [newConfession]);
-
-  // Update the CSS styles in the main useEffect
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @keyframes gradientMove {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-      }
-      
-      .char-count {
-        position: absolute;
-        bottom: 8px;
-        right: 12px;
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.5);
-      }
-      
-      .char-count.near-limit {
-        color: #ff9800;
-      }
-      
-      .char-count.at-limit {
-        color: #f44336;
-      }
-      
-      .gossip-textarea {
-        width: 100%;
-        min-height: 38px;
-        max-height: 150px;
-        padding: 8px 16px;
-        border-radius: 24px;
-        border: 1px solid rgba(51, 51, 51, 0.7);
-        background: rgba(17, 17, 17, 0.7);
-        backdrop-filter: blur(10px);
-        color: #fff;
-        font-size: 14px;
-        resize: none;
-        outline: none;
-        font-family: inherit;
-        overflow-y: auto;
-        box-sizing: border-box;
-        transition: height 0.2s ease;
-        line-height: 1.4;
-      }
-      .gossip-textarea::placeholder {
-        color: #aaa;
-        opacity: 1;
-        line-height: 1.4;
-      }
-      
-      @media (max-width: 600px) {
-        .gossip-text {
-          font-size: 16px !important;
-          line-height: 1.4 !important;
-        }
-        
-        .comment-container {
-          padding: 8px !important;
-        }
-        
-        .comment-text {
-          font-size: 12px !important;
-          line-height: 1.3 !important;
-        }
-        
-        .user-name {
-          font-size: 11px !important;
-        }
-        
-        .time-text {
-          font-size: 9px !important;,
-        }
-        
-        .action-button {
-          padding: 6px 10px !important;
-          font-size: 11px !important;
-        }
-        
-        .char-count {
-          bottom: 6px;
-          right: 10px;
-          font-size: 10px;
-        }
-        
-        .gossip-textarea {
-          padding: 6px 12px !important;
-          font-size: 13px !important;
-        }
-        .gossip-textarea::placeholder {
-          line-height: 1.4;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
+    return () => document.removeEventListener('input', adjustTextareaHeight);
+  }, [newConfession, imageCaption]);
 
   return (
     <>
-      {/* Compression Progress Overlay */}
       <CompressionProgress 
         state={compressionState}
         compressionInfo={compressionInfo}
         showCompressionInfo={false}
       />
+      
       <div
         ref={feedRef}
-        style={{
-          maxWidth: 800,
-          margin: "0 auto",
-          padding: "20px",
-          background: "#000",
-          height: "calc(100vh - 60px)",
-          overflowY: "auto",
-          borderRadius: 0, // Changed from 16 to 0 to remove rounded corners
-          boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-        }}
+        className="max-w-2xl mx-auto px-4 md:px-0 py-6 h-[calc(100vh-60px)] md:h-full overflow-y-auto scroll-smooth"
       >
-      {/* Gen Z Heading */}
-      <div
-        style={{
-          fontSize: 32,
-          fontWeight: 900,
-          color: '#fff',
-          textAlign: 'center',
-          marginBottom: 32,
-          letterSpacing: 1,
-          background: 'linear-gradient(90deg, #fc5c7d, #6a82fb, #fc5c7d)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          userSelect: 'none',
-          textShadow: '0 2px 12px #fc5c7d44',
-        }}
-      >
-         The Vibe Feed <span style={{fontWeight:700, fontSize:20}}></span>
-      </div>
-      {/* Enhanced Confession Input with Image Support */}
-      <div
-        style={{
-          position: "fixed",
-          left: isMobile ? 0 : 90, // Leave space for left nav on desktop
-          right: 0,
-          bottom: isMobile ? 56 : 0,
-          zIndex: 1001,
-          background: "#000",
-          padding: "16px 20px 12px 20px",
-          borderTop: "1px solid #333",
-          boxShadow: "0 -4px 20px rgba(0,0,0,0.15)",
-        }}
-      >
-        {/* Image Preview */}
-        {imagePreview && (
-          <div style={{ 
-            marginBottom: "12px", 
-            position: "relative",
-            borderRadius: "12px",
-            overflow: "hidden",
-            background: "#111",
-            border: "1px solid #333",
-            maxHeight: "300px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }}>
-            <img 
-              src={imagePreview} 
-              alt="Preview" 
-              style={{ 
-                width: "100%", 
-                height: "auto",
-                maxHeight: "300px",
-                objectFit: "contain",
-                display: "block"
-              }} 
-            />
-            <button
-              onClick={handleRemoveImage}
-              style={{
-                position: "absolute",
-                top: "8px",
-                right: "8px",
-                background: "rgba(0,0,0,0.8)",
-                color: "#fff",
-                border: "none",
-                borderRadius: "50%",
-                width: "32px",
-                height: "32px",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "18px",
-                fontWeight: "bold"
-              }}
-            >
-              ×
-            </button>
-          </div>
-        )}
-
-        {/* Input Area */}
-        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: "12px" }}>
-          {/* Image Upload Button */}
-          <button
-            onClick={() => imageInputRef.current?.click()}
-            style={{
-              width: "38px",
-              height: "38px",
-              borderRadius: "50%",
-              background: "#333",
-              color: "#fff",
-              border: "1px solid #555",
-              cursor: "pointer",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              transition: "all 0.2s ease",
-              flexShrink: 0,
-            }}
-            onMouseEnter={(e) => {
-              (e.target as HTMLButtonElement).style.background = "#444";
-            }}
-            onMouseLeave={(e) => {
-              (e.target as HTMLButtonElement).style.background = "#333";
-            }}
-            disabled={uploadingImage}
-          >
-            {uploadingImage ? (
-              <div
-                style={{
-                  width: "18px",
-                  height: "18px",
-                  border: "2px solid rgba(255,255,255,0.3)",
-                  borderTop: "2px solid white",
-                  borderRadius: "50%",
-                  animation: "spin 1s linear infinite",
-                }}
-              />
-            ) : (
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-              </svg>
-            )}
-          </button>
-
-          {/* Text Input */}
-          <div style={{ position: "relative", flex: 1 }}>
-            <textarea
-              className="gossip-textarea"
-              value={postType === "image" ? imageCaption : newConfession}
-              onChange={(e) => {
-                if (postType === "image") {
-                  setImageCaption(e.target.value);
-                } else {
-                  setNewConfession(e.target.value);
-                }
-              }}
-              placeholder={postType === "image" ? "Write a caption..." : confessionPlaceholder}
-              maxLength={800}
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                paddingRight: (postType === "image" ? imageCaption.length : newConfession.length) > 0 ? "50px" : "16px",
-                minWidth: 0,
-              }}
-              onKeyDown={e => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  if (postType === "text" && newConfession.trim()) {
-                    handleSubmitConfession();
-                  } else if (postType === "image" && selectedImage) {
-                    handleSubmitConfession();
-                  }
-                }
-              }}
-            />
-            {(postType === "image" ? imageCaption.length : newConfession.length) > 0 && (
-              <div 
-                className={`char-count ${
-                  (postType === "image" ? imageCaption.length : newConfession.length) > 700 ? "near-limit" : ""
-                } ${(postType === "image" ? imageCaption.length : newConfession.length) > 750 ? "at-limit" : ""}`}
-              >
-                {(postType === "image" ? imageCaption.length : newConfession.length)}/800
-              </div>
-            )}
-          </div>
-
-          {/* Send Button */}
-          <button
-            style={{
-              width: "38px",
-              height: "38px",
-              borderRadius: "50%",
-              background: (postType === "text" && newConfession.trim()) || (postType === "image" && selectedImage) 
-                ? "linear-gradient(135deg, #25D366, #128C7E)" 
-                : "#666",
-              color: "white",
-              border: "none",
-              cursor: ((postType === "text" && newConfession.trim()) || (postType === "image" && selectedImage)) 
-                ? "pointer" 
-                : "not-allowed",
-              opacity: loading || uploadingImage ? 0.7 : 1,
-              transition: "all 0.2s ease",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              padding: 0,
-              boxShadow: ((postType === "text" && newConfession.trim()) || (postType === "image" && selectedImage)) 
-                ? "0 2px 8px rgba(0, 0, 0, 0.2)" 
-                : "none",
-              flexShrink: 0,
-            }}
-            onClick={handleSubmitConfession}
-            disabled={loading || uploadingImage || ((postType === "text" && !newConfession.trim()) || (postType === "image" && !selectedImage))}
-          >
-            {loading || uploadingImage ? (
-              <div
-                style={{
-                  width: "18px",
-                  height: "18px",
-                  border: "2px solid rgba(255,255,255,0.3)",
-                  borderTop: "2px solid white",
-                  borderRadius: "50%",
-                  animation: "spin 1s linear infinite",
-                }}
-              />
-            ) : (
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="20" 
-                height="20" 
-                viewBox="0 0 24 24" 
-                fill="white"
-              >
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-              </svg>
-            )}
-          </button>
+        <div className="text-3xl md:text-4xl font-black text-center mb-8 tracking-wide bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
+           The Vibe Feed
         </div>
 
-        {/* Hidden file input */}
-        <input
-          ref={imageInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageSelect}
-          style={{ display: "none" }}
-        />
-      </div>
-
-      {/* Confessions Feed */}
-      <div style={{ 
-        display: "flex", 
-        flexDirection: "column", 
-        gap: 78,
-        paddingBottom: isMobile ? 120 : 80, // Less padding on desktop, more on mobile for nav
-      }}>
-        {confessions.length === 0 && !loading ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: 40,
-              color: "#666",
-              background: "#111",
-              borderRadius: 16,
-              border: "1px solid #333",
-            }}
-          >
-            <div style={{ fontSize: "48px", marginBottom: 16, opacity: 0.5 }}>
-              💭
-            </div>
-            <div style={{ fontSize: "18px", marginBottom: 8, color: "#fff" }}>
-              No confessions yet
-            </div>
-            <div style={{ fontSize: "14px" }}>
-              Be the first to share a confession!
-            </div>
-          </div>
-        ) : (
-          confessions.map((confession) => {
-            const reactions = confession.reactions || {};
-            return (
-              <div
-                key={confession._id}
-                style={{
-                  background: "#111",
-                  borderRadius: 16,
-                  padding: 24,
-                  border: "1px solid #333",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                  position: "relative",
-                  width: "100%", // Ensure full width
-                  boxSizing: "border-box", // Include padding in width calculation
-                  overflow: "hidden", // Prevent horizontal overflow
-                }}
+        {/* Post Input Fixed to Bottom */}
+        <div className="fixed bottom-[60px] md:bottom-6 left-0 right-0 md:left-auto md:right-auto md:w-full md:max-w-2xl md:mx-auto z-40 bg-card/90 backdrop-blur-xl p-4 md:rounded-2xl border-t md:border border-border shadow-[0_-8px_30px_rgba(0,0,0,0.12)]">
+          {imagePreview && (
+            <div className="mb-3 relative rounded-xl overflow-hidden bg-background border border-border max-h-[300px] flex items-center justify-center">
+              <img src={imagePreview} alt="Preview" className="w-full h-auto max-h-[300px] object-contain block" />
+              <button
+                onClick={handleRemoveImage}
+                className="absolute top-2 right-2 bg-black/80 text-white rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold hover:bg-destructive transition-colors"
               >
-                {/* Vibrant gradient accent */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "4px",
-                    background: "linear-gradient(90deg, #667eea, #764ba2, #fc5c7d)",
-                    backgroundSize: "200% 100%",
-                    animation: "gradientMove 3s ease infinite",
-                  }}
-                />
+                &times;
+              </button>
+            </div>
+          )}
 
-                  {/* Confession Content */}
-                  <div style={{ marginBottom: 16, width: "100%" }}>
-                    {/* Image Display */}
+          <div className="flex items-end gap-3">
+            <button
+              onClick={() => imageInputRef.current?.click()}
+              disabled={uploadingImage}
+              className="w-10 h-10 rounded-full bg-muted text-muted-foreground border border-border flex items-center justify-center hover:bg-secondary hover:text-foreground transition-colors shrink-0 mb-1"
+            >
+              {uploadingImage ? (
+                <div className="w-5 h-5 border-2 border-muted-foreground border-t-foreground rounded-full animate-spin" />
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                </svg>
+              )}
+            </button>
+
+            <div className="relative flex-1 bg-background border border-border rounded-2xl overflow-hidden transition-colors focus-within:border-primary">
+              <textarea
+                className="gossip-textarea w-full min-h-[44px] max-h-[150px] p-3 text-sm bg-transparent text-foreground placeholder:text-muted-foreground resize-none outline-none overflow-y-auto block"
+                value={postType === "image" ? imageCaption : newConfession}
+                onChange={(e) => {
+                  if (postType === "image") setImageCaption(e.target.value);
+                  else setNewConfession(e.target.value);
+                }}
+                placeholder={postType === "image" ? "Write a caption..." : "Spill the tea..."}
+                maxLength={800}
+                onKeyDown={e => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if ((postType === "text" && newConfession.trim()) || (postType === "image" && selectedImage)) {
+                      handleSubmitConfession();
+                    }
+                  }
+                }}
+              />
+            </div>
+
+            <button
+              onClick={handleSubmitConfession}
+              disabled={loading || uploadingImage || ((postType === "text" && !newConfession.trim()) || (postType === "image" && !selectedImage))}
+              className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 mb-1 transition-all ${
+                ((postType === "text" && newConfession.trim()) || (postType === "image" && selectedImage))
+                  ? "bg-primary text-primary-foreground shadow-md shadow-primary/20 hover:bg-primary/90 hover:scale-105"
+                  : "bg-muted text-muted-foreground cursor-not-allowed"
+              }`}
+            >
+              {loading || uploadingImage ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="ml-1">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+              )}
+            </button>
+          </div>
+          <input ref={imageInputRef} type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+        </div>
+
+        {/* Feed Content */}
+        <div className="flex flex-col gap-6 pb-40">
+          {confessions.length === 0 && !loading ? (
+            <div className="text-center p-12 bg-card border border-border rounded-3xl">
+              <div className="text-5xl mb-4 opacity-50">💭</div>
+              <div className="text-xl font-semibold text-foreground mb-2">No posts yet</div>
+              <div className="text-muted-foreground">Be the first to share something!</div>
+            </div>
+          ) : (
+            confessions.map((confession) => {
+              const reactions = confession.reactions || {};
+              return (
+                <div key={confession._id} className="bg-card border border-border rounded-3xl p-5 md:p-6 shadow-sm overflow-hidden relative group">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-purple-500 to-pink-500 opacity-50 group-hover:opacity-100 transition-opacity" />
+                  
+                  <div className="mb-4 w-full">
                     {confession.imageUrl && (
-                      <div style={{ 
-                        marginBottom: "16px", 
-                        borderRadius: "12px", 
-                        overflow: "hidden",
-                        background: "#111",
-                        border: "1px solid #333"
-                      }}>
+                      <div className="mb-4 rounded-2xl overflow-hidden bg-background border border-border">
                         <img 
                           src={confession.imageUrl} 
                           alt="Post image" 
-                          style={{ 
-                            width: "100%", 
-                            maxHeight: "400px", 
-                            objectFit: "contain",
-                            display: "block"
-                          }} 
+                          className="w-full max-h-[400px] object-contain block"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.style.display = 'none';
                             const parent = target.parentElement;
                             if (parent) {
-                              parent.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 200px; color: #666; font-size: 14px;">Image failed to load</div>';
+                              parent.innerHTML = '<div class="flex items-center justify-center h-48 text-muted-foreground text-sm">Image failed to load</div>';
                             }
                           }}
                         />
                       </div>
                     )}
                     
-                    {/* Text Content */}
                     {(confession.confession || confession.caption) && (
-                      <p
-                        className="gossip-text"
-                        style={{
-                          color: "#fff",
-                          fontSize: "16px",
-                          lineHeight: 1.6,
-                          margin: "0 0 12px 0",
-                          wordWrap: "break-word", // Allow breaking long words
-                          overflowWrap: "break-word", // Ensure text wraps
-                          whiteSpace: "pre-wrap", // Preserve whitespace but wrap text
-                          maxWidth: "100%", // Restrict to container width
-                        }}
-                      >
+                      <p className="text-foreground text-base md:text-lg leading-relaxed mb-4 whitespace-pre-wrap break-words">
                         {confession.confession || confession.caption}
                       </p>
                     )}
                     
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <span style={{ color: "#666", fontSize: "12px" }}>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-muted-foreground text-xs font-medium bg-secondary px-2.5 py-1 rounded-full">
                         Anonymous • {formatTime(confession.createdAt)}
                       </span>
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ color: "#666", fontSize: "12px" }}>
+                      <div className="flex items-center gap-3">
+                        <span className="text-muted-foreground text-xs font-medium">
                           {confession.comments.length} comments
                         </span>
                         <button
-                          style={{ background: "#ff9800", color: "#fff", border: "none", borderRadius: 6, padding: "4px 10px", fontWeight: 600, cursor: "pointer", fontSize: 12 }}
+                          className="text-muted-foreground hover:text-destructive text-xs font-medium transition-colors"
                           onClick={() => { setReportTarget(confession._id); setReportModalOpen(true); }}
                         >
                           Report
@@ -971,14 +508,8 @@ export default function Feed() {
                       </div>
                     </div>
                   </div>
-                  {/* Reactions Row */}
-                  <div style={{ 
-                    display: "flex", 
-                    gap: 10, 
-                    margin: "10px 0 16px 0", // Increased bottom margin
-                    flexWrap: "wrap", // Allow wrapping on smaller screens
-                    width: "100%"
-                  }}>
+
+                  <div className="flex gap-2 mb-5 flex-wrap w-full">
                     {REACTIONS.map((emoji) => {
                       const users = reactions[emoji] || [];
                       const hasReacted = session?.user?.email && users.includes(session.user.email);
@@ -995,203 +526,61 @@ export default function Feed() {
                       );
                     })}
                   </div>
-                  {/* Comments Section */}
+
                   {confession.comments.length > 0 && (
-                    <div
-                      style={{
-                        borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-                        paddingTop: 16,
-                        marginBottom: 16,
-                        width: "100%",
-                      }}
-                    >
-                      <h4
-                        style={{
-                          color: "#fff",
-                          margin: "0 0 12px 0",
-                          fontSize: "14px",
-                          fontWeight: "600",
-                        }}
-                      >
-                        Comments
-                      </h4>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 12,
-                          width: "100%",
-                        }}
-                      >
-                        {/* Show limited number of comments based on the current count */}
+                    <div className="border-t border-border pt-4 w-full">
+                      <div className="flex flex-col gap-3 w-full">
                         {confession.comments
-                          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()) // Sort by newest first
-                          .slice(0, commentCounts[confession._id] || 3) // Show only the tracked number (default 3)
+                          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                          .slice(0, commentCounts[confession._id] || 3)
                           .map((comment: any) => (
-                            <div
-                              key={comment.id}
-                              className="comment-container"
-                              style={{
-                                background: "rgba(10, 10, 10, 0.6)",
-                                borderRadius: 12,
-                                padding: 12,
-                                border: "1px solid rgba(102, 126, 234, 0.2)",
-                                backdropFilter: "blur(5px)",
-                                width: "100%",
-                                boxSizing: "border-box", // Add this to include padding in width
-                              }}
-                            >
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  alignItems: "center",
-                                  marginBottom: 4,
-                                  flexWrap: "wrap", // Allow wrapping on small screens
-                                }}
-                              >
-                                <span
-                                  className="user-name"
-                                  style={{
-                                    color: "#667eea",
-                                    fontSize: "12px",
-                                    fontWeight: "600",
-                                    maxWidth: "70%", // Prevent very long names from breaking layout
-                                    textOverflow: "ellipsis",
-                                    overflow: "hidden",
-                                    whiteSpace: "nowrap",
-                                  }}
-                                >
+                            <div key={comment.id} className="bg-secondary/50 rounded-2xl p-3.5 w-full">
+                              <div className="flex justify-between items-center mb-1.5 flex-wrap gap-2">
+                                <span className="text-primary text-xs font-bold truncate max-w-[70%]">
                                   {comment.userName}
                                 </span>
-                                <span
-                                  className="time-text"
-                                  style={{
-                                    color: "rgba(255, 255, 255, 0.4)",
-                                    fontSize: "10px",
-                                  }}
-                                >
+                                <span className="text-muted-foreground text-[10px]">
                                   {formatTime(comment.createdAt)}
                                 </span>
                               </div>
-                              <p
-                                className="comment-text"
-                                style={{
-                                  color: "#fff",
-                                  fontSize: "14px",
-                                  margin: 0,
-                                  lineHeight: 1.4,
-                                  wordWrap: "break-word", // Add this to ensure text wraps properly
-                                  overflowWrap: "break-word", // Add this for better word breaking
-                                }}
-                              >
+                              <p className="text-foreground text-sm leading-snug break-words">
                                 {comment.comment}
                               </p>
-                              {/* Comment +1 Reaction */}
-                              <div style={{ 
-                                display: "flex", 
-                                justifyContent: "flex-end", 
-                                marginTop: 8,
-                                alignItems: "center",
-                                gap: 6
-                              }}>
+                              
+                              <div className="flex justify-end mt-2">
                                 <button
                                   onClick={() => {
                                     const hasReacted = comment.reactions?.includes(session?.user?.email || '');
                                     handleCommentReaction(confession._id, comment.id, hasReacted || false);
                                   }}
                                   disabled={!session?.user?.email}
-                                  style={{
-                                    background: comment.reactions?.includes(session?.user?.email || '') 
-                                      ? "rgba(102, 126, 234, 0.3)" 
-                                      : "rgba(255, 255, 255, 0.1)",
-                                    border: "1px solid rgba(102, 126, 234, 0.3)",
-                                    color: comment.reactions?.includes(session?.user?.email || '') 
-                                      ? "#667eea" 
-                                      : "#888",
-                                    borderRadius: "6px",
-                                    padding: "4px 8px",
-                                    fontSize: "11px",
-                                    cursor: session?.user?.email ? "pointer" : "not-allowed",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 4,
-                                    transition: "all 0.2s",
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    if (session?.user?.email) {
-                                      e.currentTarget.style.background = "rgba(102, 126, 234, 0.2)";
-                                    }
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    if (session?.user?.email) {
-                                      e.currentTarget.style.background = comment.reactions?.includes(session?.user?.email || '') 
-                                        ? "rgba(102, 126, 234, 0.3)" 
-                                        : "rgba(255, 255, 255, 0.1)";
-                                    }
-                                  }}
+                                  className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs transition-colors ${
+                                    comment.reactions?.includes(session?.user?.email || '')
+                                      ? "bg-primary/20 text-primary"
+                                      : "bg-background text-muted-foreground hover:bg-muted"
+                                  }`}
                                 >
-                                  <span style={{ fontSize: "12px" }}>➕</span>
+                                  <span>➕</span>
                                   {(comment.reactions?.length || 0) > 0 && (
-                                    <span>{comment.reactions?.length}</span>
+                                    <span className="font-medium">{comment.reactions?.length}</span>
                                   )}
                                 </button>
                               </div>
                             </div>
                           ))}
                       
-                        {/* Show "View more comments" button if there are more comments to show */}
                         {confession.comments.length > (commentCounts[confession._id] || 3) ? (
                           <button
-                            className="action-button"
                             onClick={() => loadMoreComments(confession._id)}
-                            style={{
-                              background: "rgba(102, 126, 234, 0.1)",
-                              border: "1px solid rgba(102, 126, 234, 0.3)",
-                              color: "#667eea",
-                              borderRadius: "8px",
-                              padding: "6px 12px",
-                              fontSize: "12px",
-                              cursor: "pointer",
-                              alignSelf: "center",
-                              marginTop: "4px",
-                              fontWeight: "500",
-                              transition: "all 0.2s",
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.background = "rgba(102, 126, 234, 0.2)";
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.background = "rgba(102, 126, 234, 0.1)";
-                            }}
+                            className="text-primary text-xs font-medium hover:underline self-start px-2 py-1"
                           >
                             View {Math.min(3, confession.comments.length - (commentCounts[confession._id] || 3))} more comments
                           </button>
                         ) : (
-                          // Show "Show less" button when all comments are displayed
                           commentCounts[confession._id] && commentCounts[confession._id] > 3 && (
                             <button
-                              className="action-button"
                               onClick={() => showFewerComments(confession._id)}
-                              style={{
-                                background: "rgba(102, 126, 234, 0.1)",
-                                border: "1px solid rgba(102, 126, 234, 0.3)",
-                                color: "#667eea",
-                                borderRadius: "8px",
-                                padding: "6px 12px",
-                                fontSize: "12px",
-                                cursor: "pointer",
-                                alignSelf: "center",
-                                marginTop: "4px",
-                                fontWeight: "500",
-                                transition: "all 0.2s",
-                              }}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.background = "rgba(102, 126, 234, 0.2)";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.background = "rgba(102, 126, 234, 0.1)";
-                              }}
+                              className="text-muted-foreground text-xs font-medium hover:underline self-start px-2 py-1"
                             >
                               Show fewer comments
                             </button>
@@ -1201,118 +590,48 @@ export default function Feed() {
                     </div>
                   )}
 
-                {/* Add Comment */}
-                {replyingTo === confession._id ? (
-                  <div
-                    style={{
-                      borderTop: "1px solid #333",
-                      paddingTop: 16,
-                      width: "100%",
-                    }}
-                  >
-                    <textarea
-                      style={{
-                        width: "100%",
-                        minHeight: 60,
-                        padding: 12,
-                        borderRadius: 8,
-                        border: "1px solid #333",
-                        background: "#0a0a0a",
-                        color: "#fff",
-                        fontSize: "14px",
-                        resize: "vertical",
-                        outline: "none",
-                        fontFamily: "inherit",
-                        marginBottom: 8,
-                        boxSizing: "border-box", // Add this to include padding in width
-                      }}
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      placeholder="Write a comment..."
-                      maxLength={400}
-                    />
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        justifyContent: "flex-end",
-                        flexWrap: "wrap", // Allow wrapping on very small screens
-                      }}
-                    >
-                      <button
-                        className="action-button"
-                        style={{
-                          padding: "8px 16px",
-                          borderRadius: 6,
-                          background: "transparent",
-                          color: "#888",
-                          border: "1px solid #333",
-                          cursor: "pointer",
-                          fontSize: "12px",
-                        }}
-                        onClick={() => {
-                          setReplyingTo(null);
-                          setCommentText("");
-                        }}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        className="action-button"
-                        style={{
-                          padding: "8px 16px",
-                          borderRadius: 6,
-                          background: "#0070f3",
-                          color: "white",
-                          border: "none",
-                          cursor: "pointer",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                        }}
-                        onClick={() => handleAddComment(confession._id)}
-                        disabled={!commentText.trim()}
-                      >
-                        Comment
-                      </button>
+                  {replyingTo === confession._id ? (
+                    <div className="border-t border-border pt-4 mt-4 w-full">
+                      <textarea
+                        className="w-full min-h-[80px] p-3 rounded-xl border border-border bg-background text-foreground text-sm resize-y outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all mb-2"
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        placeholder="Write a comment..."
+                        maxLength={400}
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <button
+                          className="px-4 py-2 rounded-lg bg-transparent text-muted-foreground hover:bg-muted text-sm font-medium transition-colors"
+                          onClick={() => { setReplyingTo(null); setCommentText(""); }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          onClick={() => handleAddComment(confession._id)}
+                          disabled={!commentText.trim()}
+                        >
+                          Post
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <button
-                    className="action-button"
-                    style={{
-                      padding: "8px 16px",
-                      borderRadius: 8,
-                      background: "rgba(102, 126, 234, 0.2)",
-                      color: "#fff",
-                      border: "1px solid rgba(102, 126, 234, 0.4)",
-                      cursor: "pointer",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      transition: "all 0.2s",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
-                    onClick={() => setReplyingTo(confession._id)}
-                  >
-                    <span role="img" aria-label="comment">💬</span> Add Comment
-                  </button>
-                )}
-              </div>
-            );
-          })
-        )}
-        {fetchingMore && (
-          <div style={{ textAlign: "center", color: "#888", padding: 20 }}>
-            Loading more confessions...
-          </div>
-        )}
-        {!hasMore && confessions.length > 0 && (
-          <div style={{ textAlign: "center", color: "#888", padding: 20 }}>
-            No more confessions.
-          </div>
-        )}
+                  ) : (
+                    <button
+                      className="mt-4 flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary text-secondary-foreground hover:bg-secondary/80 text-sm font-medium transition-colors w-full justify-center md:w-auto md:justify-start"
+                      onClick={() => setReplyingTo(confession._id)}
+                    >
+                      <span>💬</span> Add Comment
+                    </button>
+                  )}
+                </div>
+              );
+            })
+          )}
+          {fetchingMore && <div className="text-center text-muted-foreground py-4">Loading more posts...</div>}
+          {!hasMore && confessions.length > 0 && <div className="text-center text-muted-foreground py-4">You've reached the end!</div>}
+        </div>
       </div>
+
       <ReportModal
         open={reportModalOpen}
         onClose={() => setReportModalOpen(false)}
@@ -1329,7 +648,6 @@ export default function Feed() {
         type="confession"
         targetId={reportTarget || ""}
       />
-    </div>
     </>
   );
 }

@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import BlockConfirmModal from "./BlockConfirmModal";
 import ReportModal from "./ReportModal";
-
-
-import { useCallback } from "react";
-import { useRouter } from "next/navigation";
 
 const SOCKET_URL = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -24,49 +21,34 @@ export default function Chat() {
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState<any | null>(null); // For selected user's profile
-  const [currentUserProfile, setCurrentUserProfile] = useState<any | null>(null); // For current user's profile
-  const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'new' | 'chats'>('new'); // Track which tab is active
+  const [selectedProfile, setSelectedProfile] = useState<any | null>(null);
+  const [activeTab, setActiveTab] = useState<'new' | 'chats'>('new');
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const sentMessagesRef = useRef<Set<string>>(new Set());
-  const [lastMessages, setLastMessages] = useState<Record<string, any>>({}); // email -> last message
+  const [lastMessages, setLastMessages] = useState<Record<string, any>>({});
 
   const router = useRouter();
 
-  // Check screen size for responsive layout
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    // Initial check
+    const checkIfMobile = () => setIsMobile(window.innerWidth < 768);
     checkIfMobile();
-
-    // Listen for resize events
     window.addEventListener("resize", checkIfMobile);
-
-    // Cleanup
     return () => window.removeEventListener("resize", checkIfMobile);
   }, []);
 
-  // Auto-scroll to bottom
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     messagesEndRef.current?.scrollIntoView({ behavior });
   };
 
-  // When messages change (new message), scroll smoothly
   useEffect(() => {
     scrollToBottom("smooth");
   }, [messages]);
 
-  // When opening a chat (selected changes), scroll instantly
   useEffect(() => {
     if (selected) scrollToBottom("auto");
   }, [selected]);
 
-  // Fetch matches on mount
   useEffect(() => {
     if (!session?.user?.email) return;
     fetch("/api/get-matches", {
@@ -81,33 +63,13 @@ export default function Chat() {
       });
   }, [session?.user?.email]);
 
-  // Fetch blocked users on mount and after blocking
   useEffect(() => {
     if (!session?.user?.email) return;
-    fetch(
-      `/api/block-user?blockerEmail=${encodeURIComponent(session.user.email)}`
-    )
+    fetch(`/api/block-user?blockerEmail=${encodeURIComponent(session.user.email)}`)
       .then((res) => res.json())
-      .then((data) => {
-        setBlockedUsers(data.blocked || []);
-      });
+      .then((data) => setBlockedUsers(data.blocked || []));
   }, [session?.user?.email]);
 
-  // Fetch current user profile
-  useEffect(() => {
-    if (!session?.user?.email) return;
-    fetch("/api/get-user-profile", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: session.user.email }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setCurrentUserProfile(data);
-      });
-  }, [session?.user?.email]);
-
-  // Fetch selected user profile
   useEffect(() => {
     if (!selected?.email) {
       setSelectedProfile(null);
@@ -119,28 +81,21 @@ export default function Chat() {
       body: JSON.stringify({ email: selected.email }),
     })
       .then((res) => res.json())
-      .then((data) => {
-        setSelectedProfile(data);
-      });
+      .then((data) => setSelectedProfile(data));
   }, [selected]);
 
-  // Determine if selected user is blocked
   const isBlocked = selected && blockedUsers.includes(selected.email);
 
-  // Setup socket connection and listeners
   useEffect(() => {
-    if (!session?.user?.email || !selected) return;
-    if (isBlocked) return; // Do not set up socket if blocked
+    if (!session?.user?.email || !selected || isBlocked) return;
 
     const socket = io(SOCKET_URL);
     socketRef.current = socket;
 
-    // Join a unique room for this chat (sorted emails for consistency)
     const room = [session.user.email, selected.email].sort().join("--");
     socket.emit("join", room);
 
     socket.on("chat message", (msg) => {
-      // Only add messages for this room and not already sent by this user
       if (
         [msg.sender, msg.receiver].includes(session.user.email) &&
         [msg.sender, msg.receiver].includes(selected.email) &&
@@ -155,7 +110,6 @@ export default function Chat() {
     };
   }, [session?.user?.email, selected, isBlocked]);
 
-  // Fetch chat history when a match is selected
   useEffect(() => {
     if (!session?.user?.email || !selected) return;
 
@@ -179,15 +133,12 @@ export default function Chat() {
       });
   }, [selected, session?.user?.email]);
 
-  // Fetch last message for each active chat
   useEffect(() => {
     if (!session?.user?.email || activeChats.length === 0) return;
     const fetchLastMessages = async () => {
       const results: Record<string, any> = {};
       await Promise.all(
         activeChats.map(async (user: any) => {
-          const usersSorted = [session.user.email, user.email].sort();
-          const room = usersSorted.join("--");
           const res = await fetch("/api/get-chat-history", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -217,26 +168,19 @@ export default function Chat() {
     };
 
     try {
-      // First store the message in MongoDB
       const response = await fetch("/api/save-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(msg),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to save message");
-      }
+      if (!response.ok) throw new Error("Failed to save message");
 
-      // Mark this message as sent to prevent duplicates
       sentMessagesRef.current.add(`${msg.timestamp}-${msg.message}`);
-
-      // Then emit through socket
       socketRef.current?.emit("chat message", msg);
       setMessages((prev) => [...prev, msg]);
       setInput("");
 
-      // Refresh matches to update the categorization
       setTimeout(() => {
         fetch("/api/get-matches", {
           method: "POST",
@@ -250,230 +194,85 @@ export default function Chat() {
           });
       }, 1000);
     } catch (error) {
-      console.error("Error sending message:", error);
       alert("Failed to send message. Please try again.");
     }
   };
 
-  // Function to go back to matches list on mobile
-  const handleBackToMatches = () => {
-    setSelected(null);
-  };
-
-  // Function to get similarities
-  const getSimilarities = useCallback((arr1: string[] = [], arr2: string[] = []) => {
-    return arr1.filter((item) => arr2.includes(item));
-  }, []);
-
-  // Get the current list based on active tab
-  const getCurrentList = () => {
-    return activeTab === 'new' ? newMatches : activeChats;
-  };
-
-  // Get the title for the current tab
-  const getTabTitle = () => {
-    return activeTab === 'new' ? 'New Matches' : 'Chats';
-  };
+  const getCurrentList = () => activeTab === 'new' ? newMatches : activeChats;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        height: "calc(100vh - 150px)", // Reduced height to account for navbar and bottom bar
-        maxWidth: 800,
-        margin: "0 auto",
-        border: "1px solid #333",
-        borderRadius: 0, // Changed from 12 to 0 to remove rounded corners
-        overflow: "hidden",
-        background: "#0a0a0a",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
-        flexDirection: isMobile ? "column" : "row",
-      }}
-    >
-      {/* Sidebar with matches - Hidden on mobile when chat is selected */}
+    <div className="flex flex-col md:flex-row h-[calc(100vh-140px)] md:h-[calc(100vh-80px)] w-full max-w-5xl mx-auto bg-background md:border border-border md:rounded-3xl shadow-2xl overflow-hidden mt-0 md:mt-4">
+      
+      {/* Sidebar / Match List */}
       {(!isMobile || (isMobile && !selected)) && (
-        <div
-          style={{
-            width: isMobile ? "100%" : 250,
-            borderRight: isMobile ? "none" : "1px solid #333",
-            borderBottom: isMobile ? "1px solid #333" : "none",
-            background: "#111",
-            display: "flex",
-            flexDirection: "column",
-            height: isMobile ? "auto" : "100%",
-            flex: isMobile ? "1" : "none",
-          }}
-        >
-          <div
-            style={{
-              padding: 20,
-              borderBottom: "1px solid #333",
-              background: "#000",
-              color: "#fff",
-            }}
-          >
-            <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 600 }}>
-              💬 Matches
+        <div className="w-full md:w-80 flex flex-col bg-card border-r border-border shrink-0">
+          <div className="p-5 border-b border-border bg-card text-foreground flex items-center justify-between">
+            <h3 className="text-xl font-bold m-0 flex items-center gap-2">
+              <span className="text-primary text-2xl">💬</span> Matches
             </h3>
           </div>
 
-          {/* Tab Navigation */}
-          <div
-            style={{
-              display: "flex",
-              borderBottom: "1px solid #333",
-              background: "#0a0a0a",
-            }}
-          >
+          <div className="flex border-b border-border bg-background">
             <button
               onClick={() => setActiveTab('new')}
-              style={{
-                flex: 1,
-                padding: "12px 16px",
-                background: activeTab === 'new' ? "#0070f3" : "transparent",
-                color: activeTab === 'new' ? "#fff" : "#666",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "14px",
-                fontWeight: "600",
-                transition: "all 0.2s",
-              }}
+              className={`flex-1 py-3.5 text-sm font-bold transition-colors ${activeTab === 'new' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted'}`}
             >
-              New Matches ({newMatches.length})
+              New ({newMatches.length})
             </button>
             <button
               onClick={() => setActiveTab('chats')}
-              style={{
-                flex: 1,
-                padding: "12px 16px",
-                background: activeTab === 'chats' ? "#0070f3" : "transparent",
-                color: activeTab === 'chats' ? "#fff" : "#666",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "14px",
-                fontWeight: "600",
-                transition: "all 0.2s",
-              }}
+              className={`flex-1 py-3.5 text-sm font-bold transition-colors ${activeTab === 'chats' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted'}`}
             >
               Chats ({activeChats.length})
             </button>
           </div>
 
-          <div
-            style={{
-              padding: 12,
-              flex: 1,
-              overflowY: "auto",
-              maxHeight: isMobile ? "calc(100vh - 280px)" : "auto",
-            }}
-          >
+          <div className="flex-1 overflow-y-auto p-3">
             {getCurrentList().length === 0 && (
-              <div
-                style={{
-                  padding: 20,
-                  textAlign: "center",
-                  color: "#666",
-                  fontSize: "14px",
-                }}
-              >
+              <div className="p-8 text-center text-muted-foreground text-sm font-medium">
                 {activeTab === 'new' 
                   ? "Still a lil dry in here, go like some cuties..."
                   : "Still waiting on that first “hey 👋” — go make a move!"
                 }
               </div>
             )}
+            
             {getCurrentList().map((user: any, index: number) => (
               <div
                 key={`${user.email}-${index}`}
-                style={{
-                  padding: 16,
-                  margin: "8px 0",
-                  borderRadius: 10,
-                  background:
-                    selected?.email === user.email ? "#1a1a1a" : "#0a0a0a",
-                  cursor: "pointer",
-                  border:
-                    selected?.email === user.email
-                      ? "2px solid #0070f3"
-                      : "1px solid #333",
-                  transition: "all 0.2s",
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                }}
                 onClick={() => setSelected(user)}
+                className={`flex items-center gap-4 p-3 mb-2 rounded-2xl cursor-pointer transition-all ${
+                  selected?.email === user.email 
+                    ? "bg-primary/10 border-2 border-primary shadow-sm shadow-primary/10" 
+                    : "bg-secondary border border-transparent hover:border-border hover:bg-secondary/80"
+                }`}
               >
-                {/* Profile Photo */}
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                    background: "#1a1a1a",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    border: "1px solid #333",
-                    overflow: "hidden",
-                    flexShrink: 0,
-                  }}
-                >
+                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center border-2 border-border overflow-hidden shrink-0">
                   {user.profilePhoto ? (
-                    <img
-                      src={user.profilePhoto}
-                      alt={`${user.name || user.email}'s profile`}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
+                    <img src={user.profilePhoto} alt="profile" className="w-full h-full object-cover" />
                   ) : (
-                    <span style={{ fontSize: "16px", color: "#666" }}>👤</span>
+                    <span className="text-xl text-muted-foreground">👤</span>
                   )}
                 </div>
 
-                {/* User Info */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontWeight: "600",
-                      fontSize: "14px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-[15px] text-foreground truncate">
                     {user.name || user.email}
                   </div>
                   {activeTab === 'new' && (
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "#0070f3",
-                        marginTop: "2px",
-                      }}
-                    >
+                    <div className="text-xs font-semibold text-primary mt-0.5 flex items-center gap-1">
                       ✨ New match!
                     </div>
                   )}
                   {activeTab === 'chats' && lastMessages[user.email] && (
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: '#ccc',
-                        marginTop: 2,
-                        fontWeight:
-                          lastMessages[user.email].sender !== session?.user?.email && !lastMessages[user.email].read
-                            ? 'bold'
-                            : 'normal',
-                      }}
+                    <div className={`text-xs mt-0.5 truncate ${
+                        lastMessages[user.email].sender !== session?.user?.email && !lastMessages[user.email].read
+                          ? 'font-bold text-foreground'
+                          : 'text-muted-foreground'
+                      }`}
                     >
                       {lastMessages[user.email].sender === session?.user?.email ? 'You: ' : ''}
-                      {lastMessages[user.email].message.length > 12
-                        ? lastMessages[user.email].message.slice(0, 12) + '...'
-                        : lastMessages[user.email].message}
+                      {lastMessages[user.email].message}
                     </div>
                   )}
                 </div>
@@ -483,483 +282,195 @@ export default function Chat() {
         </div>
       )}
 
-      {/* Chat area */}
+      {/* Chat Area */}
       {(!isMobile || (isMobile && selected)) && (
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            background: "#0a0a0a",
-            height: isMobile ? "calc(100vh - 120px)" : "auto",
-            position: "relative",
-            paddingTop: isMobile ? 35 : 0, // Add top padding to prevent overlap with sticky navbar
-          }}
-        >
+        <div className="flex-1 flex flex-col bg-background relative h-full">
           {selected ? (
             <>
-              <div
-                style={{
-                  padding: 20,
-                  borderBottom: "1px solid #333",
-                  background: "#111",
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {/* Chat Header */}
+              <div className="px-4 py-3 md:p-5 border-b border-border bg-card text-foreground flex items-center justify-between sticky top-0 z-10">
+                <div className="flex items-center gap-3">
                   {isMobile && (
-                      <button
-                        onClick={handleBackToMatches}
-                        style={{
-                          width: "38px",
-                          height: "38px",
-                          borderRadius: "50%",
-                          background: "#222",
-                          border: "1px solid #333",
-                          color: "#0070f3",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                          marginRight: 8,
-                          transition: "background 0.2s, border-color 0.2s, color 0.2s",
-                          fontSize: "20px",
-                        }}
-                        onMouseEnter={e => {
-                          (e.target as HTMLButtonElement).style.background = "#333";
-                          (e.target as HTMLButtonElement).style.color = "#fff";
-                          (e.target as HTMLButtonElement).style.borderColor = "#0070f3";
-                        }}
-                        onMouseLeave={e => {
-                          (e.target as HTMLButtonElement).style.background = "#222";
-                          (e.target as HTMLButtonElement).style.color = "#0070f3";
-                          (e.target as HTMLButtonElement).style.borderColor = "#333";
-                        }}
-                      >
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M15 19L8 12L15 5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-                    )}
-                  <div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        fontWeight: "600",
-                        fontSize: "16px",
-                        marginBottom: 4,
-                        cursor: "pointer",
-                        // Remove underline
-                        textDecoration: "none",
-                      }}
-                      onClick={() => {
-                        if (selected?.email) {
-                          router.push(`/mainpage/user-profile?email=${encodeURIComponent(selected.email)}`);
-                        }
-                      }}
+                    <button
+                      onClick={() => setSelected(null)}
+                      className="w-10 h-10 rounded-full bg-secondary text-primary flex items-center justify-center -ml-2 hover:bg-muted transition-colors"
                     >
-                      {/* Profile Photo */}
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15 19L8 12L15 5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </button>
+                  )}
+                  
+                  <div 
+                    className="flex items-center gap-3 cursor-pointer group"
+                    onClick={() => {
+                      if (selected?.email) {
+                        router.push(`/mainpage/user-profile?email=${encodeURIComponent(selected.email)}`);
+                      }
+                    }}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-secondary border border-border overflow-hidden shrink-0 group-hover:border-primary transition-colors">
                       {selectedProfile?.profilePhoto ? (
-                        <img
-                          src={selectedProfile.profilePhoto}
-                          alt={`${selected.name || selected.email}'s profile`}
-                          style={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: '50%',
-                            objectFit: 'cover',
-                            background: '#1a1a1a',
-                            border: '1px solid #333',
-                            flexShrink: 0,
-                          }}
-                        />
+                        <img src={selectedProfile.profilePhoto} alt="profile" className="w-full h-full object-cover" />
                       ) : (
-                        <span style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: '50%',
-                          background: '#1a1a1a',
-                          border: '1px solid #333',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: 18,
-                          color: '#666',
-                          flexShrink: 0,
-                        }}>👤</span>
+                        <div className="w-full h-full flex items-center justify-center text-xl text-muted-foreground">👤</div>
                       )}
-                      {/* User Name */}
-                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{selected.name}</span>
                     </div>
-                    {/* Show if this is a new match */}
-                    {newMatches.find(match => match.email === selected.email) && (
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#0070f3",
-                          fontWeight: "500",
-                        }}
-                      >
-                        ✨ New match - send a message to start chatting!
-                      </div>
-                    )}
+                    <div>
+                      <div className="font-bold text-base truncate group-hover:text-primary transition-colors">{selected.name}</div>
+                      {newMatches.find(match => match.email === selected.email) && (
+                        <div className="text-xs text-primary font-medium">✨ New match</div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div
-                style={{
-                  flex: 1,
-                  overflowY: "auto",
-                  paddingBottom: isMobile ? 120 : 0, // Add enough padding for input + nav on mobile
-                }}
-              >
+              {/* Chat Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 pb-24 md:pb-4">
                 {messages.find((msg) => msg.sender === 'system') && (
-                  <div
-                    className="chat-system-message"
-                    style={{
-                      background: "linear-gradient(90deg, #a1c4fd 0%, #c2e9fb 100%)",
-                      color: "#222",
-                      padding: "16px 28px",
-                      borderRadius: "18px",
-                      margin: "0 auto 18px auto",
-                      textAlign: "center",
-                      fontStyle: "italic",
-                      fontWeight: 600,
-                      maxWidth: 420,
-                      fontSize: 18,
-                      boxShadow: "0 2px 16px rgba(100,180,255,0.10)",
-                      display: "block",
-                      whiteSpace: "pre-line"
-                    }}
-                  >
+                  <div className="bg-gradient-to-r from-blue-200 to-cyan-200 text-blue-950 p-4 rounded-2xl mx-auto text-center italic font-semibold max-w-sm text-sm shadow-md mb-6 whitespace-pre-line">
                     {messages.find((msg) => msg.sender === 'system')?.message}
                   </div>
                 )}
+                
                 {loading && (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      padding: 20,
-                      color: "#666",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Loading chat history...
-                  </div>
+                  <div className="text-center p-4 text-muted-foreground text-sm font-medium">Loading chat history...</div>
                 )}
 
                 {messages.filter((msg, idx) => msg.sender !== 'system' || idx !== messages.findIndex(m => m.sender === 'system')).map((msg, idx, arr) => {
-                  // Determine if this is the last message in a cluster (same sender, same minute)
                   const currentSender = msg.sender;
                   const currentDate = new Date(msg.timestamp);
                   const currentMinute = currentDate.getHours() + ':' + currentDate.getMinutes();
                   const nextMsg = arr[idx + 1];
-                  let showTime = false;
-                  if (!nextMsg) {
-                    showTime = true;
-                  } else {
-                    const nextSender = nextMsg.sender;
-                    const nextDate = new Date(nextMsg.timestamp);
-                    const nextMinute = nextDate.getHours() + ':' + nextDate.getMinutes();
-                    if (nextSender !== currentSender || nextMinute !== currentMinute) {
-                      showTime = true;
-                    }
-                  }
+                  let showTime = !nextMsg || nextMsg.sender !== currentSender || (new Date(nextMsg.timestamp).getHours() + ':' + new Date(nextMsg.timestamp).getMinutes()) !== currentMinute;
+                  
+                  const isMe = msg.sender === session?.user?.email;
+
                   return (
-                    <div
-                      key={`${msg.timestamp}-${idx}`}
-                      style={{ margin: "12px 0" }}
-                    >
+                    <div key={`${msg.timestamp}-${idx}`} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[85%] md:max-w-[70%] ${isMe ? 'ml-auto' : 'mr-auto'}`}>
                       <div
-                        style={{
-                          textAlign:
-                            msg.sender === session?.user?.email ? "right" : "left",
-                          maxWidth: isMobile ? "85%" : "70%",
-                          marginLeft:
-                            msg.sender === session?.user?.email ? "auto" : (isMobile ? 8 : 20),
-                          marginRight:
-                            msg.sender === session?.user?.email ? 0 : "auto",
-                        }}
+                        className={`px-4 py-2.5 rounded-2xl shadow-sm text-[15px] leading-relaxed break-words max-w-full ${
+                          isMe 
+                            ? "bg-primary text-primary-foreground rounded-br-sm" 
+                            : "bg-secondary text-secondary-foreground border border-border rounded-bl-sm"
+                        }`}
                       >
-                        <div
-                          style={{
-                            padding: "12px 16px",
-                            borderRadius: 18,
-                            background:
-                              msg.sender === session?.user?.email
-                                ? "#0070f3"
-                                : "#1a1a1a",
-                            color:
-                              msg.sender === session?.user?.email
-                                ? "white"
-                                : "#fff",
-                            border:
-                              msg.sender === session?.user?.email
-                                ? "none"
-                                : "1px solid #333",
-                            display: "inline-block",
-                            wordBreak: "break-word",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-                            textAlign: msg.sender === session?.user?.email ? "right" : "left",
-                          }}
-                        >
-                          {msg.message}
-                        </div>
-                        {/* Message Reactions - Always show existing reactions */}
-                        {msg.reactions && Object.keys(msg.reactions).length > 0 && (
-                          <div
-                            style={{
-                              display: "flex",
-                              gap: "4px",
-                              marginTop: "8px",
-                              flexWrap: "wrap",
-                              justifyContent:
-                                msg.sender === session?.user?.email
-                                  ? "flex-end"
-                                  : "flex-start",
-                            }}
-                          >
-                            {Object.entries(msg.reactions).map(
-                              ([reaction, count]) => (
-                                <span
-                                  key={reaction}
-                                  style={{
-                                    background: "rgba(0,0,0,0.7)",
-                                    padding: "4px 8px",
-                                    borderRadius: "12px",
-                                    fontSize: "12px",
-                                    color: "#fff",
-                                    border: "1px solid rgba(255,255,255,0.1)",
-                                  }}
-                                >
-                                  {reaction} {String(count)}
-                                </span>
-                              )
-                            )}
-                          </div>
-                        )}
-                        {showTime && (
-                          <div
-                            style={{
-                              fontSize: "10px",
-                              color: "#666",
-                              marginTop: 6,
-                              textAlign:
-                                msg.sender === session?.user?.email
-                                  ? "right"
-                                  : "left",
-                            }}
-                          >
-                            {currentDate.toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </div>
-                        )}
+                        {msg.message}
                       </div>
+                      
+                      {msg.reactions && Object.keys(msg.reactions).length > 0 && (
+                        <div className={`flex flex-wrap gap-1 mt-1.5 ${isMe ? 'justify-end' : 'justify-start'}`}>
+                          {Object.entries(msg.reactions).map(([reaction, count]) => (
+                            <span key={reaction} className="bg-card text-foreground px-2 py-0.5 rounded-full text-xs border border-border shadow-sm">
+                              {reaction} {String(count)}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {showTime && (
+                        <div className="text-[10px] text-muted-foreground mt-1 px-1 font-medium">
+                          {currentDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Chat input box - fixed on mobile */}
-              <div
-                style={
-                  isMobile
-                    ? {
-                        position: "fixed",
-                        left: 0,
-                        right: 0,
-                        bottom: 56, // Height of bottom nav (adjust if needed)
-                        zIndex: 1001,
-                        padding: "12px",
-                        borderTop: "1px solid #333",
-                        background: "#111",
-                      }
-                    : {
-                        padding: "20px",
-                        borderTop: "1px solid #333",
-                        background: "#111",
-                      }
-                }
-              >
-                <div style={{ display: "flex", gap: isMobile ? 8 : 12 }}>
-                  <input
-                    style={{
-                      flex: 1,
-                      padding: isMobile ? "10px 16px" : "14px 20px",
-                      borderRadius: 25,
-                      border: "1px solid #333",
-                      background: "#0a0a0a",
-                      color: "#fff",
-                      outline: "none",
-                      fontSize: isMobile ? "14px" : "16px",
-                      transition: "border-color 0.2s",
-                    }}
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !isBlocked) sendMessage();
-                    }}
-                    onFocus={(e) =>
-                      ((e.target as HTMLInputElement).style.borderColor =
-                        "#0070f3")
-                    }
-                    onBlur={(e) =>
-                      ((e.target as HTMLInputElement).style.borderColor = "#333")
-                    }
-                    placeholder={isBlocked ? "You have ghosted this user. You cannot send messages." : "Type a message..."}
-                    disabled={isBlocked}
-                  />
+              {/* Chat Input */}
+              <div className="absolute md:static bottom-0 left-0 right-0 p-3 md:p-5 bg-card/90 backdrop-blur-md border-t border-border z-10 pb-safe">
+                <div className="flex gap-2.5 items-end max-w-4xl mx-auto">
+                  <div className="flex-1 bg-input border border-border rounded-3xl overflow-hidden focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+                    <input
+                      className="w-full px-5 py-3.5 bg-transparent text-foreground placeholder:text-muted-foreground outline-none text-sm md:text-base"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter" && !isBlocked) sendMessage(); }}
+                      placeholder={isBlocked ? "You have ghosted this user." : "Type a message..."}
+                      disabled={isBlocked}
+                    />
+                  </div>
                   <button
-                    style={{
-                      width: "38px",
-                      height: "38px",
-                      borderRadius: "50%",
-                      background: isBlocked || !input.trim() ? "#666" : "linear-gradient(135deg, #25D366, #128C7E)",
-                      color: "white",
-                      border: "none",
-                      cursor: isBlocked || !input.trim() ? "not-allowed" : "pointer",
-                      opacity: isBlocked ? 0.6 : 1,
-                      transition: "all 0.2s ease",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      padding: 0,
-                      boxShadow: !isBlocked && input.trim() ? "0 2px 8px rgba(0, 0, 0, 0.2)" : "none",
-                    }}
+                    className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                      isBlocked || !input.trim() 
+                        ? "bg-muted text-muted-foreground cursor-not-allowed" 
+                        : "bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 hover:-translate-y-0.5 shadow-lg shadow-primary/25"
+                    }`}
                     onClick={() => { if (!isBlocked && input.trim()) sendMessage(); }}
                     disabled={isBlocked || !input.trim()}
-                    onMouseEnter={(e) =>
-                      ((e.target as HTMLButtonElement).style.background =
-                        isBlocked || !input.trim() ? "#666" : "#128C7E")
-                    }
-                    onMouseLeave={(e) =>
-                      ((e.target as HTMLButtonElement).style.background =
-                        isBlocked || !input.trim() ? "#666" : "linear-gradient(135deg, #25D366, #128C7E)")
-                    }
                   >
-                    {/* WhatsApp-style paper plane icon */}
-                    <svg 
-                      xmlns="http://www.w3.org/2000/svg" 
-                      width="20" 
-                      height="20" 
-                      viewBox="0 0 24 24" 
-                      fill="white"
-                      style={{ display: "block" }}
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5">
                       <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                     </svg>
                   </button>
                 </div>
               </div>
-              <BlockConfirmModal
-                open={blockModalOpen}
-                onClose={() => setBlockModalOpen(false)}
-                onConfirm={async () => {
-                  setBlockModalOpen(false);
-                  if (!session?.user?.email || !selected?.email) return;
-                  await fetch("/api/block-user", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      blockerEmail: session.user.email,
-                      blockedEmail: selected.email,
-                      action: "block",
-                    }),
-                  });
-                  // Refetch blocked users after blocking
-                  const res = await fetch(
-                    `/api/block-user?blockerEmail=${encodeURIComponent(
-                      session.user.email
-                    )}`
-                  );
-                  const data = await res.json();
-                  setBlockedUsers(data.blocked || []);
-                  setSelected(null);
-                }}
-                userEmail={selected?.email || ""}
-              />
-              <ReportModal
-                open={reportModalOpen}
-                onClose={() => setReportModalOpen(false)}
-                onSubmit={async (reason, details) => {
-                  setReportModalOpen(false);
-                  if (!session?.user?.email || !selected?.email) return;
-                  await fetch("/api/report", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      reporterEmail: session.user.email,
-                      reportedUserEmail: selected.email,
-                      reason,
-                      details,
-                    }),
-                  });
-                  alert("Report submitted. Thank you!");
-                  // Instantly remove the match and clear chat
-                  setNewMatches((prev) => prev.filter((u) => u.email !== selected.email));
-                  setActiveChats((prev) => prev.filter((u) => u.email !== selected.email));
-                  setSelected(null);
-                }}
-                type="user"
-                targetEmail={selected?.email || ""}
-              />
             </>
           ) : (
-            <div
-              style={{
-                padding: 40,
-                color: "#888",
-                textAlign: "center",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100%",
-                background: "#0a0a0a",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "64px",
-                  marginBottom: 20,
-                  opacity: 0.5,
-                }}
-              >
-
-                💬
+            <div className="h-full flex flex-col items-center justify-center p-8 text-center bg-card md:bg-background">
+              <div className="text-6xl md:text-7xl mb-6 opacity-40">💬</div>
+              <div className="text-xl md:text-2xl font-bold text-foreground mb-3 tracking-tight">
+                Your next fav convo is one tap away
               </div>
-              <div
-                style={{
-                  fontSize: "20px",
-                  marginBottom: 12,
-                  color: "#fff",
-                  fontWeight: "600",
-                }}
-              >
-                {isMobile ? "Your next fav convo is one tap away—go for it " : "Your next fav convo is one tap away—go for it "}
-              </div>
-              <div
-                style={{
-                  fontSize: "14px",
-                  color: "#666",
-                  maxWidth: 300,
-                }}
-              >
+              <div className="text-sm md:text-base text-muted-foreground max-w-xs leading-relaxed">
                 Your chats will pop up once the vibes are mutual...
               </div>
             </div>
           )}
         </div>
       )}
+
+      {/* Modals */}
+      <BlockConfirmModal
+        open={blockModalOpen}
+        onClose={() => setBlockModalOpen(false)}
+        onConfirm={async () => {
+          setBlockModalOpen(false);
+          if (!session?.user?.email || !selected?.email) return;
+          await fetch("/api/block-user", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              blockerEmail: session.user.email,
+              blockedEmail: selected.email,
+              action: "block",
+            }),
+          });
+          const res = await fetch(`/api/block-user?blockerEmail=${encodeURIComponent(session.user.email)}`);
+          const data = await res.json();
+          setBlockedUsers(data.blocked || []);
+          setSelected(null);
+        }}
+        userEmail={selected?.email || ""}
+      />
+
+      <ReportModal
+        open={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        onSubmit={async (reason, details) => {
+          setReportModalOpen(false);
+          if (!session?.user?.email || !selected?.email) return;
+          await fetch("/api/report", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              reporterEmail: session.user.email,
+              reportedUserEmail: selected.email,
+              reason,
+              details,
+            }),
+          });
+          alert("Report submitted. Thank you!");
+          setNewMatches((prev) => prev.filter((u) => u.email !== selected.email));
+          setActiveChats((prev) => prev.filter((u) => u.email !== selected.email));
+          setSelected(null);
+        }}
+        type="user"
+        targetEmail={selected?.email || ""}
+      />
     </div>
   );
 }
