@@ -13,7 +13,7 @@ import Privacy from "./Privacy";
 import FAQs from "./FAQs";
 import Feedback from "./Feedback";
 import { useSearchParams } from "next/navigation";
-import TypographyWhiteImage from "../../assets/Typography_white.png";
+// Removed import of TypographyWhiteImage
 import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_OPTIONS = [
@@ -155,7 +155,7 @@ function MainPageContent() {
       <header className="flex justify-between items-center px-4 md:px-8 py-3 md:py-4 bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
         <div className="flex items-center gap-3">
           <img
-            src={TypographyWhiteImage.src}
+            src="/Typography_white.png"
             alt="Destyn Logo"
             className="h-6 md:h-7 w-auto object-contain cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => setActive("feed")}
